@@ -1,0 +1,12 @@
+{% extends 'base.j2' %} {% block content %} {% for day in trip_days %}
+<div class="card d-inline-flex m-3" style="width: 18rem;">
+    <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
+    <div class="card-body">
+        <h5 class="card-title">{{ day['name'] }}</h5>
+        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        <p class="card-text">Start: {{ day['from_date'].strftime('%d-%m-%y') }}</p>
+        <p class="card-text">End: {{ day['till_date'].strftime('%d-%m-%y') }}</p>
+        <a href="#" class="btn btn-primary">Eat a bag of dicks</a>
+    </div>
+</div>
+{% endfor %} {% endblock %}
