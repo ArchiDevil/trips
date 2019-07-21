@@ -1,5 +1,9 @@
 {% extends 'base.j2' %} {% block content %} {% for day in trip_days %}
-<div class="card d-inline-flex m-3" style="width: 18rem;">
+<script>
+    $("#trips_link").addClass("active");
+</script>
+
+<div class="card shadow d-inline-flex m-3" style="width: 18rem;">
     <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
     <div class="card-body">
         <h5 class="card-title">{{ day['name'] }}</h5>
