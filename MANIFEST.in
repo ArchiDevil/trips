@@ -1,0 +1,4 @@
+include organizer/schema.sql
+graft organizer/static
+graft organizer/templates
+global-exclude *.pyc
