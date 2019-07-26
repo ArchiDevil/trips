@@ -39,7 +39,51 @@
 
 <script>
     $(document).ready(function () {
-        $("#input_form").validate({
+        $("#add_form").validate({
+            rules: {
+                name: {
+                    required: true,
+                },
+                calories: {
+                    required: true,
+                    number: true,
+                },
+                proteins: {
+                    required: true,
+                    number: true,
+                    min: 0,
+                    max: 100
+                },
+                fats: {
+                    required: true,
+                    number: true,
+                    min: 0,
+                    max: 100
+                },
+                carbs: {
+                    required: true,
+                    number: true,
+                    min: 0,
+                    max: 100
+                },
+            },
+            errorPlacement: function (error, element) {
+                errorLabelName = element.attr("id") + "_invalid";
+                var oldElement = $("#" + errorLabelName);
+                if (oldElement !== undefined) {
+                    oldElement.remove();
+                }
+                error.appendTo(element.parent());
+                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
+            },
+            errorClass: "is-invalid",
+            validClass: "is-valid",
+            errorElement: "div"
+        });
+    });
+
+    $(document).ready(function () {
+        $("#edit_form").validate({
             rules: {
                 name: {
                     required: true,
