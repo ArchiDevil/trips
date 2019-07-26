@@ -8,7 +8,6 @@ setup(
     zip_safe=False,
     install_requires=[
         'flask',
-        'Jinja2'
     ],
 
     url='https://bitbucket.org/ArchiDevil/trips/',

@@ -15,7 +15,8 @@ CREATE TABLE products (
     calories REAL,
     proteins REAL,
     fats REAL,
-    carbs REAL
+    carbs REAL,
+    archived INTEGER DEFAULT 0
 );
 
 --- fake data
@@ -44,4 +45,11 @@ INSERT INTO products(name, calories, proteins, fats, carbs) VALUES (
     "Some meat",
     221,
     22, 3, 3
+);
+
+INSERT INTO products(name, calories, proteins, fats, carbs, archived) VALUES (
+    "Archived thingy :)",
+    51,
+    2, 3, 3, 
+    1
 );
