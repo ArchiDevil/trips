@@ -1,0 +1,93 @@
+{% extends 'base.j2' %} {% block content %}
+
+<script>
+    $("#trips_link").addClass("active");
+</script>
+
+<script>
+    $(function () {
+        $('input[name="daterange"]').daterangepicker({
+            opens: 'right',
+            autoApply: true,
+            locale: {
+                format: "YYYY-MM-DD"
+            }
+        }, function (start, end, label) {
+            console.log(end.diff(start, 'days'));
+        });
+    });
+
+    $(document).ready(function () {
+        $("#input_form").validate({
+            rules: {
+                name: {
+                    required: true,
+                },
+                attendees: {
+                    required: true,
+                    number: true,
+                    min: 0
+                }
+            },
+            errorPlacement: function (error, element) {
+                errorLabelName = element.attr("id") + "_invalid";
+                var oldElement = $("#" + errorLabelName);
+                if (oldElement !== undefined) {
+                    oldElement.remove();
+                }
+                error.appendTo(element.parent());
+                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
+            },
+            errorClass: "is-invalid",
+            validClass: "is-valid",
+            errorElement: "div"
+        });
+    });
+</script>
+
+<div class="container col-md-6">
+    <h1 class="display-4 my-3">Edit a trip</h1>
+</div>
+
+<div class="container col-md-6 border shadow">
+    <form class="m-3" id="input_form" action="{{ url_for('trips.edit', trip_id=trip['id']) }}" method="POST">
+        <div class="form-group">
+            <label for="inputName">Trip name</label>
+            <input type="text" class="form-control" id="inputName" name="name" aria-describedby="nameHelp" placeholder="Enter name" value="{{ trip['name'] }}">
+            <small id="nameHelp" class="form-text text-muted">This is the name of your trip. Make sure this is a great name.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="inputDate">Dates of the trip</label>
+            <input class="form-control" type="text" id="inputDate" name="daterange" value="{{ trip['from_date'] }} - {{ trip['till_date'] }}"/>
+        </div>
+
+        <div class="form-group">
+            <label for="inputAttendees">How many people go to this trip?</label>
+            <input class="form-control" type="text" id="inputAttendees" name="attendees" value="{{ trip['attendees'] }}"/>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Edit</button>
+        <a type="button" href="{{ url_for('trips.trip', trip_id=trip['id']) }}" class="btn btn-secondary">Close</a>
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#archiveModal">Archive</button>
+    </form>
+</div>
+
+<div class="modal fade" id="archiveModal" tabindex="-1" role="dialog" aria-labelledby="archiveModalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="archiveModalTitle">Archive a trip?</h5>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to archive this trip?</p>
+            </div>
+            <div class="modal-footer">
+                <a id="archive_button" class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">Archive</a>
+                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

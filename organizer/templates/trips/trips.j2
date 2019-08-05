@@ -1,0 +1,59 @@
+{% extends 'base.j2' %}
+{% block content %}
+
+<script>
+    $("#trips_link").addClass("active");
+</script>
+
+<div class="container-fluid">
+    <h1 class="display-4 m-3">Trips</h1>
+</div>
+
+<div class="container-fluid d-inline-flex flex-wrap">
+    <div class="card shadow m-3" style="width: 18rem;">
+        <img src="{{ url_for('static', filename='trip.jpg') }}" class="card-img-top" alt="...">
+        <h5 class="card-header">Create something new</h5>
+        <div class="card-body">
+            <!-- <h5 class="card-title">Adventure is out there!</h5> -->
+            <p class="card-text">Start doing a great things by clicking this button. Let's start a new adventure!
+            </p>
+            <a href="{{ url_for('trips.add') }}" class="btn btn-primary">Add a new trip</a>
+        </div>
+    </div>
+
+    {% for day in trip_days %}
+    <div class="card shadow m-3" style="width: 18rem;">
+        <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
+        <h5 class="card-header">{{ day['name'] }}</h5>
+        <div class="card-body">
+            <p class="card-text">Starts: {{ day['from_date'].strftime('%d-%m-%y') }}</p>
+            <p class="card-text">Ends: {{ day['till_date'].strftime('%d-%m-%y') }}</p>
+            <p class="card-text"><small class="text-muted">Last updated: {{ day['last_update'] }}</small></p>
+            <a href="{{ url_for('trips.trip', trip_id=day['id']) }}" class="btn btn-secondary">Open</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add a trip modal -->
+<div class="modal fade" id="addTripModal" tabindex="-1" role="dialog" aria-labelledby="addTripModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTripModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
