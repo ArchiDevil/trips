@@ -101,7 +101,7 @@ def index():
     trips = db.execute(
         'SELECT id, name, from_date, till_date, last_update FROM trips WHERE archived=0'
     ).fetchall()
-    return render_template('trips/trips.j2', trip_days=trips, no_trips=True if not trips else False)
+    return render_template('trips/trips.html', trip_days=trips, no_trips=True if not trips else False)
 
 
 @bp.route('/trips/add', methods=('GET', 'POST'))
@@ -122,7 +122,7 @@ def add():
 
         return redirect(url_for('trips.index'))
 
-    return render_template('trips/add.j2')
+    return render_template('trips/add.html')
 
 
 @bp.route('/trips/trip/<int:trip_id>')
@@ -142,7 +142,7 @@ def trip(trip_id):
     first_date = trip_info['from_date']
     last_date = trip_info['till_date']
     days = calculate_total_days_info(first_date, last_date, trip_info['attendees'], meals_info)
-    return render_template('trips/trip.j2', trip=trip_info, days=days)
+    return render_template('trips/trip.html', trip=trip_info, days=days)
 
 
 @bp.route('/trips/trip/<int:trip_id>/day_table/<int:day_number>', methods=('POST',))
@@ -161,7 +161,7 @@ def day_tables(trip_id, day_number):
 
     date = format_date(trip_info['from_date'], day_number)
     day = calculate_day_info(day_number, date, trip_info['attendees'], meals_info)
-    day_macro = get_template_attribute('trips/trip_day.j2', 'day')
+    day_macro = get_template_attribute('trips/trip_day.html', 'day')
     return day_macro(day)
 
 @bp.route('/trips/edit/<int:trip_id>', methods=('GET', 'POST'))
@@ -188,7 +188,7 @@ def edit(trip_id):
         (trip_id,)
     ).fetchone()
 
-    return render_template('trips/edit.j2', trip=trip_info, action='edit')
+    return render_template('trips/edit.html', trip=trip_info, action='edit')
 
 
 @bp.route('/trips/archive/<int:trip_id>')

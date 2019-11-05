@@ -12,7 +12,7 @@ def index():
     products = db.execute(
         'SELECT * FROM products WHERE archived=0'
     ).fetchall()
-    return render_template('products/products.j2', products=products, filtered=False)
+    return render_template('products/products.html', products=products, filtered=False)
 
 @bp.route('/add', methods=['POST'])
 def add():
@@ -61,7 +61,7 @@ def search():
             [search_request]
         ).fetchall()
 
-        return render_template('products/products.j2', products=found_products, filtered=True)
+        return render_template('products/products.html', products=found_products, filtered=True)
 
     return flask.redirect(flask.url_for('products.index'))
 

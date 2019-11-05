@@ -1,4 +1,4 @@
-{% extends 'base.j2' %} {% block content %}
+{% extends 'base.html' %} {% block content %}
 
 <div class="container">
     <h1 class="display-4 my-3">{{ trip['name'] }}</h1>
@@ -114,7 +114,7 @@
         </div>
 
         <div class="col">
-            {% import 'trips/trip_day.j2' as trip_day %}
+            {% import 'trips/trip_day.html' as trip_day %}
             {% for day in days %}
             {{ trip_day.day(day_info=day) }}
             {% endfor %}

@@ -1,7 +1,6 @@
-{% extends 'base.j2' %} {% block content %}
+{% extends 'base.html' %} {% block content %}
 
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
 
 <script>
     $("#trips-link").addClass("active");
@@ -47,31 +46,51 @@
 </script>
 
 <div class="container col-md-6">
-    <h1 class="display-4 my-3">Add a new trip</h1>
+    <h1 class="display-4 my-3">Edit a trip</h1>
 </div>
 
 <div class="container col-md-6 border shadow">
-    <form class="m-3" id="input-form" action="{{ url_for('trips.add') }}" method="POST">
+    <form class="m-3" id="input-form" action="{{ url_for('trips.edit', trip_id=trip['id']) }}" method="POST">
         <div class="form-group">
             <label for="input-name">Trip name</label>
-            <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help" placeholder="Enter name">
+            <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help" placeholder="Enter name" value="{{ trip['name'] }}">
             <small id="name-help" class="form-text text-muted">This is the name of your trip. Make sure this is a great name.</small>
         </div>
 
         <div class="form-group">
             <label for="input-date">Dates of the trip</label>
-            <input class="form-control" type="text" id="input-date" name="daterange" />
+            <input class="form-control" type="text" id="input-date" name="daterange" value="{{ trip['from_date'] }} - {{ trip['till_date'] }}"/>
         </div>
 
         <div class="form-group">
             <label for="input-attendees">How many people go to this trip?</label>
-            <input class="form-control" type="text" id="input-attendees" name="attendees" />
+            <input class="form-control" type="text" id="input-attendees" name="attendees" value="{{ trip['attendees'] }}"/>
         </div>
 
-        <button type="submit" class="btn btn-primary">Add</button>
-        <a class="btn btn-secondary" href="{{ url_for('trips.index') }}">Close</a>
+        <button type="submit" class="btn btn-primary">Edit</button>
+        <a class="btn btn-secondary" href="{{ url_for('trips.trip', trip_id=trip['id']) }}">Close</a>
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#archive-modal">Archive</button>
     </form>
 </div>
 
+<div class="modal fade" id="archive-modal" tabindex="-1" role="dialog" aria-labelledby="archive-modal-title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="archive-modal-title">Archive a trip?</h5>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to archive this trip?</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">Archive</a>
+                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
 {% endblock %}
