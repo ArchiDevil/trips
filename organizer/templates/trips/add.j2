@@ -4,7 +4,7 @@
 
 
 <script>
-    $("#trips_link").addClass("active");
+    $("#trips-link").addClass("active");
 
     $(function () {
         $('input[name="daterange"]').daterangepicker({
@@ -19,7 +19,7 @@
     });
 
     $(document).ready(function () {
-        $("#input_form").validate({
+        $("#input-form").validate({
             rules: {
                 name: {
                     required: true,
@@ -51,25 +51,25 @@
 </div>
 
 <div class="container col-md-6 border shadow">
-    <form class="m-3" id="input_form" action="{{ url_for('trips.add') }}" method="POST">
+    <form class="m-3" id="input-form" action="{{ url_for('trips.add') }}" method="POST">
         <div class="form-group">
-            <label for="inputName">Trip name</label>
-            <input type="text" class="form-control" id="inputName" name="name" aria-describedby="nameHelp" placeholder="Enter name">
-            <small id="nameHelp" class="form-text text-muted">This is the name of your trip. Make sure this is a great name.</small>
+            <label for="input-name">Trip name</label>
+            <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help" placeholder="Enter name">
+            <small id="name-help" class="form-text text-muted">This is the name of your trip. Make sure this is a great name.</small>
         </div>
 
         <div class="form-group">
-            <label for="inputDate">Dates of the trip</label>
-            <input class="form-control" type="text" id="inputDate" name="daterange" />
+            <label for="input-date">Dates of the trip</label>
+            <input class="form-control" type="text" id="input-date" name="daterange" />
         </div>
 
         <div class="form-group">
-            <label for="inputAttendees">How many people go to this trip?</label>
-            <input class="form-control" type="text" id="inputAttendees" name="attendees" />
+            <label for="input-attendees">How many people go to this trip?</label>
+            <input class="form-control" type="text" id="input-attendees" name="attendees" />
         </div>
 
         <button type="submit" class="btn btn-primary">Add</button>
-        <a type="button" href="{{ url_for('trips.index') }}" class="btn btn-secondary">Close</a>
+        <a class="btn btn-secondary" href="{{ url_for('trips.index') }}">Close</a>
     </form>
 </div>
 

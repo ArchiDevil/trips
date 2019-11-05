@@ -3,7 +3,7 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <script>
-    $("#trips_link").addClass("active");
+    $("#trips-link").addClass("active");
 
     $(function () {
         $('input[name="daterange"]').daterangepicker({
@@ -18,7 +18,7 @@
     });
 
     $(document).ready(function () {
-        $("#input_form").validate({
+        $("#input-form").validate({
             rules: {
                 name: {
                     required: true,
@@ -50,41 +50,41 @@
 </div>
 
 <div class="container col-md-6 border shadow">
-    <form class="m-3" id="input_form" action="{{ url_for('trips.edit', trip_id=trip['id']) }}" method="POST">
+    <form class="m-3" id="input-form" action="{{ url_for('trips.edit', trip_id=trip['id']) }}" method="POST">
         <div class="form-group">
-            <label for="inputName">Trip name</label>
-            <input type="text" class="form-control" id="inputName" name="name" aria-describedby="nameHelp" placeholder="Enter name" value="{{ trip['name'] }}">
-            <small id="nameHelp" class="form-text text-muted">This is the name of your trip. Make sure this is a great name.</small>
+            <label for="input-name">Trip name</label>
+            <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help" placeholder="Enter name" value="{{ trip['name'] }}">
+            <small id="name-help" class="form-text text-muted">This is the name of your trip. Make sure this is a great name.</small>
         </div>
 
         <div class="form-group">
-            <label for="inputDate">Dates of the trip</label>
-            <input class="form-control" type="text" id="inputDate" name="daterange" value="{{ trip['from_date'] }} - {{ trip['till_date'] }}"/>
+            <label for="input-date">Dates of the trip</label>
+            <input class="form-control" type="text" id="input-date" name="daterange" value="{{ trip['from_date'] }} - {{ trip['till_date'] }}"/>
         </div>
 
         <div class="form-group">
-            <label for="inputAttendees">How many people go to this trip?</label>
-            <input class="form-control" type="text" id="inputAttendees" name="attendees" value="{{ trip['attendees'] }}"/>
+            <label for="input-attendees">How many people go to this trip?</label>
+            <input class="form-control" type="text" id="input-attendees" name="attendees" value="{{ trip['attendees'] }}"/>
         </div>
 
         <button type="submit" class="btn btn-primary">Edit</button>
-        <a type="button" href="{{ url_for('trips.trip', trip_id=trip['id']) }}" class="btn btn-secondary">Close</a>
-        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#archiveModal">Archive</button>
+        <a class="btn btn-secondary" href="{{ url_for('trips.trip', trip_id=trip['id']) }}">Close</a>
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#archive-modal">Archive</button>
     </form>
 </div>
 
-<div class="modal fade" id="archiveModal" tabindex="-1" role="dialog" aria-labelledby="archiveModalTitle"
+<div class="modal fade" id="archive-modal" tabindex="-1" role="dialog" aria-labelledby="archive-modal-title"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="archiveModalTitle">Archive a trip?</h5>
+                <h5 class="modal-title" id="archive-modal-title">Archive a trip?</h5>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to archive this trip?</p>
             </div>
             <div class="modal-footer">
-                <a id="archive_button" class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">Archive</a>
+                <a class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">Archive</a>
                 <button class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
