@@ -131,7 +131,7 @@
         data: {
             currentProductId: 0,
             currentProductName: '',
-            mass: 100,
+            mass: 0,
             unit: 'g',
             products: [],
             units: [],
@@ -202,9 +202,10 @@
                         else {
                             vm.submitDisabled = true;
                             reloadDay(day);
+                            vm.currentProductId = 0;
                             vm.currentProductName = '';
                             vm.mass = 0;
-                            vm.unit = '';
+                            vm.unit = 'g';
                             vm.errorMessageVisible = false;
                         }
                         vm.spinnerVisible = false;
