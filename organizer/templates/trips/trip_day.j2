@@ -1,0 +1,26 @@
+{% import 'trips/trip_table.j2' as trip_table %}
+
+{% macro day(day_info) %}
+<div class="card shadow mb-3" id="day{{day_info['number']}}">
+    <h5 class="card-header text-white bg-success">
+        Day {{day_info['number']}} - {{day_info['date']}}
+    </h5>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <th style="width: 60%">Name</th>
+                <th style="width: 8%" class="text-right">Mass</th>
+                <th style="width: 8%" class="text-right">P</th>
+                <th style="width: 8%" class="text-right">F</th>
+                <th style="width: 8%" class="text-right">C</th>
+                <th style="width: 8%" class="text-right">Cals</th>
+            </thead>
+        </table>
+        {{ trip_table.table('success',   'Breakfast', day_info, 'breakfast', 'breakfast_total') }}
+        {{ trip_table.table('warning',   'Lunch',     day_info, 'lunch',     'lunch_total') }}
+        {{ trip_table.table('info',      'Dinner',    day_info, 'dinner',    'dinner_total') }}
+        {{ trip_table.table('secondary', 'Snacks',    day_info, 'snacks',    'snacks_total') }}
+        {{ trip_table.table('danger',    'Results',   day_info, '',          'total_total', results=True) }}
+    </div>
+</div>
+{%- endmacro %}

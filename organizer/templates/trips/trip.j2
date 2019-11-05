@@ -1,0 +1,321 @@
+{% extends 'base.j2' %} {% block content %}
+
+<div class="container">
+    <h1 class="display-4 my-3">{{ trip['name'] }}</h1>
+</div>
+
+<div class="position-fixed d-none d-lg-block" style="width: 100%;">
+    <div class="btn-group-vertical float-right m-3">
+        {% for day in days %}
+        <a class="btn btn-outline-success" href="#day{{day['number']}}">Day {{day['number']}}</a>
+        {% endfor %}
+    </div>
+</div>
+
+{% raw %}
+<div class="modal fade" id="add-product-modal" tabindex="-1" role="dialog" aria-labelledby="add-product-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add-product-modal-label">Add a product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="add-meal-form" name="meal" novalidate>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">Product:</label>
+                        <div class="input-group col-sm-10">
+                            <input type="text" class="form-control w-75" v-model="currentProductName" disabled>
+                            <div class="input-group-append w-25">
+                                <button class="btn btn-outline-secondary w-100" type="button" v-on:click="clearProduct()">Clear product</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="mass-input" class="col-sm-2 col-form-label">Mass:</label>
+                        <div class="input-group col-sm-10">
+                            <input class="form-control w-75" id="mass-input" name="mass" placeholder="Enter the mass" v-model="mass"/>
+                            <select class="custom-select input-group-append w-25" v-model="unit">
+                                <option v-for="unit in units" v-bind:value="unit.name">{{unit.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+                <div class="border-bottom"></div>
+
+                <div class="input-group my-3">
+                    <input type="text" id="product-name" class="form-control" placeholder="Search for a product" v-on:input="searchProducts">
+                </div>
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%">#</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="found-products">
+                        <tr v-for="product in products">
+                            <th scope="row">
+                                {{ product.id}}
+                            </th>
+                            <td>
+                                <a v-on:click="setProduct(product.id, product.name)" href="javascript:void(0);">{{ product.name }}</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <span id="error-message" class="align-middle text-danger mx-3" v-if="errorMessageVisible">{{errorMessage}}</span>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="add-product-button" type="button" class="btn btn-primary" v-bind:disabled="submitDisabled" v-on:click="addMeal">
+                    <span class="spinner-border spinner-border-sm" v-if="spinnerVisible" role="status"></span>
+                    Add
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endraw %}
+
+<div class="modal fade" id="fatal-error-modal" tabindex="-1" role="dialog" aria-labelledby="fatal-error-modal-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fatal-error-modal-label">Connection error</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Connection to the server lost or there is internal error happened. You can reload the page.
+            </div>
+            <div class="modal-footer">
+                <button id="reload-page-button" type="button" class="btn btn-primary">Reload</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col col-auto d-none d-lg-block">
+            <div class="card shadow" style="width: 18rem;">
+                <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="">
+                <div class="card-body">
+                    <h5 class="card-title">Trip information</h5>
+                    <p class="card-text">From: {{ trip['from_date'] }}</p>
+                    <p class="card-text">Until: {{ trip['till_date'] }}</p>
+                    <a type="button" class="btn btn-primary" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">Edit the trip</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            {% import 'trips/trip_day.j2' as trip_day %}
+            {% for day in days %}
+            {{ trip_day.day(day_info=day) }}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- development version, includes helpful console warnings -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<script>
+    vm = new Vue({
+        el: '#add-product-modal',
+        data: {
+            currentProductId: 0,
+            currentProductName: '',
+            mass: 100,
+            unit: 'g',
+            products: [],
+            units: [],
+            submitDisabled: true,
+            spinnerVisible: false,
+            errorMessageVisible: false,
+            errorMessage: ''
+        },
+        methods: {
+            setProduct: function(productId, productName) {
+                this.currentProductId = productId;
+                this.currentProductName = productName;
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('api.product_units') }}",
+                    data: {
+                        'id': this.currentProductId
+                    },
+                    success: function (msg) {
+                        console.log(msg);
+                        if (msg.result == false) {
+                            vm.submitDisabled = false;
+                            return;
+                        }
+
+                        vm.units = []
+                        for (unit of msg.units) {
+                            vm.units.push({name: unit})
+                        }
+                        vm.submitDisabled = vm.currentProductName === '' ? true : false;
+                    }
+                })
+            },
+            clearProduct: function() {
+                this.currentProductId = 0;
+                this.currentProductName = '';
+                this.submitDisabled = true;
+            },
+            searchProducts: function(event) {
+                updateList($(event.target).val());
+            },
+            addMeal: function(event) {
+                var day = $("#found-products").data("day");
+                var mealName = $("#found-products").data("mealtype");
+                if ($('#add-meal-form').valid() != true)
+                    return;
+
+                this.spinnerVisible = true;
+                this.submitDisabled = true;
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('api.meals_add') }}",
+                    data: {
+                        'trip_id': "{{ trip['id'] }}",
+                        'meal_name': mealName,
+                        'day_number': day,
+                        'name': this.currentProductName,
+                        'mass': this.mass,
+                        'unit': this.unit
+                    },
+                    success: function (msg) {
+                        if (msg['result'] != true) {
+                            vm.submitDisabled = false;
+                            vm.errorMessageVisible = true;
+                            vm.errorMessage = 'Unable to add a meal';
+                        }
+                        else {
+                            vm.submitDisabled = true;
+                            reloadDay(day);
+                            vm.currentProductName = '';
+                            vm.mass = 0;
+                            vm.unit = '';
+                            vm.errorMessageVisible = false;
+                        }
+                        vm.spinnerVisible = false;
+                    }
+                })
+            }
+        }
+    })
+
+    $(document).ready(function () {
+        updateList('');
+
+        var validationRules = {
+            rules: {
+                mass: {
+                    required: true,
+                    number: true,
+                    min: 1
+                }
+            },
+            errorPlacement: function (error, element) {
+                errorLabelName = element.attr("id") + "_invalid";
+                var oldElement = $("#" + errorLabelName);
+                if (oldElement !== undefined) {
+                    oldElement.remove();
+                }
+                error.appendTo(element.parent());
+                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
+            },
+            errorClass: "is-invalid",
+            validClass: "is-valid",
+            errorElement: "div"
+        };
+
+        $("#add-meal-form").validate(validationRules);
+    });
+
+    $(document).on('show.bs.modal', '#add-product-modal', function (event) {
+        var button = $(event.relatedTarget);
+        var day = button.data('day');
+        var mealType = button.data('mealtype');
+        var modal = $(this);
+        modal.find("#found-products").data("day", day);
+        modal.find("#found-products").data("mealtype", mealType);
+    })
+
+    $(document).on('click', '#reload-page-button', function (event) {
+        window.location.reload(true);
+    })
+
+    function removeProduct(dayNumber, mealId) {
+        var url = "{{ url_for('api.meals_remove') }}";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: "meal_id=" + mealId.toString(),
+            success: function (msg) {
+                if (msg['result'] != true) {
+                    $("#fatal-error-modal").modal({
+                        backdrop: 'static'
+                    });
+                }
+                else {
+                    reloadDay(dayNumber);
+                }
+            }
+        });
+    }
+
+    function reloadDay(dayNumber) {
+        var url = "{{ url_for('trips.trip', trip_id=trip['id']) }}/day_table/" + dayNumber.toString();
+        var dayElement = $("#day" + dayNumber.toString());
+        $.ajax({
+            type: "POST",
+            url: url,
+            success: function (msg) {
+                dayElement.replaceWith(msg);
+            }
+        });
+    }
+
+    var lastRequestHandle = undefined;
+    function updateList(value) {
+        if (lastRequestHandle) {
+            clearTimeout(lastRequestHandle);
+        }
+
+        lastRequestHandle = setTimeout(function () {
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('api.products_search') }}",
+                data: {
+                    'name': value,
+                    'count': '10'
+                },
+                success: function (msg) {
+                    // trigger just to show things right from the beginning
+                    $('#add-meal-form').valid();
+                    lastRequestHandle = undefined;
+
+                    vm.products = []
+                    for (product of msg) {
+                        vm.products.push({
+                            id: product['id'],
+                            name: product['name']
+                        })
+                    }
+                }
+            })
+        }, 500)
+    }
+</script>
+
+{% endblock %}

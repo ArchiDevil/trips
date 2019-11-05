@@ -1,10 +1,11 @@
 {% extends 'base.j2' %} {% block content %}
 
-<script>
-    $("#trips_link").addClass("active");
-</script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
 
 <script>
+    $("#trips_link").addClass("active");
+
     $(function () {
         $('input[name="daterange"]').daterangepicker({
             opens: 'right',
@@ -71,4 +72,6 @@
         <a type="button" href="{{ url_for('trips.index') }}" class="btn btn-secondary">Close</a>
     </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 {% endblock %}

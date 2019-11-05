@@ -1,10 +1,10 @@
 {% extends 'base.j2' %} {% block content %}
 
-<script>
-    $("#trips_link").addClass("active");
-</script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <script>
+    $("#trips_link").addClass("active");
+
     $(function () {
         $('input[name="daterange"]').daterangepicker({
             opens: 'right',
@@ -90,4 +90,7 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
 {% endblock %}

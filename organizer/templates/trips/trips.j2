@@ -5,6 +5,24 @@
     $("#trips_link").addClass("active");
 </script>
 
+{% if no_trips %}
+
+<div class="container">
+    <h1 class="display-4 m-3">Trips</h1>
+</div>
+
+<div class="container">
+    <div class="jumbotron shadow">
+        <h1 class="display-4">Welcome!</h1>
+        <p class="lead">We have discovered that you have no trips planned. The whole beatiful world is waiting for you to open it. Let's discover the world together!</p>
+        <hr class="my-4">
+        <p>Start doing great things by clicking this button. We just need a bit info from you, this won't take a long time.</p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('trips.add') }}" role="button">Create first trip</a>
+    </div>
+</div>
+
+{% else %}
+
 <div class="container-fluid">
     <h1 class="display-4 m-3">Trips</h1>
 </div>
@@ -15,9 +33,8 @@
         <h5 class="card-header">Create something new</h5>
         <div class="card-body">
             <!-- <h5 class="card-title">Adventure is out there!</h5> -->
-            <p class="card-text">Start doing a great things by clicking this button. Let's start a new adventure!
-            </p>
-            <a href="{{ url_for('trips.add') }}" class="btn btn-primary">Add a new trip</a>
+            <p class="card-text">Start doing a great things by clicking this button. Let's start a new adventure!</p>
+            <a href="{{ url_for('trips.add') }}" class="btn btn-primary stretched-link" role="button">Add a new trip</a>
         </div>
     </div>
 
@@ -29,11 +46,13 @@
             <p class="card-text">Starts: {{ day['from_date'].strftime('%d-%m-%y') }}</p>
             <p class="card-text">Ends: {{ day['till_date'].strftime('%d-%m-%y') }}</p>
             <p class="card-text"><small class="text-muted">Last updated: {{ day['last_update'] }}</small></p>
-            <a href="{{ url_for('trips.trip', trip_id=day['id']) }}" class="btn btn-secondary">Open</a>
+            <a href="{{ url_for('trips.trip', trip_id=day['id']) }}" class="btn btn-secondary stretched-link">Open</a>
         </div>
     </div>
     {% endfor %}
 </div>
+
+{% endif %}
 
 <!-- Add a trip modal -->
 <div class="modal fade" id="addTripModal" tabindex="-1" role="dialog" aria-labelledby="addTripModalLabel"

@@ -1,0 +1,52 @@
+{% macro cell(data) %}
+<td style="width: 8%" class="text-right">{{ data }}</td>
+{%- endmacro %}
+
+{% macro table(table_style, title, day, datatype, total_datatype, results=False) %}
+<table class="table table-sm table-{{ table_style }} table-hover">
+    <tbody>
+        <tr>
+            {% if not results %}
+            <td colspan="5">
+                {% else %}
+            <td colspan="6">
+                {% endif %}
+                <h5><strong>{{ title }}</strong></h5>
+            </td>
+            {% if not results %}
+            <td class="text-right">
+                <button type="button"
+                        class="btn btn-{{ table_style }} btn-sm"
+                        data-toggle="modal"
+                        data-target="#add-product-modal"
+                        data-day="{{ day['number'] }}"
+                        data-mealtype="{{ datatype }}">+</button>
+            </td>
+            {% endif %}
+        </tr>
+        {% for meal in day[datatype] %}
+        <tr>
+            <td style="width: 60%" class="showhim">
+                <span>{{ meal['name'] }}</span>
+                <span class="text-right float-right showme">
+                    <a onclick="removeProduct({{day['number']}}, {{meal['id']}})" href="javascript:void(0);">Delete</a>
+                </span>
+            </td>
+            {{ cell(meal['mass']) }}
+            {{ cell("{:.2f}".format(meal['proteins'])) }}
+            {{ cell("{:.2f}".format(meal['carbs'])) }}
+            {{ cell("{:.2f}".format(meal['fats'])) }}
+            {{ cell("{:.2f}".format(meal['cals'])) }}
+        </tr>
+        {% endfor %}
+        <tr>
+            <td style="width: 60%" class="text-right font-weight-bold">Total</td>
+            {{ cell(day[total_datatype]['mass']) }}
+            {{ cell("{:.2f}".format(day[total_datatype]['proteins'])) }}
+            {{ cell("{:.2f}".format(day[total_datatype]['carbs'])) }}
+            {{ cell("{:.2f}".format(day[total_datatype]['fats'])) }}
+            {{ cell("{:.2f}".format(day[total_datatype]['cals'])) }}
+        </tr>
+    </tbody>
+</table>
+{%- endmacro %}

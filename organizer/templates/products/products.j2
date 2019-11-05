@@ -1,154 +1,34 @@
 {% extends 'base.j2' %} {% block content %}
-<script>
-    $("#products_link").addClass("active");
-
-    $(document).on('show.bs.modal', '#editProductModal', function(event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-
-        // Extract info from data-* attributes
-        var editAction = button.data('edit');
-        var archiveAction = button.data('archive');
-
-        var name = button.data('name');
-        var calories = button.data('calories');
-        var proteins = button.data('proteins');
-        var fats = button.data('fats');
-        var carbs = button.data('carbs');
-
-        // Applying changes into forms
-        var modal = $(this);
-        modal.find('#edit_form').attr('action', editAction);
-        modal.find('#edit_archive_activator').attr('data-whatever', archiveAction);
-
-        modal.find('#edit_name_input').val(name);
-        modal.find('#edit_calories_input').val(calories);
-        modal.find('#edit_proteins_input').val(proteins);
-        modal.find('#edit_fats_input').val(fats);
-        modal.find('#edit_carbs_input').val(carbs);
-    });
-
-    $(document).on('show.bs.modal', '#archiveProductModal', function (event) {
-        $('#editProductModal').modal('hide');
-
-        var button = $(event.relatedTarget); // Button that triggered the modal
-        var archiveRef = button.data('whatever'); // Extract info from data-* attributes
-        var modal = $(this);
-        modal.find('#archive_button').attr('href', archiveRef);
-    });
-</script>
-
-<script>
-    $(document).ready(function () {
-        $("#add_form").validate({
-            rules: {
-                name: {
-                    required: true,
-                },
-                calories: {
-                    required: true,
-                    number: true,
-                },
-                proteins: {
-                    required: true,
-                    number: true,
-                    min: 0,
-                    max: 100
-                },
-                fats: {
-                    required: true,
-                    number: true,
-                    min: 0,
-                    max: 100
-                },
-                carbs: {
-                    required: true,
-                    number: true,
-                    min: 0,
-                    max: 100
-                },
-            },
-            errorPlacement: function (error, element) {
-                errorLabelName = element.attr("id") + "_invalid";
-                var oldElement = $("#" + errorLabelName);
-                if (oldElement !== undefined) {
-                    oldElement.remove();
-                }
-                error.appendTo(element.parent());
-                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
-            },
-            errorClass: "is-invalid",
-            validClass: "is-valid",
-            errorElement: "div"
-        });
-    });
-
-    $(document).ready(function () {
-        $("#edit_form").validate({
-            rules: {
-                name: {
-                    required: true,
-                },
-                calories: {
-                    required: true,
-                    number: true,
-                },
-                proteins: {
-                    required: true,
-                    number: true,
-                    min: 0,
-                    max: 100
-                },
-                fats: {
-                    required: true,
-                    number: true,
-                    min: 0,
-                    max: 100
-                },
-                carbs: {
-                    required: true,
-                    number: true,
-                    min: 0,
-                    max: 100
-                },
-            },
-            errorPlacement: function (error, element) {
-                errorLabelName = element.attr("id") + "_invalid";
-                var oldElement = $("#" + errorLabelName);
-                if (oldElement !== undefined) {
-                    oldElement.remove();
-                }
-                error.appendTo(element.parent());
-                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
-            },
-            errorClass: "is-invalid",
-            validClass: "is-valid",
-            errorElement: "div"
-        });
-    });
-</script>
 
 <div class="container">
     <h1 class="display-4 my-3">Products</h1>
 </div>
 
-<div class="container">
+<div class="container" id="products-app">
     <div class="row">
-        <div class="col col-auto d-none d-xl-block">
+        <div class="col col-auto d-none d-lg-block">
             <div class="card shadow" style="width: 18rem;">
                 <img src="{{ url_for('static', filename='food.jpg') }}" class="card-img-top" alt="...">
                 <div class="card-body">
                     <h5 class="card-title">Want to edit food?</h5>
                     <p class="card-text">If you cannot find something in this database, just add any product you want.
                         Be ready to fill up information about nutrition.</p>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProductModal">Add a product</button>
+                    <button type="button"
+                            class="btn btn-primary"
+                            data-toggle="modal"
+                            data-target="#edit-modal"
+                            data-link="{{ url_for('products.add') }}"
+                            data-bname="Add">
+                        Add a product
+                    </button>
                 </div>
             </div>
         </div>
+
         <div class="col">
             <form method="POST" action="{{ url_for('products.search') }}">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Product name" aria-label="Product name"
-                        aria-describedby="button-addon2" name="request">
+                    <input type="text" class="form-control" placeholder="Product name" aria-label="Product name" aria-describedby="button-addon2" name="request">
                     <div class="input-group-append">
                         <button class="btn btn-outline-success" id="button-addon2" type="submit">Search</button>
                     </div>
@@ -165,168 +45,152 @@
             <table class="table table-sm table-hover table-responsive-xs">
                 <thead class="thead-light">
                     <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Calories</th>
-                        <th scope="col">Proteins</th>
-                        <th scope="col">Fats</th>
-                        <th scope="col">Carbs</th>
-                        <th scope="col"></th>
+                        <th scope="col" style="width: 8%">#</th>
+                        <th scope="col" style="width: 60%">Name</th>
+                        <th scope="col" style="width: 8%">Cals</th>
+                        <th scope="col" style="width: 8%">P</th>
+                        <th scope="col" style="width: 8%">F</th>
+                        <th scope="col" style="width: 8%">C</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for product in products %}
-                    <tr>
+                    <tr class="showhim">
                         <th scope="row">{{ product['id'] }}</th>
-                        <td>{{ product['name'] }}</td>
+                        <td>
+                            <span>{{ product['name'] }}</span>
+                            <span class="text-right float-right mx-1 showme">
+                                <a data-toggle="modal"
+                                   data-target="#edit-modal"
+                                   data-name="{{ product['name'] }}"
+                                   data-calories="{{ product['calories'] }}"
+                                   data-proteins="{{ product['proteins'] }}"
+                                   data-fats="{{ product['fats'] }}"
+                                   data-carbs="{{ product['carbs'] }}"
+                                   data-grams="{{ product['grams'] if product['grams'] != None else '' }}"
+                                   data-link="{{ url_for('products.edit', product_id=product['id']) }}"
+                                   data-bname="Edit"
+                                   href="javascript:void(0);">
+                                   Edit
+                                </a>
+                            </span>
+                            <span class="text-right float-right mx-1 showme">
+                                <a data-toggle="modal"
+                                   data-target="#archive-modal"
+                                   data-archive="{{ url_for('products.archive', product_id=product['id']) }}"
+                                   href="javascript:void(0);">
+                                    Archive
+                                </a>
+                            </span>
+                        </td>
                         <td>{{ product['calories'] }}</td>
                         <td>{{ product['proteins'] }}</td>
                         <td>{{ product['fats'] }}</td>
                         <td>{{ product['carbs'] }}</td>
-                        <td>
-                            <a data-toggle="modal"
-                               data-target="#editProductModal"
-                               data-name="{{ product['name'] }}"
-                               data-calories="{{ product['calories'] }}"
-                               data-proteins="{{ product['proteins'] }}"
-                               data-fats="{{ product['fats'] }}"
-                               data-carbs="{{ product['carbs'] }}"
-                               data-edit=" {{ url_for('products.edit', product_id=product['id']) }} "
-                               data-archive="{{ url_for('products.archive', product_id=product['id']) }}"
-                               href="#">
-                                ⚙
-                            </a>
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-</div>
 
-<!-- Add a product modal -->
-<div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalTitle" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="add_form" method="POST" action="{{ url_for('products.add') }}" novalidate>
+    <!-- Add/edit a product modal -->
+    {% raw %}
+    <div id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="edit-modal-title"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="edit-form" method="POST" v-bind:action="submitLink" novalidate>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="edit-modal-title">{{ modalTitle }}</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="add-name-input" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="name" id="add-name-input"
+                                    placeholder="enter a product name" v-model="productName">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="add-calories-input" class="col-sm-2 col-form-label">Calories</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="calories" id="add-calories-input"
+                                    placeholder="enter amount of calories" v-model="calories">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="add-proteins-input" class="col-sm-2 col-form-label">Proteins</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="proteins" id="add-proteins-input"
+                                    v-model="proteins">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="add-fats-input" class="col-sm-2 col-form-label">Fats</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="fats" id="add-fats-input" v-model="fats">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="add-carbs-input" class="col-sm-2 col-form-label">Carbs</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="carbs" id="add-carbs-input" v-model="carbs">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-2 col-form-label"></div>
+                            <div class="col-sm-10 custom-control custom-checkbox my-1">
+                                <div class="form-check pl-3">
+                                    <input type="checkbox" class="custom-control-input align-middle" id="add-custom-weight" v-model="custom">
+                                    <label class="custom-control-label align-middle" for="add-custom-weight">Use pieces instead of grams</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row" v-if="custom">
+                            <div class="col-sm-2">Note:</div>
+                            <span class="col-sm-10">Specify how many grams each piece weighs in the field below. You can use rational numbers.</span>
+                        </div>
+                        <div class="form-group row" v-if="custom">
+                            <label for="add-gpp-input" class="col-sm-2 col-form-label">Mass</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="grams" id="add-gpp-input" v-model="grams">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button class="btn btn-primary" type="submit">{{buttonName}}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archive a product confirmation modal -->
+    <div class="modal fade" id="archive-modal" tabindex="-1" role="dialog" aria-labelledby="archive-modal-title"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addProductModalTitle">Add a product</h5>
+                    <h5 class="modal-title" id="archive-modal-title">Archive a product?</h5>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group row">
-                        <label for="add_name_input" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="name" id="add_name_input" placeholder="enter a product name">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="add_calories_input" class="col-sm-2 col-form-label">Calories</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="calories" id="add_calories_input" placeholder="enter amount of calories">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="add_proteins_input" class="col-sm-2 col-form-label">Proteins</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="proteins" id="add_proteins_input" value="0">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="add_fats_input" class="col-sm-2 col-form-label">Fats</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="fats" id="add_fats_input" value="0">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="add_carbs_input" class="col-sm-2 col-form-label">Carbs</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="carbs" id="add_carbs_input" value="0">
-                        </div>
-                    </div>
+                    <p>Are you sure you want to put this product to the archive?</p>
                 </div>
                 <div class="modal-footer">
+                    <a id="archive-button" class="btn btn-danger" v-bind:href="archiveLink">Archive</a>
                     <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button class="btn btn-primary" type="submit">Add</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
+    {% endraw %}
 </div>
 
-<!-- Edit a product modal -->
-<div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalTitle" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="edit_form" method="POST" action="" novalidate>
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editProductModalTitle">Edit a product</h5>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group row">
-                        <label for="edit_name_input" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="name" id="edit_name_input" placeholder="enter a product name">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="edit_calories_input" class="col-sm-2 col-form-label">Calories</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="calories" id="edit_calories_input" placeholder="enter amount of calories">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="edit_proteins_input" class="col-sm-2 col-form-label">Proteins</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="proteins" id="edit_proteins_input" value="0">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="edit_fats_input" class="col-sm-2 col-form-label">Fats</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="fats" id="edit_fats_input" value="0">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="edit_carbs_input" class="col-sm-2 col-form-label">Carbs</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="carbs" id="edit_carbs_input" value="0">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="edit_archive_activator"
-                            class="btn btn-danger"
-                            data-toggle="modal"
-                            data-target="#archiveProductModal"
-                            data-whatever=""
-                            href="#"
-                            type="button">
-                        Archive
-                    </button>
-                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button class="btn btn-primary" type="submit">Edit</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<!-- development version, includes helpful console warnings -->
+<!-- should be included before products.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="application/javascript" src="{{ url_for('static', filename='products.js') }}"></script>
 
-<!-- Archive a product confirmation modal -->
-<div class="modal fade" id="archiveProductModal" tabindex="-1" role="dialog" aria-labelledby="archiveProductModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="archiveProductModalTitle">Archive a product?</h5>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to put this product to the archive?</p>
-            </div>
-            <div class="modal-footer">
-                <a id="archive_button" class="btn btn-danger">Archive</a>
-                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
