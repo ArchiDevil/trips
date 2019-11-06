@@ -34,8 +34,8 @@
             </td>
             {{ cell(meal['mass']) }}
             {{ cell("{:.2f}".format(meal['proteins'])) }}
-            {{ cell("{:.2f}".format(meal['carbs'])) }}
             {{ cell("{:.2f}".format(meal['fats'])) }}
+            {{ cell("{:.2f}".format(meal['carbs'])) }}
             {{ cell("{:.2f}".format(meal['cals'])) }}
         </tr>
         {% endfor %}
@@ -43,8 +43,8 @@
             <td style="width: 60%" class="text-right font-weight-bold">Total</td>
             {{ cell(day[total_datatype]['mass']) }}
             {{ cell("{:.2f}".format(day[total_datatype]['proteins'])) }}
-            {{ cell("{:.2f}".format(day[total_datatype]['carbs'])) }}
             {{ cell("{:.2f}".format(day[total_datatype]['fats'])) }}
+            {{ cell("{:.2f}".format(day[total_datatype]['carbs'])) }}
             {{ cell("{:.2f}".format(day[total_datatype]['cals'])) }}
         </tr>
     </tbody>
