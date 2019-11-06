@@ -2,10 +2,12 @@ from flask import Blueprint, request, jsonify
 
 from organizer.db import get_db
 
-bp = Blueprint('api', __name__, url_prefix='/api/v1')
+# bp = Blueprint('api', __name__, url_prefix='/api/v1')
+products_bp = Blueprint('api.products', __name__, url_prefix='/api/v1/products')
+meals_bp = Blueprint('api.meals', __name__, url_prefix='/api/v1/meals')
 
 
-@bp.route('/products/search', methods=['POST'])
+@products_bp.route('/search', methods=['POST'])
 def products_search():
     # TODO: check the provided name
     search_request = request.form['name']
@@ -26,7 +28,7 @@ def products_search():
     return jsonify(output)
 
 
-@bp.route('/products/units', methods=['POST'])
+@products_bp.route('/units', methods=['POST'])
 def product_units():
     product_id = request.form['id']
     db = get_db()
@@ -34,12 +36,13 @@ def product_units():
         "SELECT grams FROM products WHERE id=? AND archived=0",
         [product_id]
     ).fetchone()
-    
+
     if not product:
         return jsonify({
             'result': False
         })
 
+    # put these units in some table
     units = ['g']
     if product['grams'] is not None:
         units.append('p')
@@ -50,7 +53,7 @@ def product_units():
     })
 
 
-@bp.route('/meals/add', methods=['POST'])
+@meals_bp.route('/add', methods=['POST'])
 def meals_add():
     trip_id = request.form['trip_id']
     meal_name = request.form['meal_name']
@@ -105,7 +108,7 @@ def meals_add():
     return jsonify({'result': True})
 
 
-@bp.route('/meals/remove', methods=['POST'])
+@meals_bp.route('/remove', methods=['POST'])
 def meals_remove():
     meal_id = request.form['meal_id']
 

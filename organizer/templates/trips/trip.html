@@ -146,7 +146,7 @@
                 this.currentProductName = productName;
                 $.ajax({
                     type: "POST",
-                    url: "{{ url_for('api.product_units') }}",
+                    url: "{{ url_for('api.products.product_units') }}",
                     data: {
                         'id': this.currentProductId
                     },
@@ -184,7 +184,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "{{ url_for('api.meals_add') }}",
+                    url: "{{ url_for('api.meals.meals_add') }}",
                     data: {
                         'trip_id': "{{ trip['id'] }}",
                         'meal_name': mealName,
@@ -257,7 +257,7 @@
     })
 
     function removeProduct(dayNumber, mealId) {
-        var url = "{{ url_for('api.meals_remove') }}";
+        var url = "{{ url_for('api.meals.meals_remove') }}";
         $.ajax({
             type: "POST",
             url: url,
@@ -296,7 +296,7 @@
         lastRequestHandle = setTimeout(function () {
             $.ajax({
                 type: "POST",
-                url: "{{ url_for('api.products_search') }}",
+                url: "{{ url_for('api.products.products_search') }}",
                 data: {
                     'name': value,
                     'count': '10'

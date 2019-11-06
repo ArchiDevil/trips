@@ -43,7 +43,8 @@ def create_app(test_config=None):
     app.register_blueprint(products.bp)
 
     from . import api
-    app.register_blueprint(api.bp)
+    app.register_blueprint(api.products_bp)
+    app.register_blueprint(api.meals_bp)
 
     app.before_first_request(before_first_request_handler)
 
