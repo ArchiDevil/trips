@@ -16,7 +16,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow">
         <a class="navbar-brand" href="{{ url_for('trips.index') }}">Trips organizer</a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,11 +28,6 @@
                 <a id="trips_link" class="nav-item nav-link" href="{{ url_for('trips.index') }}">Trips</a>
                 <a id="products_link" class="nav-item nav-link" href="{{ url_for('products.index') }}">Products</a>
             </div>
-
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Fake and gay">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Do not search</button>
-            </form>
         </div>
     </nav>
 
