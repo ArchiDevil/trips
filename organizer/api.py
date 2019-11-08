@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Blueprint, request, jsonify
 
 from organizer.db import get_db
@@ -105,6 +107,12 @@ def meals_add():
         [trip_id, day_number, meal_number, product_id, mass]
     )
     db.commit()
+
+    db.execute(
+        "UPDATE trips SET last_update=? WHERE id=?",
+        [datetime.datetime.now(), trip_id]
+    )
+    db.commit()
     return jsonify({'result': True})
 
 
@@ -119,9 +127,20 @@ def meals_remove():
         return jsonify({'result': False})
 
     db = get_db()
+    trip_info = db.execute(
+        'SELECT trip_id FROM meal_records WHERE id=?',
+        [meal_id]
+    ).fetchone()
+
     db.execute(
         'DELETE FROM meal_records WHERE id=?',
         [meal_id]
+    )
+    db.commit()
+
+    db.execute(
+        "UPDATE trips SET last_update=? WHERE id=?",
+        [datetime.datetime.now(), trip_info['trip_id']]
     )
     db.commit()
     return jsonify({'result': True})

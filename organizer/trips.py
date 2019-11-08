@@ -15,10 +15,9 @@ def format_date(first_day, current_day_number):
     return '{:4}-{:02}-{:02}'.format(y, m, d)
 
 
-def calculate_day_info(day_number : int,
+def calculate_day_info(day_number: int,
                        date: str,
-                       attendees_count : int,
-                       meals_info : List[dict]):
+                       meals_info: List[dict]):
     day = {
         'number': day_number,
         'date': '',
@@ -70,7 +69,7 @@ def calculate_day_info(day_number : int,
     return day
 
 
-def calculate_total_days_info(first_date, last_date, attendees_count, meals_info):
+def calculate_total_days_info(first_date, last_date, meals_info):
     days_amount = (last_date - first_date).days + 1
     days = [
         {
@@ -90,7 +89,7 @@ def calculate_total_days_info(first_date, last_date, attendees_count, meals_info
     for i, _ in enumerate(days):
         date = format_date(first_date, i + 1)
         day_meals = [x for x in meals_info if x['day_number'] == i + 1]
-        days[i] = calculate_day_info(i + 1,  date, attendees_count, day_meals)
+        days[i] = calculate_day_info(i + 1, date, day_meals)
 
     return days
 
@@ -101,7 +100,8 @@ def index():
     trips = db.execute(
         'SELECT id, name, from_date, till_date, last_update FROM trips WHERE archived=0'
     ).fetchall()
-    return render_template('trips/trips.html', trip_days=trips, no_trips=True if not trips else False)
+
+    return render_template('trips/trips.html', trip_days=trips, no_trips=bool(trips))
 
 
 @bp.route('/trips/add', methods=('GET', 'POST'))
@@ -116,7 +116,7 @@ def add():
         db = get_db()
         db.execute(
             'INSERT INTO trips(name, from_date, till_date, attendees) VALUES (?, ?, ?, ?)',
-            (name, from_date, till_date, attendees)
+            [name, from_date, till_date, attendees]
         )
         db.commit()
 
@@ -130,18 +130,18 @@ def trip(trip_id):
     db = get_db()
 
     trip_info = db.execute(
-        'SELECT id, name, from_date, till_date, attendees FROM trips WHERE id=?',
-        (trip_id,)
+        'SELECT id, name, from_date, till_date FROM trips WHERE id=?',
+        [trip_id]
     ).fetchone()
 
     meals_info = db.execute(
         "SELECT mr.id, mr.trip_id, mr.day_number, mr.meal_number, mr.product_id, mr.mass, p.name, p.calories, p.proteins, p.fats, p.carbs FROM 'meal_records' mr INNER JOIN 'products' p ON p.id=mr.product_id WHERE trip_id=?",
-        (trip_id,)
+        [trip_id]
     ).fetchall()
-    
+
     first_date = trip_info['from_date']
     last_date = trip_info['till_date']
-    days = calculate_total_days_info(first_date, last_date, trip_info['attendees'], meals_info)
+    days = calculate_total_days_info(first_date, last_date, meals_info)
     return render_template('trips/trip.html', trip=trip_info, days=days)
 
 
@@ -150,19 +150,20 @@ def day_tables(trip_id, day_number):
     db = get_db()
 
     trip_info = db.execute(
-        'SELECT id, name, from_date, till_date, attendees FROM trips WHERE id=?',
-        (trip_id,)
+        'SELECT id, name, from_date, till_date FROM trips WHERE id=?',
+        [trip_id]
     ).fetchone()
 
     meals_info = db.execute(
         "SELECT mr.id, mr.trip_id, mr.day_number, mr.meal_number, mr.product_id, mr.mass, p.name, p.calories, p.proteins, p.fats, p.carbs FROM 'meal_records' mr INNER JOIN 'products' p ON p.id=mr.product_id WHERE trip_id=? AND day_number=?",
-        (trip_id, day_number)
+        [trip_id, day_number]
     ).fetchall()
 
     date = format_date(trip_info['from_date'], day_number)
-    day = calculate_day_info(day_number, date, trip_info['attendees'], meals_info)
+    day = calculate_day_info(day_number, date, meals_info)
     day_macro = get_template_attribute('trips/trip_day.html', 'day')
     return day_macro(day)
+
 
 @bp.route('/trips/edit/<int:trip_id>', methods=('GET', 'POST'))
 def edit(trip_id):
@@ -176,8 +177,8 @@ def edit(trip_id):
         from_date, till_date = daterange.split(' - ')
 
         db.execute(
-            'UPDATE trips SET name=?, from_date=?, till_date=?, attendees=? WHERE id=?',
-            (name, from_date, till_date, attendees, trip_id)
+            'UPDATE trips SET name=?, from_date=?, till_date=?, attendees=?, last_update=? WHERE id=?',
+            [name, from_date, till_date, attendees, datetime.datetime.now(), trip_id]
         )
         db.commit()
 
@@ -185,7 +186,7 @@ def edit(trip_id):
 
     trip_info = db.execute(
         'SELECT id, name, from_date, till_date, attendees FROM trips WHERE id=?',
-        (trip_id,)
+        [trip_id]
     ).fetchone()
 
     return render_template('trips/edit.html', trip=trip_info, action='edit')
@@ -195,8 +196,8 @@ def edit(trip_id):
 def archive(trip_id):
     db = get_db()
     db.execute(
-        'UPDATE trips SET archived=1 WHERE id=?',
-        (trip_id,)
+        'UPDATE trips SET archived=1, last_update=? WHERE id=?',
+        [datetime.datetime.now(), trip_id]
     )
     db.commit()
 

@@ -14,6 +14,7 @@ def index():
     ).fetchall()
     return render_template('products/products.html', products=products, filtered=False)
 
+
 @bp.route('/add', methods=['POST'])
 def add():
     if request.method == 'POST':
@@ -38,6 +39,7 @@ def add():
 
     return flask.redirect(flask.url_for('products.index'))
 
+
 @bp.route('/archive/<int:product_id>')
 def archive(product_id):
     db = get_db()
@@ -48,6 +50,7 @@ def archive(product_id):
     )
     db.commit()
     return flask.redirect(flask.url_for('products.index'))
+
 
 @bp.route('/search', methods=['POST'])
 def search():
@@ -64,6 +67,7 @@ def search():
         return render_template('products/products.html', products=found_products, filtered=True)
 
     return flask.redirect(flask.url_for('products.index'))
+
 
 @bp.route('/edit/<int:product_id>', methods=['POST'])
 def edit(product_id):
