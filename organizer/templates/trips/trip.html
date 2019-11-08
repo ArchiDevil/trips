@@ -46,7 +46,7 @@
                 <div class="border-bottom"></div>
 
                 <div class="input-group my-3">
-                    <input type="text" id="product-name" class="form-control" placeholder="Search for a product" v-on:input="searchProducts">
+                    <input type="text" id="search-product-input" class="form-control" placeholder="Search for a product" v-on:input="searchProducts">
                 </div>
                 <table class="table table-sm table-hover">
                     <thead>
@@ -108,7 +108,8 @@
                     <h5 class="card-title">Trip information</h5>
                     <p class="card-text">From: {{ trip['from_date'] }}</p>
                     <p class="card-text">Until: {{ trip['till_date'] }}</p>
-                    <a class="btn btn-primary" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">Edit the trip</a>
+                    <a class="btn btn-primary w-100 my-1" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">Edit the trip</a>
+                    <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.shopping', trip_id=trip['id']) }}">Shopping report</a>
                 </div>
             </div>
         </div>
@@ -250,6 +251,10 @@
         var modal = $(this);
         modal.find("#found-products").data("day", day);
         modal.find("#found-products").data("mealtype", mealType);
+
+        setTimeout(() => {
+            document.getElementById('search-product-input').focus();
+        }, 500);
     })
 
     $(document).on('click', '#reload-page-button', function (event) {

@@ -43,9 +43,9 @@ def product_units():
         })
 
     # put these units in some table
-    units = ['g']
+    units = ['grams']
     if product['grams'] is not None:
-        units.append('p')
+        units.append('pcs')
 
     return jsonify({
         'result': True,
@@ -77,7 +77,7 @@ def meals_add():
         assert day_number > 0
         mass = int(mass)
         assert mass > 0
-        assert unit in ['g', 'p']
+        assert unit in ['grams', 'pcs']
     except:
         return jsonify({"result": False})
 
@@ -95,8 +95,8 @@ def meals_add():
     grams = found_products['grams']
     if grams is None:
         # if product has no special units it must use grams
-        assert unit == 'g'
-    elif unit == 'p':
+        assert unit == 'grams'
+    elif unit == 'pcs':
         mass = grams * mass
 
     meal_number = meals_map[meal_name]

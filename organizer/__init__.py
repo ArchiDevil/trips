@@ -46,6 +46,9 @@ def create_app(test_config=None):
     app.register_blueprint(api.products_bp)
     app.register_blueprint(api.meals_bp)
 
+    from . import reports
+    app.register_blueprint(reports.bp)
+
     app.before_first_request(before_first_request_handler)
 
     return app

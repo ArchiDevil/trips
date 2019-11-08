@@ -13,14 +13,14 @@ INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Borsch conc
 INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Beef jerk", 53.8, 10.9, 1.12, 0);
 INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Crackers", 180.3, 1.82, 14.4, 11.8);
 INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Chicken pate", 318, 9, 30, 3);
-INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Ptitsa divnaya sweet", 439, 2.6, 23.7, 56);
+INSERT INTO products(name, calories, proteins, fats, carbs, grams) VALUES ("Ptitsa divnaya sweet", 439, 2.6, 23.7, 56, 5.5);
 
 INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Lentils", 314, 21.6, 1.1, 48);
 INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Chicken jerk", 244.5, 52.3, 4.3, 0);
 INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Sausage", 472.7, 24.8, 41.5, 0);
 INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Chocolate", 550, 6.9, 35.7, 54.4);
 
-INSERT INTO products(name, calories, proteins, fats, carbs) VALUES ("Step snack", 455.9, 9.6, 26.1, 47.3);
+INSERT INTO products(name, calories, proteins, fats, carbs, grams) VALUES ("Step snack", 455.9, 9.6, 26.1, 47.3, 12.0);
 
 ---
 
@@ -50,7 +50,7 @@ INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VAL
 INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 1, 2, 12, 30);
 INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 1, 2, 13, 30);
 
-INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 1, 3, 14, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 1, 3, 14, 60);
 
 ---
 

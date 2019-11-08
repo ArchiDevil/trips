@@ -54,7 +54,7 @@
     <form class="m-3" id="input-form" action="{{ url_for('trips.add') }}" method="POST">
         <div class="form-group">
             <label for="input-name">Trip name</label>
-            <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help" placeholder="Enter name">
+            <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help" placeholder="Enter name" autofocus>
             <small id="name-help" class="form-text text-muted">This is the name of your trip. Make sure this is a great name.</small>
         </div>
 

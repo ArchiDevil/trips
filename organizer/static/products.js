@@ -1,3 +1,23 @@
+function isNumber(value) {
+    return !isNaN(+value)
+}
+
+function notEmpty(value) {
+    return value.toString().length > 0
+}
+
+function min(value, min_val) {
+    return +value >= min_val
+}
+
+function max(value, max_val) {
+    return +value <= max_val
+}
+
+function between(value, min_val, max_val) {
+    return min(value, min_val) && max(value, max_val)
+}
+
 var vm = new Vue({
     el: '#products-app',
     data: {
@@ -12,10 +32,30 @@ var vm = new Vue({
         archiveLink: '',
         submitLink: '',
         buttonName: ''
+    },
+    computed: {
+        validation: function () {
+            return {
+                name:      notEmpty(this.productName),
+                cals:      isNumber(this.calories) && notEmpty(this.calories) && min(this.calories, 0),
+                proteins:  isNumber(this.proteins) && notEmpty(this.proteins) && between(this.proteins, 0, 100),
+                fats:      isNumber(this.fats)     && notEmpty(this.fats)     && between(this.fats, 0, 100),
+                carbs:     isNumber(this.carbs)    && notEmpty(this.carbs)    && between(this.carbs, 0, 100),
+                grams:     isNumber(this.grams)    && notEmpty(this.grams)    && min(this.grams, 0.1),
+                nutrition: +this.proteins + +this.fats + +this.carbs <= 100
+            }
+        },
+        formValid: function () {
+            return this.validation.name
+                && this.validation.cals
+                && this.validation.proteins
+                && this.validation.fats
+                && this.validation.carbs
+                && this.validation.nutrition
+                && (this.custom ? this.validation.grams : true);
+        }
     }
 })
-
-$('#products_link').addClass('active');
 
 $(document).on('show.bs.modal', '#edit-modal', function(event) {
     var button = $(event.relatedTarget); // Button that triggered the modal
@@ -38,6 +78,10 @@ $(document).on('show.bs.modal', '#edit-modal', function(event) {
     var customMass = grams ? grams : false;
     vm.custom = customMass;
     vm.grams = customMass ? grams : 1;
+
+    setTimeout(() => {
+        document.getElementById('add-name-input').select();
+    }, 500);
 });
 
 $(document).on('show.bs.modal', '#archive-modal', function (event) {
@@ -45,53 +89,9 @@ $(document).on('show.bs.modal', '#archive-modal', function (event) {
     vm.archiveLink = caller.data('archive');
 });
 
-var validationRules = {
-    rules: {
-        name: {
-            required: true,
-        },
-        calories: {
-            required: true,
-            number: true,
-        },
-        proteins: {
-            required: true,
-            number: true,
-            min: 0,
-            max: 100
-        },
-        fats: {
-            required: true,
-            number: true,
-            min: 0,
-            max: 100
-        },
-        carbs: {
-            required: true,
-            number: true,
-            min: 0,
-            max: 100
-        },
-        grams: {
-            required: false,
-            number: true,
-            min: 0.1
-        }
-    },
-    errorPlacement: function (error, element) {
-        errorLabelName = element.attr("id") + "_invalid";
-        var oldElement = $("#" + errorLabelName);
-        if (oldElement !== undefined) {
-            oldElement.remove();
-        }
-        error.appendTo(element.parent());
-        $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
-    },
-    errorClass: "is-invalid",
-    validClass: "is-valid",
-    errorElement: "div"
-};
-
 $(document).ready(function () {
-    $("#edit-form").validate(validationRules);
+    $('#products_link').addClass('active');
+    setTimeout(() => {
+        document.getElementById('input-search').focus();
+    }, 500);
 });
