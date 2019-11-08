@@ -101,7 +101,7 @@ def index():
         'SELECT id, name, from_date, till_date, last_update FROM trips WHERE archived=0'
     ).fetchall()
 
-    return render_template('trips/trips.html', trip_days=trips, no_trips=bool(trips))
+    return render_template('trips/trips.html', trip_days=trips, no_trips=bool(not trips))
 
 
 @bp.route('/trips/add', methods=('GET', 'POST'))
