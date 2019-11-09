@@ -29,15 +29,15 @@
                         <div class="input-group col-sm-10">
                             <input type="text" class="form-control w-75" v-model="currentProductName" disabled>
                             <div class="input-group-append w-25">
-                                <button class="btn btn-outline-secondary w-100" type="button" v-on:click="clearProduct()">Clear product</button>
+                                <button tabindex="7" class="btn btn-outline-secondary w-100" type="button" v-on:click="clearProduct()">Clear product</button>
                             </div>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label for="mass-input" class="col-sm-2 col-form-label">Mass:</label>
                         <div class="input-group col-sm-10">
-                            <input class="form-control w-75" id="mass-input" name="mass" placeholder="Enter the mass" v-model="mass"/>
-                            <select class="custom-select input-group-append w-25" v-model="unit">
+                            <input tabindex="2" class="form-control w-75" id="mass-input" name="mass" placeholder="Enter the mass" v-model="mass"/>
+                            <select tabindex="3" class="custom-select input-group-append w-25" v-model="unit">
                                 <option v-for="unit in units" v-bind:value="unit.name">{{unit.name}}</option>
                             </select>
                         </div>
@@ -46,7 +46,7 @@
                 <div class="border-bottom"></div>
 
                 <div class="input-group my-3">
-                    <input type="text" id="search-product-input" class="form-control" placeholder="Search for a product" v-on:input="searchProducts">
+                    <input tabindex="6" type="text" id="search-product-input" class="form-control" placeholder="Search for a product" v-on:input="searchProducts">
                 </div>
                 <table class="table table-sm table-hover">
                     <thead>
@@ -61,7 +61,7 @@
                                 {{ product.id}}
                             </th>
                             <td>
-                                <a v-on:click="setProduct(product.id, product.name)" href="javascript:void(0);">{{ product.name }}</a>
+                                <a tabindex="-1" v-on:click="setProduct(product.id, product.name)" href="javascript:void(0);">{{ product.name }}</a>
                             </td>
                         </tr>
                     </tbody>
@@ -69,8 +69,8 @@
             </div>
             <div class="modal-footer">
                 <span id="error-message" class="align-middle text-danger mx-3" v-if="errorMessageVisible">{{errorMessage}}</span>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button id="add-product-button" type="button" class="btn btn-primary" v-bind:disabled="submitDisabled" v-on:click="addMeal">
+                <button tabindex="5" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button tabindex="4" id="add-product-button" type="button" class="btn btn-primary" v-bind:disabled="submitDisabled" v-on:click="addMeal">
                     <span class="spinner-border spinner-border-sm" v-if="spinnerVisible" role="status"></span>
                     Add
                 </button>
@@ -127,13 +127,26 @@
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
 <script>
+    var defaults = {
+        currentProductId: 0,
+        currentProductName: '',
+        mass: 0,
+        unit: 'grams',
+        products: [],
+        units: [],
+        submitDisabled: true,
+        spinnerVisible: false,
+        errorMessageVisible: false,
+        errorMessage: ''
+    };
+
     vm = new Vue({
         el: '#add-product-modal',
         data: {
             currentProductId: 0,
             currentProductName: '',
             mass: 0,
-            unit: 'g',
+            unit: 'grams',
             products: [],
             units: [],
             submitDisabled: true,
@@ -145,6 +158,7 @@
             setProduct: function(productId, productName) {
                 this.currentProductId = productId;
                 this.currentProductName = productName;
+                document.getElementById('mass-input').select();
                 $.ajax({
                     type: "POST",
                     url: "{{ url_for('api.products.product_units') }}",
@@ -206,7 +220,7 @@
                             vm.currentProductId = 0;
                             vm.currentProductName = '';
                             vm.mass = 0;
-                            vm.unit = 'g';
+                            vm.unit = 'grams';
                             vm.errorMessageVisible = false;
                         }
                         vm.spinnerVisible = false;
@@ -251,6 +265,13 @@
         var modal = $(this);
         modal.find("#found-products").data("day", day);
         modal.find("#found-products").data("mealtype", mealType);
+
+        vm.submitDisabled = true;
+        vm.currentProductId = 0;
+        vm.currentProductName = '';
+        vm.mass = 0;
+        vm.unit = 'grams';
+        vm.errorMessageVisible = false;
 
         setTimeout(() => {
             document.getElementById('search-product-input').focus();
