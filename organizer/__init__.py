@@ -49,6 +49,9 @@ def create_app(test_config=None):
     from . import reports
     app.register_blueprint(reports.bp)
 
+    from . import developer
+    app.register_blueprint(developer.bp)
+
     app.before_first_request(before_first_request_handler)
 
     return app
