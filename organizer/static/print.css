@@ -1,0 +1,5 @@
+@media print {
+    body {
+        line-height: 1.0;
+    }
+}

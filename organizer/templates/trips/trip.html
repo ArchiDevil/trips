@@ -101,7 +101,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col col-auto d-none d-lg-block">
+        <div class="col-auto d-none d-lg-block">
             <div class="card shadow" style="width: 18rem;">
                 <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="">
                 <div class="card-body">
@@ -110,6 +110,7 @@
                     <p class="card-text">Until: {{ trip['till_date'] }}</p>
                     <a class="btn btn-primary w-100 my-1" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">Edit the trip</a>
                     <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.shopping', trip_id=trip['id']) }}">Shopping report</a>
+                    <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.packing', trip_id=trip['id']) }}">Packing report</a>
                 </div>
             </div>
         </div>

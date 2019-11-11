@@ -52,6 +52,186 @@ INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VAL
 
 INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 1, 3, 14, 60);
 
+--- day 2
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 2, 3, 14, 60);
+
+--- day 3
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 3, 3, 14, 60);
+
+--- day 4
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 4, 3, 14, 60);
+
+--- day 5
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 5, 3, 14, 60);
+
+--- day 6
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 6, 3, 14, 60);
+
+--- day 7
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 7, 3, 14, 60);
+
+--- day 8
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 8, 3, 14, 60);
+
+--- day 9
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 9, 3, 14, 60);
+
+--- day 10
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 0,  1, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 0,  2, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 0,  3, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 0,  4, 50);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 1,  5, 50);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 1,  6, 20);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 1,  7, 15);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 1,  8, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 1,  9, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 2, 10, 60);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 2, 11, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 2, 12, 30);
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 2, 13, 30);
+
+INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (1, 10, 3, 14, 60);
+
 ---
 
 DELETE FROM users;
