@@ -303,7 +303,7 @@
     }
 
     function reloadDay(dayNumber) {
-        var url = "{{ url_for('trips.trip', trip_id=trip['id']) }}/day_table/" + dayNumber.toString();
+        var url = "{{ url_for('trips.days_view', trip_id=trip['id']) }}/day_table/" + dayNumber.toString();
         var dayElement = $("#day" + dayNumber.toString());
         $.ajax({
             type: "POST",

@@ -2,9 +2,9 @@ import datetime
 
 from flask import Blueprint, request, jsonify
 
-from organizer.db import get_db
+from organizer.db import get_session
+from organizer.schema import Product, Trip, MealRecord
 
-# bp = Blueprint('api', __name__, url_prefix='/api/v1')
 products_bp = Blueprint('api.products', __name__, url_prefix='/api/v1/products')
 meals_bp = Blueprint('api.meals', __name__, url_prefix='/api/v1/meals')
 
@@ -16,43 +16,41 @@ def products_search():
     search_request = "%{}%".format(search_request)
 
     count = request.form['count']
+    # TODO: check if it is wrong
     count = int(count)
 
-    db = get_db()
-    found_products = db.execute(
-        "SELECT id, name FROM products WHERE name LIKE ? AND archived=0 LIMIT ?",
-        [search_request, count]
-    ).fetchall()
-
-    output = []
-    for data in found_products:
-        output.append({'id': data['id'], 'name': data['name']})
-    return jsonify(output)
+    with get_session() as session:
+        found_products = session.query(Product.id, Product.name).filter(
+            Product.name.ilike(search_request), Product.archived == 0).limit(count).all()
+        output = []
+        for data in found_products:
+            output.append({'id': data.id, 'name': data.name})
+        return jsonify(output)
 
 
 @products_bp.route('/units', methods=['POST'])
 def product_units():
+    # TODO: check the id
     product_id = request.form['id']
-    db = get_db()
-    product = db.execute(
-        "SELECT grams FROM products WHERE id=? AND archived=0",
-        [product_id]
-    ).fetchone()
 
-    if not product:
+    with get_session() as session:
+        product = session.query(Product).filter(
+            Product.id == product_id, Product.archived == 0).one()
+
+        if not product:
+            return jsonify({
+                'result': False
+            })
+
+        # TODO: put these units in some table
+        units = ['grams']
+        if product.grams is not None:
+            units.append('pcs')
+
         return jsonify({
-            'result': False
+            'result': True,
+            'units': units
         })
-
-    # put these units in some table
-    units = ['grams']
-    if product['grams'] is not None:
-        units.append('pcs')
-
-    return jsonify({
-        'result': True,
-        'units': units
-    })
 
 
 @meals_bp.route('/add', methods=['POST'])
@@ -83,37 +81,35 @@ def meals_add():
     except:
         return jsonify({"result": False})
 
+    # TODO: DO NOT USE PRODUCT NAME HERE!
     product_name = request.form['name']
-    db = get_db()
-    found_products = db.execute(
-        "SELECT id, grams FROM products WHERE name=? AND NOT archived=1",
-        [product_name]
-    ).fetchone()
+    with get_session() as session:
+        found_product = session.query(Product.id, Product.grams).filter(
+            Product.name == product_name, Product.archived != 1).one()
 
-    if not found_products:
-        return jsonify({'result': False})
+        if not found_product:
+            return jsonify({'result': False})
 
-    product_id = found_products['id']
-    grams = found_products['grams']
-    if grams is None:
-        # if product has no special units it must use grams
-        assert unit == 'grams'
-    elif unit == 'pcs':
-        mass = grams * mass
+        grams = found_product.grams
 
-    meal_number = meals_map[meal_name]
-    db.execute(
-        "INSERT INTO meal_records(trip_id, day_number, meal_number, product_id, mass) VALUES (?, ?, ?, ?, ?)",
-        [trip_id, day_number, meal_number, product_id, mass]
-    )
-    db.commit()
+        if grams is None:
+            if unit != 'grams':
+                return jsonify({'result': False})
+        elif unit == 'pcs':
+            mass = grams * mass
 
-    db.execute(
-        "UPDATE trips SET last_update=? WHERE id=?",
-        [datetime.datetime.now(), trip_id]
-    )
-    db.commit()
-    return jsonify({'result': True})
+        meal_number = meals_map[meal_name]
+        session.add(MealRecord(trip_id=trip_id,
+                               product_id=found_product.id,
+                               day_number=day_number,
+                               meal_number=meal_number,
+                               mass=mass))
+        session.commit()
+
+        # update the last time trip was touched
+        session.query(Trip).filter(Trip.id == trip_id).update({'last_update': datetime.datetime.utcnow()})
+        session.commit()
+        return jsonify({'result': True})
 
 
 @meals_bp.route('/remove', methods=['POST'])
@@ -126,21 +122,14 @@ def meals_remove():
     except:
         return jsonify({'result': False})
 
-    db = get_db()
-    trip_info = db.execute(
-        'SELECT trip_id FROM meal_records WHERE id=?',
-        [meal_id]
-    ).fetchone()
+    with get_session() as session:
+        meal_info = session.query(MealRecord.trip_id).filter(MealRecord.id == meal_id).one()
+        # TODO: what if None?
 
-    db.execute(
-        'DELETE FROM meal_records WHERE id=?',
-        [meal_id]
-    )
-    db.commit()
+        session.query(MealRecord).filter(MealRecord.id == meal_id).delete()
+        session.commit()
 
-    db.execute(
-        "UPDATE trips SET last_update=? WHERE id=?",
-        [datetime.datetime.now(), trip_info['trip_id']]
-    )
-    db.commit()
+        # update the last time trip was touched
+        session.query(Trip).filter(Trip.id == meal_info.trip_id).update({'last_update': datetime.datetime.utcnow()})
+        session.commit()
     return jsonify({'result': True})

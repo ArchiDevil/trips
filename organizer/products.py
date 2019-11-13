@@ -1,18 +1,17 @@
 from flask import Blueprint, render_template, request
 import flask
 
-from organizer.db import get_db
+from organizer.db import get_session
+from organizer.schema import Product
 
 bp = Blueprint('products', __name__, url_prefix='/products')
 
 
 @bp.route('/')
 def index():
-    db = get_db()
-    products = db.execute(
-        'SELECT * FROM products WHERE archived=0'
-    ).fetchall()
-    return render_template('products/products.html', products=products, filtered=False)
+    with get_session() as session:
+        products = session.query(Product).filter(Product.archived == 0)
+        return render_template('products/products.html', products=products, filtered=False)
 
 
 @bp.route('/add', methods=['POST'])
@@ -28,13 +27,11 @@ def add():
         if 'grams' in request.form.keys():
             grams = request.form['grams']
 
-        db = get_db()
+        with get_session() as session:
+            prod = Product(name=name, calories=calories, proteins=proteins, fats=fats, carbs=carbs, grams=grams)
+            session.add(prod)
+            session.commit()
 
-        db.execute(
-            'INSERT INTO products(name, calories, proteins, fats, carbs, grams) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, calories, proteins, fats, carbs, grams]
-        )
-        db.commit()
         return flask.redirect(flask.url_for('products.index'))
 
     return flask.redirect(flask.url_for('products.index'))
@@ -42,13 +39,10 @@ def add():
 
 @bp.route('/archive/<int:product_id>')
 def archive(product_id):
-    db = get_db()
-
-    db.execute(
-        'UPDATE products SET archived=1 WHERE id=?',
-        [product_id]
-    )
-    db.commit()
+    with get_session() as session:
+        prod = session.query(Product).filter(Product.id == product_id).one()
+        prod.archived = 1
+        session.commit()
     return flask.redirect(flask.url_for('products.index'))
 
 
@@ -58,12 +52,9 @@ def search():
         search_request = request.form['request']
         search_request = "%{}%".format(search_request)
 
-        db = get_db()
-        found_products = db.execute(
-            "SELECT * FROM products WHERE name LIKE ? AND NOT archived=1",
-            [search_request]
-        ).fetchall()
-
+        with get_session() as session:
+            found_products = session.query(Product).filter(
+                Product.name.like(search_request), Product.archived != 1).all()
         return render_template('products/products.html', products=found_products, filtered=True)
 
     return flask.redirect(flask.url_for('products.index'))
@@ -77,14 +68,19 @@ def edit(product_id):
     fats = request.form['fats']
     carbs = request.form['carbs']
 
-    db = get_db()
     if 'grams' in request.form.keys():
         grams = request.form['grams']
     else:
         grams = None
-    db.execute(
-        'UPDATE products SET name=?, calories=?, proteins=?, fats=?, carbs=?, grams=? WHERE id=?',
-        [name, calories, proteins, fats, carbs, grams, product_id]
-    )
-    db.commit()
+
+    with get_session() as session:
+        prod = session.query(Product).filter(Product.id == product_id).one()
+        prod.name = name
+        prod.calories = calories
+        prod.proteins = proteins
+        prod.fats = fats
+        prod.carbs = carbs
+        prod.grams = grams
+        session.commit()
+
     return flask.redirect(flask.url_for('products.index'))

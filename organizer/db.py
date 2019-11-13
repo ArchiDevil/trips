@@ -1,58 +1,74 @@
-import sqlite3
+from contextlib import contextmanager
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
 
-
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            current_app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
-
-    return g.db
+from organizer.schema import init_schema as init_schema_internal, BASE
+from organizer.fake_data import init_fake_data_internal
 
 
-def close_db(e=None):
-    db = g.pop('db', None)
+@contextmanager
+def get_session():
+    # this is the first request to the DB
+    if 'engine' not in g:
+        init_connection()
+    try:
+        session = g.sessionmaker()
+        yield session
+    finally:
+        g.sessionmaker.remove()
 
-    if db is not None:
-        db.close()
+
+def init_connection():
+    engine = create_engine(
+        current_app.config['DATABASE']
+    )
+    g.engine = engine
+    session_factory = sessionmaker(bind=engine)
+    g.sessionmaker = scoped_session(session_factory)
 
 
-def init_db():
-    db = get_db()
+def close_connection(e=None):
+    g.pop('sessionmaker', None)
+    engine = g.pop('engine', None)
+    if engine is not None:
+        engine.dispose()
 
-    with current_app.open_resource('schema.sql') as f:
-        db.executescript(f.read().decode('utf8'))
+
+def re_init_schema():
+    BASE.metadata.drop_all(g.engine)
+    init_schema_internal(g.engine)
 
 
 def init_fake_data():
-    db = get_db()
-
-    with current_app.open_resource('fake_data.sql') as f:
-        db.executescript(f.read().decode('utf8'))
+    with get_session() as session:
+        init_fake_data_internal(session)
 
 
-@click.command('init-db')
+@click.command('init-empty-db')
 @with_appcontext
-def init_db_command():
+def init_empty_db_command():
     """Clear the existing data and create new tables."""
-    init_db()
-    click.echo('Initialized the database.')
+    init_connection()
+    re_init_schema()
+    click.echo('Initialized the database')
 
 
 @click.command('init-fake-data')
 @with_appcontext
 def init_fake_data_command():
     """Fill the tables with some fake data."""
+    init_connection()
+    re_init_schema()
     init_fake_data()
     click.echo('Tables filled with fake data')
 
+
 def init_app(app):
-    app.teardown_appcontext(close_db)
-    app.cli.add_command(init_db_command)
+    app.teardown_appcontext(close_connection)
+    app.cli.add_command(init_empty_db_command)
     app.cli.add_command(init_fake_data_command)

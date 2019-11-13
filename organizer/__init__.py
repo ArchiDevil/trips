@@ -3,20 +3,16 @@ import os
 from flask import Flask, current_app
 
 
-def before_first_request_handler():
-    from . import db
-    db_instance = db.get_db()
-    result = db_instance.execute('SELECT * FROM sqlite_master').fetchone()
-    if result is None:
-        db.init_db()
-
-
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    if 'DATABASE_URL' in os.environ:
+        db_url = os.environ['DATABASE_URL']
+    else:
+        db_url = 'sqlite:///' + os.path.join(app.instance_path, 'flaskr.sqlite')
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+        DATABASE=db_url
     )
 
     if test_config is None:
@@ -51,7 +47,5 @@ def create_app(test_config=None):
 
     from . import developer
     app.register_blueprint(developer.bp)
-
-    app.before_first_request(before_first_request_handler)
 
     return app

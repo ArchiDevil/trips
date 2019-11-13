@@ -8,6 +8,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'flask',
+        'SQLAlchemy'
     ],
 
     url='https://bitbucket.org/ArchiDevil/trips/',
