@@ -1,10 +1,22 @@
 {% extends 'base.html' %} {% block content %}
 
-<div class="container">
-    <h1 class="display-4 my-3">Products</h1>
-</div>
-
 <div class="container" id="products-app">
+    <div class="row">
+        <div class="col-8">
+            <h1 class="display-4 my-3">Products</h1>
+        </div>
+        <div class="col d-flex flex-row-reverse align-items-end">
+            <button class="btn btn-primary mb-3 d-block d-lg-none"
+                    type="button"
+                    data-toggle="modal"
+                    data-target="#edit-modal"
+                    data-link="{{ url_for('products.add') }}"
+                    data-bname="Add">
+                Add new
+            </button>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col col-auto d-none d-lg-block">
             <div class="card shadow" style="width: 18rem;">
@@ -28,8 +40,13 @@
         <div class="col">
             <form method="POST" action="{{ url_for('products.search') }}">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Product name" aria-label="Product name"
-                        aria-describedby="button-addon2" name="request" id="input-search">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Search for a product"
+                           aria-label="Search for a product"
+                           aria-describedby="button-addon2"
+                           name="request"
+                           id="input-search">
                     <div class="input-group-append">
                         <button class="btn btn-outline-success" id="button-addon2" type="submit">Search</button>
                     </div>
@@ -49,9 +66,9 @@
                         <th scope="col" style="width: 8%">#</th>
                         <th scope="col" style="width: 60%">Name</th>
                         <th scope="col" style="width: 8%">Cals</th>
-                        <th scope="col" style="width: 8%">P</th>
-                        <th scope="col" style="width: 8%">F</th>
-                        <th scope="col" style="width: 8%">C</th>
+                        <th class="d-none d-sm-table-cell" scope="col" style="width: 8%">P</th>
+                        <th class="d-none d-sm-table-cell" scope="col" style="width: 8%">F</th>
+                        <th class="d-none d-sm-table-cell" scope="col" style="width: 8%">C</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,9 +102,9 @@
                             </span>
                         </td>
                         <td>{{ product['calories'] }}</td>
-                        <td>{{ product['proteins'] }}</td>
-                        <td>{{ product['fats'] }}</td>
-                        <td>{{ product['carbs'] }}</td>
+                        <td class="d-none d-sm-table-cell">{{ product['proteins'] }}</td>
+                        <td class="d-none d-sm-table-cell">{{ product['fats'] }}</td>
+                        <td class="d-none d-sm-table-cell">{{ product['carbs'] }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
