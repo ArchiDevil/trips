@@ -25,8 +25,8 @@
             {% endif %}
         </tr>
         {% for meal in day[datatype] %}
-        <tr>
-            <td style="width: 60%" class="showhim">
+        <tr class="showhim">
+            <td style="width: 60%">
                 <span>{{ meal['name'] }}</span>
                 <span class="text-right float-right showme">
                     <a onclick="removeProduct({{day['number']}}, {{meal['id']}})" href="javascript:void(0);">Delete</a>

@@ -81,11 +81,10 @@ def meals_add():
     except:
         return jsonify({"result": False})
 
-    # TODO: DO NOT USE PRODUCT NAME HERE!
-    product_name = request.form['name']
+    product_id = request.form['product_id']
     with get_session() as session:
         found_product = session.query(Product.id, Product.grams).filter(
-            Product.name == product_name, Product.archived != 1).one()
+            Product.id == product_id, Product.archived != 1).one()
 
         if not found_product:
             return jsonify({'result': False})
