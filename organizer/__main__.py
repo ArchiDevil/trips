@@ -1,4 +1,3 @@
-from . import create_app
+from organizer.wsgi import app
 
-app = create_app()
-app.run()
+app.run(host='0.0.0.0')
