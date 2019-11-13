@@ -23,7 +23,7 @@ var vm = new Vue({
     data: {
         modalTitle: 'Add a product',
         productName: '',
-        calories: 0,
+        caloriesInternal: 0,
         proteins: 0,
         fats: 0,
         carbs: 0,
@@ -31,7 +31,8 @@ var vm = new Vue({
         custom: false,
         archiveLink: '',
         submitLink: '',
-        buttonName: ''
+        buttonName: '',
+        caloriesLock: false
     },
     computed: {
         validation: function () {
@@ -53,8 +54,27 @@ var vm = new Vue({
                 && this.validation.carbs
                 && this.validation.nutrition
                 && (this.custom ? this.validation.grams : true);
+        },
+        calories: {
+            get: function () {
+                if (this.caloriesLock === true) {
+                    return this.proteins * 4.0 + this.fats * 9.0 + this.carbs * 4.0
+                } else {
+                    return this.caloriesInternal
+                }
+            },
+            set: function (v) {
+                this.caloriesInternal = v
+            }
+        }
+    },
+    methods: {
+        lockCalories: function () {
+            this.caloriesLock = !this.caloriesLock;
+            console.log('lock val:', this.caloriesLock)
         }
     }
+
 })
 
 $(document).on('show.bs.modal', '#edit-modal', function(event) {
