@@ -57,8 +57,6 @@ def packing_ext(trip_id, columns_count):
                               MealRecord.meal_number,
                               MealRecord.mass,
                               Product.name).join(Product).filter(MealRecord.trip_id == trip_id).all()
-        if not meals:
-            abort(500)
 
     products = {}
     for meal in meals:
