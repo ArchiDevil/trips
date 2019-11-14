@@ -143,7 +143,7 @@ def days_view(trip_id):
                                    Product.calories,
                                    Product.proteins,
                                    Product.fats,
-                                   Product.carbs).join(Product).filter(Trip.id == trip_id).all()
+                                   Product.carbs).join(Product).filter(MealRecord.trip_id == trip_id).all()
 
     first_date = trip_info.from_date
     last_date = trip_info.till_date
@@ -164,7 +164,8 @@ def day_tables(trip_id, day_number):
                                    Product.calories,
                                    Product.proteins,
                                    Product.fats,
-                                   Product.carbs).join(Product).filter(Trip.id == trip_id, MealRecord.day_number == day_number).all()
+                                   Product.carbs).join(Product).filter(MealRecord.trip_id == trip_id,
+                                                                       MealRecord.day_number == day_number).all()
 
     date = format_date(trip_info.from_date, day_number)
     day = calculate_day_info(day_number, date, meals_info)
