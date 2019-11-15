@@ -161,7 +161,7 @@
                 this.currentProductName = productName;
                 document.getElementById('mass-input').select();
                 $.ajax({
-                    type: "POST",
+                    type: "GET",
                     url: "{{ url_for('api.products.product_units') }}",
                     data: {
                         'id': this.currentProductId
@@ -286,7 +286,7 @@
     function removeProduct(dayNumber, mealId) {
         var url = "{{ url_for('api.meals.meals_remove') }}";
         $.ajax({
-            type: "POST",
+            type: "DELETE",
             url: url,
             data: "meal_id=" + mealId.toString(),
             success: function (msg) {
@@ -322,7 +322,7 @@
 
         lastRequestHandle = setTimeout(function () {
             $.ajax({
-                type: "POST",
+                type: "GET",
                 url: "{{ url_for('api.products.products_search') }}",
                 data: {
                     'name': value,
@@ -333,8 +333,11 @@
                     $('#add-meal-form').valid();
                     lastRequestHandle = undefined;
 
+                    if (msg.result !== true)
+                        return;
+
                     vm.products = []
-                    for (product of msg) {
+                    for (product of msg.products) {
                         vm.products.push({
                             id: product['id'],
                             name: product['name']

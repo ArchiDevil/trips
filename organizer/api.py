@@ -9,48 +9,48 @@ products_bp = Blueprint('api.products', __name__, url_prefix='/api/v1/products')
 meals_bp = Blueprint('api.meals', __name__, url_prefix='/api/v1/meals')
 
 
-@products_bp.route('/search', methods=['POST'])
+@products_bp.route('/search', methods=['GET'])
 def products_search():
     # TODO: check the provided name
-    search_request = request.form['name']
+    search_request = request.args['name']
     search_request = "%{}%".format(search_request)
 
-    count = request.form['count']
-    # TODO: check if it is wrong
-    count = int(count)
+    count = request.args['count']
+    try:
+        count = int(count)
+    except ValueError:
+        return {'result': False}
 
     with get_session() as session:
-        found_products = session.query(Product.id, Product.name).filter(
-            Product.name.ilike(search_request), Product.archived == 0).limit(count).all()
-        output = []
-        for data in found_products:
-            output.append({'id': data.id, 'name': data.name})
-        return jsonify(output)
+        found_products = session.query(Product.id,
+                                       Product.name).filter(Product.name.ilike(search_request),
+                                                            Product.archived == 0).limit(count).all()
+        return {
+            'result': True,
+            'products': [{'id': prod.id, 'name': prod.name} for prod in found_products]
+        }
 
 
-@products_bp.route('/units', methods=['POST'])
+@products_bp.route('/units', methods=['GET'])
 def product_units():
-    # TODO: check the id
-    product_id = request.form['id']
+    product_id = request.args['id']
 
     with get_session() as session:
-        product = session.query(Product).filter(
-            Product.id == product_id, Product.archived == 0).one()
+        product = session.query(Product).filter(Product.id == product_id,
+                                                Product.archived == 0).first()
 
         if not product:
-            return jsonify({
-                'result': False
-            })
+            return {'result': False}
 
         # TODO: put these units in some table
         units = ['grams']
         if product.grams is not None:
             units.append('pcs')
 
-        return jsonify({
+        return {
             'result': True,
             'units': units
-        })
+        }
 
 
 @meals_bp.route('/add', methods=['POST'])
@@ -72,28 +72,38 @@ def meals_add():
     try:
         trip_id = int(trip_id)
         assert trip_id > 0
+        with get_session() as session:
+            assert session.query(Trip.id).filter(Trip.id == trip_id).first()
+
+            trip_info = session.query(Trip.from_date,
+                                      Trip.till_date).filter(Trip.id == trip_id).one()
+            diff = trip_info.till_date - trip_info.from_date
+
+            day_number = int(day_number)
+            assert day_number > 0
+            assert day_number <= diff.days + 1
+
         assert meal_name in meals_map
-        day_number = int(day_number)
-        assert day_number > 0
         mass = int(mass)
         assert mass > 0
         assert unit in ['grams', 'pcs']
-    except:
-        return jsonify({"result": False})
+    except (ValueError, AssertionError):
+        return {"result": False}
 
     product_id = request.form['product_id']
     with get_session() as session:
-        found_product = session.query(Product.id, Product.grams).filter(
-            Product.id == product_id, Product.archived != 1).one()
+        found_product = session.query(Product.id,
+                                      Product.grams).filter(Product.id == product_id,
+                                                            Product.archived != 1).first()
 
         if not found_product:
-            return jsonify({'result': False})
+            return {'result': False}
 
         grams = found_product.grams
 
         if grams is None:
             if unit != 'grams':
-                return jsonify({'result': False})
+                return {'result': False}
         elif unit == 'pcs':
             mass = grams * mass
 
@@ -108,22 +118,25 @@ def meals_add():
         # update the last time trip was touched
         session.query(Trip).filter(Trip.id == trip_id).update({'last_update': datetime.datetime.utcnow()})
         session.commit()
-        return jsonify({'result': True})
+        return {'result': True}
 
 
-@meals_bp.route('/remove', methods=['POST'])
+@meals_bp.route('/remove', methods=['DELETE'])
 def meals_remove():
     meal_id = request.form['meal_id']
 
     try:
         meal_id = int(meal_id)
         assert meal_id > 0
-    except:
-        return jsonify({'result': False})
+    except (ValueError, AssertionError):
+        return {'result': False}
 
     with get_session() as session:
-        meal_info = session.query(MealRecord.trip_id).filter(MealRecord.id == meal_id).one()
-        # TODO: what if None?
+        meal_info = session.query(MealRecord.trip_id).filter(
+            MealRecord.id == meal_id).first()
+
+        if not meal_info:
+            return {'result': False}
 
         session.query(MealRecord).filter(MealRecord.id == meal_id).delete()
         session.commit()
@@ -131,4 +144,4 @@ def meals_remove():
         # update the last time trip was touched
         session.query(Trip).filter(Trip.id == meal_info.trip_id).update({'last_update': datetime.datetime.utcnow()})
         session.commit()
-    return jsonify({'result': True})
+        return {'result': True}
