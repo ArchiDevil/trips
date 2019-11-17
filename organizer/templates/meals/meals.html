@@ -58,7 +58,7 @@
                     <tbody id="found-products">
                         <tr v-for="product in products" v-on:click="setProduct(product.id, product.name)">
                             <th scope="row">
-                                {{ product.id}}
+                                {{ product.id }}
                             </th>
                             <td>
                                 <a tabindex="-1" v-on:click="setProduct(product.id, product.name)" href="javascript:void(0);">{{ product.name }}</a>
@@ -108,7 +108,9 @@
                     <h5 class="card-title">Trip information</h5>
                     <p class="card-text">From: {{ trip['from_date'] }}</p>
                     <p class="card-text">Until: {{ trip['till_date'] }}</p>
+                    {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
                     <a class="btn btn-primary w-100 my-1" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">Edit the trip</a>
+                    {% endif %}
                     <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.shopping', trip_id=trip['id']) }}">Shopping report</a>
                     <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.packing', trip_id=trip['id']) }}">Packing report</a>
                 </div>
@@ -116,9 +118,9 @@
         </div>
 
         <div class="col">
-            {% import 'trips/trip_day.html' as trip_day %}
+            {% import 'meals/meals_day.html' as meals_day %}
             {% for day in days %}
-            {{ trip_day.day(day_info=day) }}
+            {{ meals_day.day(day_info=day) }}
             {% endfor %}
         </div>
     </div>
@@ -303,7 +305,7 @@
     }
 
     function reloadDay(dayNumber) {
-        var url = "{{ url_for('trips.days_view', trip_id=trip['id']) }}/day_table/" + dayNumber.toString();
+        var url = "{{ url_for('meals.days_view', trip_id=trip['id']) }}/day_table/" + dayNumber.toString();
         var dayElement = $("#day" + dayNumber.toString());
         $.ajax({
             type: "POST",

@@ -6,14 +6,10 @@
 <table class="table table-sm table-{{ table_style }} table-hover">
     <tbody>
         <tr>
-            {% if not results %}
             <td colspan="5">
-                {% else %}
-            <td colspan="6">
-                {% endif %}
                 <h5><strong>{{ title }}</strong></h5>
             </td>
-            {% if not results %}
+            {% if not results and g.user.access_group.value != 0 %}
             <td class="text-right">
                 <button type="button"
                         class="btn btn-{{ table_style }} btn-sm"
@@ -28,9 +24,11 @@
         <tr class="showhim">
             <td style="width: 60%">
                 <span>{{ meal['name'] }}</span>
+                {% if g.user.access_group.value != 0 %}
                 <span class="text-right float-right showme">
                     <a onclick="removeProduct({{day['number']}}, {{meal['id']}})" href="javascript:void(0);">Delete</a>
                 </span>
+                {% endif %}
             </td>
             {{ cell(meal['mass']) }}
             {{ cell("{:.2f}".format(meal['proteins'])) }}

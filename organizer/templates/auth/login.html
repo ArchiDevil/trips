@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}" />
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+    <title>Trips organizer</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row my-3">
+            <div class="col"></div>
+            <div class="col-xl-4 col-lg-5 col-md-8 col-xs-12">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            </div>
+            <div class="col"></div>
+        </div>
+        <div class="row my-3">
+            <div class="col"></div>
+            <div class="col-xl-4 col-lg-5 col-md-8 col-xs-12">
+                <div class="login-form">
+                    <form action="{{ url_for('auth.login') }}" method="post" class="shadow p-4 bg-light mb-3 rounded">
+                        <h2 class="text-center my-3">Log in</h2>
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Username" required="required" name="login">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control" placeholder="Password" required="required" name="password">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">Log in</button>
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="remember-me-check" name="remember">
+                                <label class="custom-control-label" for="remember-me-check">Remember me</label>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- <p class="text-center">
+                        <a href="#">Create an Account</a>
+                    </p> -->
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+    </div>
+</body>
+
+</html>

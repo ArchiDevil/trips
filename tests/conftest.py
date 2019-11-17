@@ -32,5 +32,35 @@ def client(app):
 
 
 @pytest.fixture
+def user_logged_client(client):
+    client.post('/auth/login',
+                data={
+                    'login': 'User',
+                    'password': 'user1'
+                })
+    return client
+
+
+@pytest.fixture
+def org_logged_client(client):
+    client.post('/auth/login',
+                data={
+                    'login': 'Organizer',
+                    'password': 'org'
+                })
+    return client
+
+
+@pytest.fixture
+def admin_logged_client(client):
+    client.post('/auth/login',
+                data={
+                    'login': 'Administrator',
+                    'password': 'admin'
+                })
+    return client
+
+
+@pytest.fixture
 def runner(app):
     return app.test_cli_runner()

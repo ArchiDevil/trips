@@ -1,10 +1,11 @@
 {% extends 'base.html' %} {% block content %}
 
 <div class="container" id="products-app">
-    <div class="row">
+    <div class="row my-3">
         <div class="col-8">
-            <h1 class="display-4 my-3">Products</h1>
+            <h1 class="display-4">Products</h1>
         </div>
+        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
         <div class="col d-flex flex-row-reverse align-items-end">
             <button class="btn btn-primary mb-3 d-block d-lg-none"
                     type="button"
@@ -15,10 +16,12 @@
                 Add new
             </button>
         </div>
+        {% endif %}
     </div>
 
-    <div class="row">
-        <div class="col col-auto d-none d-lg-block">
+    <div class="row my-3">
+        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
+        <div class="col-auto d-none d-lg-block">
             <div class="card shadow" style="width: 18rem;">
                 <img src="{{ url_for('static', filename='food.jpg') }}" class="card-img-top" alt="...">
                 <div class="card-body">
@@ -36,6 +39,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <div class="col">
             <form method="POST" action="{{ url_for('products.search') }}">
@@ -77,6 +81,7 @@
                         <th scope="row">{{ product['id'] }}</th>
                         <td>
                             <span>{{ product['name'] }}</span>
+                            {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
                             <span class="text-right float-right mx-1 showme">
                                 <a data-toggle="modal"
                                    data-target="#edit-modal"
@@ -100,6 +105,7 @@
                                     Archive
                                 </a>
                             </span>
+                            {% endif %}
                         </td>
                         <td>{{ product['calories'] }}</td>
                         <td class="d-none d-sm-table-cell">{{ product['proteins'] }}</td>
@@ -112,6 +118,7 @@
         </div>
     </div>
 
+    {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
     <!-- Add/edit a product modal -->
     {% raw %}
     <div id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="edit-modal-title"
@@ -250,6 +257,7 @@
         </div>
     </div>
     {% endraw %}
+    {% endif %}
 </div>
 
 <!-- development version, includes helpful console warnings -->

@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from flask import Flask, current_app
@@ -10,9 +11,14 @@ def create_app(test_config=None):
         db_url = os.environ['DATABASE_URL']
     else:
         db_url = 'sqlite:///' + os.path.join(app.instance_path, 'flaskr.sqlite')
+
+    secret_key = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ else 'dev'
+    session_lifetime = datetime.timedelta(days=14)
+
     app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=db_url
+        SECRET_KEY=secret_key,
+        DATABASE=db_url,
+        PERMANENT_SESSION_LIFETIME=session_lifetime
     )
 
     if test_config is None:
@@ -31,9 +37,15 @@ def create_app(test_config=None):
     from . import db
     db.init_app(app)
 
+    from . import auth
+    app.register_blueprint(auth.bp)
+
     from . import trips
     app.register_blueprint(trips.bp)
     app.add_url_rule('/', endpoint='index')
+
+    from . import meals
+    app.register_blueprint(meals.bp)
 
     from . import products
     app.register_blueprint(products.bp)
@@ -45,7 +57,15 @@ def create_app(test_config=None):
     from . import reports
     app.register_blueprint(reports.bp)
 
+    from . import users
+    app.register_blueprint(users.bp)
+
     from . import developer
     app.register_blueprint(developer.bp)
+
+    @app.context_processor
+    def inject_props():
+        from . import schema
+        return dict(AccessGroup=schema.AccessGroup)
 
     return app

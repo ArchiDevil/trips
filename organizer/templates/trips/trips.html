@@ -2,23 +2,37 @@
 {% block content %}
 
 <script>
-    $("#trips_link").addClass("active");
+    $("#trips-link").addClass("active");
 </script>
 
 {% if no_trips %}
 
 <div class="container">
-    <h1 class="display-4 m-3">Trips</h1>
-</div>
-
-<div class="container">
-    <div class="jumbotron shadow">
-        <h1 class="display-4">Welcome!</h1>
-        <p class="lead">We have discovered that you have no trips planned. The whole beatiful world is waiting for you to open it. Let's discover the world together!</p>
-        <hr class="my-4">
-        <p>Start doing great things by clicking this button. We just need a bit info from you, this won't take a long time.</p>
-        <a class="btn btn-primary btn-lg" href="{{ url_for('trips.add') }}" role="button">Create first trip</a>
+    <div class="row my-3">
+        <h1 class="display-4">Trips</h1>
     </div>
+
+    {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
+    <div class="row my-3">
+        <div class="jumbotron shadow">
+            <h1 class="display-4">Welcome!</h1>
+            <p class="lead">We have discovered that you have no trips planned. The whole beatiful world is waiting for
+                you to open it. Let's discover the world together!</p>
+            <hr class="my-4">
+            <p>Start doing great things by clicking this button. We just need a bit info from you, this won't take a
+                long time.</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('trips.add') }}" role="button">Create first trip</a>
+        </div>
+    </div>
+    {% else %}
+    <div class="row my-3">
+        <div class="jumbotron shadow">
+            <h1 class="display-4">Welcome!</h1>
+            <p class="lead">Seems like no one shared any trips with you. Ask you trip manager or anyone from your team to provide
+                you a link with the information.</p>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 {% else %}
@@ -28,6 +42,7 @@
 </div>
 
 <div class="container-fluid d-inline-flex flex-wrap">
+    {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
     <div class="card shadow m-3" style="width: 18rem;">
         <img src="{{ url_for('static', filename='trip.jpg') }}" class="card-img-top" alt="...">
         <h5 class="card-header">Create something new</h5>
@@ -37,6 +52,7 @@
             <a href="{{ url_for('trips.add') }}" class="btn btn-primary stretched-link" role="button">Add a new trip</a>
         </div>
     </div>
+    {% endif %}
 
     {% for day in trip_days %}
     <div class="card shadow m-3" style="width: 18rem;">
@@ -46,7 +62,8 @@
             <p class="card-text">Starts: {{ day['from_date'].strftime('%d-%m-%y') }}</p>
             <p class="card-text">Ends: {{ day['till_date'].strftime('%d-%m-%y') }}</p>
             <!-- <p class="card-text"><small class="text-muted">Last updated: {{ day['last_update'] }}</small></p> -->
-            <a href="{{ url_for('trips.days_view', trip_id=day['id']) }}" class="btn btn-secondary stretched-link">Open</a>
+            <a href="{{ url_for('meals.days_view', trip_id=day['id']) }}"
+                class="btn btn-secondary stretched-link">Open</a>
         </div>
     </div>
     {% endfor %}
@@ -54,25 +71,4 @@
 
 {% endif %}
 
-<!-- Add a trip modal -->
-<div class="modal fade" id="addTripModal" tabindex="-1" role="dialog" aria-labelledby="addTripModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addTripModalLabel">Modal title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                ...
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

@@ -1,12 +1,14 @@
 from flask import Blueprint, render_template, abort
 
+from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, Product, MealRecord
+from organizer.schema import Trip, Product, MealRecord, AccessGroup
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
 
 
 @bp.route('/shopping/<int:trip_id>')
+@login_required_group(AccessGroup.Guest)
 def shopping(trip_id):
     with get_session() as session:
         trip = session.query(Trip.name, Trip.attendees).filter(
@@ -41,12 +43,14 @@ def shopping(trip_id):
 
 
 @bp.route('/packing/<int:trip_id>')
+@login_required_group(AccessGroup.Guest)
 def packing(trip_id):
     # four is a default value that is suitable for the most cases
     return packing_ext(trip_id, 4)
 
 
 @bp.route('/packing/<int:trip_id>/<int:columns_count>')
+@login_required_group(AccessGroup.Guest)
 def packing_ext(trip_id, columns_count):
     with get_session() as session:
         trip = session.query(Trip).filter(Trip.id == trip_id).one()

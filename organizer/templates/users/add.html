@@ -1,0 +1,67 @@
+{% extends 'base.html' %} {% block content %}
+
+<script>
+    $(document).ready(function () {
+        $("#input-form").validate({
+            rules: {
+                name: {
+                    required: true
+                },
+                password: {
+                    required: true
+                }
+            },
+            errorPlacement: function (error, element) {
+                errorLabelName = element.attr("id") + "_invalid";
+                var oldElement = $("#" + errorLabelName);
+                if (oldElement !== undefined) {
+                    oldElement.remove();
+                }
+                error.appendTo(element.parent());
+                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
+            },
+            errorClass: "is-invalid",
+            validClass: "is-valid",
+            errorElement: "div"
+        });
+    });
+</script>
+
+<div class="container">
+    <div class="row my-3">
+        <div class="col">
+            <h1 class="display-4">Add a user</h1>
+        </div>
+    </div>
+
+    <div class="row my-3">
+        <div class="col">
+            <form class="p-4 border shadow bg-light" id="input-form" action="{{ url_for('users.add') }}" method="POST">
+                <div class="form-group">
+                    <label for="input-name">User name</label>
+                    <input type="text" class="form-control" id="input-name" name="name" placeholder="Enter name"
+                        autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="input-password">User password</label>
+                    <input class="form-control" type="password" id="input-password" name="password" />
+                </div>
+
+                <div class="form-group">
+                    <label for="input-group">Access group</label>
+                    <select class="form-control custom-select" id="input-group" name="group">
+                        {% for option in groups %}
+                        <option>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add</button>
+                <a class="btn btn-secondary" href="{{ url_for('users.index') }}">Close</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -18,20 +18,36 @@
     <title>Trips organizer</title>
 </head>
 
-<body>
+<body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow">
         <a class="navbar-brand" href="{{ url_for('trips.index') }}">Trips organizer</a>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler"
+                type="button"
+                data-toggle="collapse"
+                data-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav mr-auto mt-2 mt-lg-0">
-                <a id="trips_link" class="nav-item nav-link" href="{{ url_for('trips.index') }}">Trips</a>
-                <a id="products_link" class="nav-item nav-link" href="{{ url_for('products.index') }}">Products</a>
-                <a id="developer-console" class="nav-item nav-link" href="{{ url_for('developer.console') }}">Console</a>
+                {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
+                <a id="trips-link" class="nav-item nav-link" href="{{ url_for('trips.index') }}">Trips</a>
+                {% endif %}
+                <a id="products-link" class="nav-item nav-link" href="{{ url_for('products.index') }}">Products</a>
+                {% if g.user.access_group == AccessGroup.Administrator %}
+                <a id="users-link" class="nav-item nav-link" href="{{ url_for('users.index') }}">Users</a>
+                <a id="developer-console-link" class="nav-item nav-link" href="{{ url_for('developer.console') }}">Console</a>
+                {% endif %}
             </div>
+
+            <form class="form-inline my-2 my-lg-0">
+                <label class="mx-3">{{ g.user.name }}</label>
+                <a class="btn btn-outline-success my-2 my-sm-0" href="{{ url_for('auth.logout') }}">Logout</a>
+            </form>
         </div>
     </nav>
 

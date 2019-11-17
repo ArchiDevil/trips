@@ -110,7 +110,7 @@ $(document).on('show.bs.modal', '#archive-modal', function (event) {
 });
 
 $(document).ready(function () {
-    $('#products_link').addClass('active');
+    $('#products-link').addClass('active');
     setTimeout(() => {
         document.getElementById('input-search').focus();
     }, 500);

@@ -1,20 +1,23 @@
 from flask import Blueprint, render_template, request
 import flask
 
+from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import Product
+from organizer.schema import Product, AccessGroup
 
 bp = Blueprint('products', __name__, url_prefix='/products')
 
 
 @bp.route('/')
+@login_required_group(AccessGroup.Guest)
 def index():
     with get_session() as session:
-        products = session.query(Product).filter(Product.archived == 0)
+        products = session.query(Product).filter(Product.archived == False)
         return render_template('products/products.html', products=products, filtered=False)
 
 
 @bp.route('/add', methods=['POST'])
+@login_required_group(AccessGroup.TripManager)
 def add():
     if request.method == 'POST':
         name = request.form['name']
@@ -38,15 +41,17 @@ def add():
 
 
 @bp.route('/archive/<int:product_id>')
+@login_required_group(AccessGroup.TripManager)
 def archive(product_id):
     with get_session() as session:
         prod = session.query(Product).filter(Product.id == product_id).one()
-        prod.archived = 1
+        prod.archived = True
         session.commit()
     return flask.redirect(flask.url_for('products.index'))
 
 
 @bp.route('/search', methods=['POST'])
+@login_required_group(AccessGroup.Guest)
 def search():
     if request.method == 'POST':
         search_request = request.form['request']
@@ -54,13 +59,14 @@ def search():
 
         with get_session() as session:
             found_products = session.query(Product).filter(
-                Product.name.like(search_request), Product.archived != 1).all()
+                Product.name.like(search_request), Product.archived == False).all()
         return render_template('products/products.html', products=found_products, filtered=True)
 
     return flask.redirect(flask.url_for('products.index'))
 
 
 @bp.route('/edit/<int:product_id>', methods=['POST'])
+@login_required_group(AccessGroup.TripManager)
 def edit(product_id):
     name = request.form['name']
     calories = request.form['calories']

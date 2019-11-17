@@ -1,9 +1,9 @@
 import datetime
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, g, abort
 
 from organizer.db import get_session
-from organizer.schema import Product, Trip, MealRecord
+from organizer.schema import Product, Trip, MealRecord, AccessGroup
 
 products_bp = Blueprint('api.products', __name__, url_prefix='/api/v1/products')
 meals_bp = Blueprint('api.meals', __name__, url_prefix='/api/v1/meals')
@@ -11,6 +11,9 @@ meals_bp = Blueprint('api.meals', __name__, url_prefix='/api/v1/meals')
 
 @products_bp.route('/search', methods=['GET'])
 def products_search():
+    if 'user' not in g or g.user is None:
+        abort(403)
+
     # TODO: check the provided name
     search_request = request.args['name']
     search_request = "%{}%".format(search_request)
@@ -24,7 +27,7 @@ def products_search():
     with get_session() as session:
         found_products = session.query(Product.id,
                                        Product.name).filter(Product.name.ilike(search_request),
-                                                            Product.archived == 0).limit(count).all()
+                                                            Product.archived == False).limit(count).all()
         return {
             'result': True,
             'products': [{'id': prod.id, 'name': prod.name} for prod in found_products]
@@ -33,6 +36,9 @@ def products_search():
 
 @products_bp.route('/units', methods=['GET'])
 def product_units():
+    if 'user' not in g or g.user is None:
+        abort(403)
+
     product_id = request.args['id']
 
     with get_session() as session:
@@ -55,6 +61,11 @@ def product_units():
 
 @meals_bp.route('/add', methods=['POST'])
 def meals_add():
+    if 'user' not in g or g.user is None:
+        abort(403)
+    if g.user.access_group.value < AccessGroup.TripManager.value:
+        abort(403)
+
     trip_id = request.form['trip_id']
     meal_name = request.form['meal_name']
     day_number = request.form['day_number']
@@ -94,7 +105,7 @@ def meals_add():
     with get_session() as session:
         found_product = session.query(Product.id,
                                       Product.grams).filter(Product.id == product_id,
-                                                            Product.archived != 1).first()
+                                                            Product.archived == False).first()
 
         if not found_product:
             return {'result': False}
@@ -116,13 +127,20 @@ def meals_add():
         session.commit()
 
         # update the last time trip was touched
-        session.query(Trip).filter(Trip.id == trip_id).update({'last_update': datetime.datetime.utcnow()})
+        session.query(Trip).filter(Trip.id == trip_id).update({
+            'last_update': datetime.datetime.utcnow()
+        })
         session.commit()
         return {'result': True}
 
 
 @meals_bp.route('/remove', methods=['DELETE'])
 def meals_remove():
+    if 'user' not in g or g.user is None:
+        abort(403)
+    if g.user.access_group.value < AccessGroup.TripManager.value:
+        abort(403)
+
     meal_id = request.form['meal_id']
 
     try:
@@ -134,7 +152,6 @@ def meals_remove():
     with get_session() as session:
         meal_info = session.query(MealRecord.trip_id).filter(
             MealRecord.id == meal_id).first()
-
         if not meal_info:
             return {'result': False}
 
@@ -142,6 +159,8 @@ def meals_remove():
         session.commit()
 
         # update the last time trip was touched
-        session.query(Trip).filter(Trip.id == meal_info.trip_id).update({'last_update': datetime.datetime.utcnow()})
+        session.query(Trip).filter(Trip.id == meal_info.trip_id).update({
+            'last_update': datetime.datetime.utcnow()
+        })
         session.commit()
         return {'result': True}
