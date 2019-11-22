@@ -12,7 +12,7 @@ def app():
 
     application = create_app({
         'TESTING': True,
-        'DATABASE_URL': 'sqlite:///' + db_path,
+        'DATABASE': 'sqlite:///' + db_path,
     })
 
     with application.app_context():
@@ -56,7 +56,7 @@ def admin_logged_client(client):
     client.post('/auth/login',
                 data={
                     'login': 'Administrator',
-                    'password': 'admin'
+                    'password': 'qwerty'
                 })
     return client
 

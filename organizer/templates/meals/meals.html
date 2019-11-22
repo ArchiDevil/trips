@@ -308,7 +308,7 @@
         var url = "{{ url_for('meals.days_view', trip_id=trip['id']) }}/day_table/" + dayNumber.toString();
         var dayElement = $("#day" + dayNumber.toString());
         $.ajax({
-            type: "POST",
+            type: "GET",
             url: url,
             success: function (msg) {
                 dayElement.replaceWith(msg);

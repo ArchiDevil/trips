@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, render_template, abort, redirect, url_for
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
@@ -11,8 +11,7 @@ bp = Blueprint('reports', __name__, url_prefix='/reports')
 @login_required_group(AccessGroup.Guest)
 def shopping(trip_id):
     with get_session() as session:
-        trip = session.query(Trip.name, Trip.attendees).filter(
-            Trip.id == trip_id).one()
+        trip = session.query(Trip.name, Trip.attendees).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
 
@@ -35,9 +34,7 @@ def shopping(trip_id):
         products[meal.id]['mass'] += meal.mass * trip.attendees
 
         if meal.grams is not None:
-            # TODO: this will lead to floating error, so do something with it
-            products[meal.id]['pieces'] += meal.mass * \
-                trip.attendees / meal.grams
+            products[meal.id]['pieces'] += meal.mass * trip.attendees / meal.grams
 
     return render_template('reports/shopping.html', trip=trip, products=products)
 
@@ -46,14 +43,17 @@ def shopping(trip_id):
 @login_required_group(AccessGroup.Guest)
 def packing(trip_id):
     # four is a default value that is suitable for the most cases
-    return packing_ext(trip_id, 4)
+    return redirect(url_for('reports.packing_ext', trip_id=trip_id, columns_count=4))
 
 
 @bp.route('/packing/<int:trip_id>/<int:columns_count>')
 @login_required_group(AccessGroup.Guest)
 def packing_ext(trip_id, columns_count):
+    if columns_count > 6 or columns_count < 1:
+        abort(403)
+
     with get_session() as session:
-        trip = session.query(Trip).filter(Trip.id == trip_id).one()
+        trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
 

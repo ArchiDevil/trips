@@ -40,22 +40,19 @@ def calculate_day_info(day_number: int,
 
     for record in meals_info:
         meal_number = record.meal_number
-        day[meals_map[meal_number]].append(
-            {
-                'id': record.id,
-                'name': record.name,
-                'mass': record.mass,
-                'proteins': record.proteins * record.mass / 100.0,
-                'fats': record.fats * record.mass / 100.0,
-                'carbs': record.carbs * record.mass / 100.0,
-                'cals': record.calories * record.mass / 100.0
-            }
-        )
+        day[meals_map[meal_number]].append({
+            'id': record.id,
+            'name': record.name,
+            'mass': record.mass,
+            'proteins': record.proteins * record.mass / 100.0,
+            'fats': record.fats * record.mass / 100.0,
+            'carbs': record.carbs * record.mass / 100.0,
+            'cals': record.calories * record.mass / 100.0
+        })
 
     # calculating totals for each day
     for field in ('mass', 'proteins', 'fats', 'carbs', 'cals'):
-        day['breakfast_total'][field] = sum(
-            [e[field] for e in day['breakfast']])
+        day['breakfast_total'][field] = sum([e[field] for e in day['breakfast']])
         day['lunch_total'][field] = sum([e[field] for e in day['lunch']])
         day['dinner_total'][field] = sum([e[field] for e in day['dinner']])
         day['snacks_total'][field] = sum([e[field] for e in day['snacks']])
@@ -71,8 +68,7 @@ def calculate_day_info(day_number: int,
 
 def calculate_total_days_info(first_date, last_date, meals_info):
     days_amount = (last_date - first_date).days + 1
-    days = [
-        {
+    days = [{
             'number': x,
             'date': '',
             'breakfast': [],
@@ -126,13 +122,15 @@ def days_view(trip_id):
     return render_template('meals/meals.html', trip=trip_info, days=days)
 
 
-# TODO: POST?
-@bp.route('/<int:trip_id>/day_table/<int:day_number>', methods=['POST'])
+@bp.route('/<int:trip_id>/day_table/<int:day_number>')
 @login_required_group(AccessGroup.Guest)
 def day_tables(trip_id, day_number):
     with get_session() as session:
         trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip_info:
+            abort(404)
+
+        if (trip_info.till_date - trip_info.from_date).days < day_number:
             abort(404)
 
         meals_info = session.query(MealRecord.id,

@@ -45,50 +45,86 @@
     });
 </script>
 
-<div class="container col-md-6">
-    <h1 class="display-4 my-3">Edit a trip</h1>
-</div>
-
-<div class="container col-md-6 border shadow">
-    <form class="m-3" id="input-form" action="{{ url_for('trips.edit', trip_id=trip['id']) }}" method="POST">
-        <div class="form-group">
-            <label for="input-name">Trip name</label>
-            <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help" placeholder="Enter name" value="{{ trip['name'] }}" autofocus>
-            <small id="name-help" class="form-text text-muted">This is the name of your trip. Make sure this is a great name.</small>
+<div class="container">
+    <div class="row my-3">
+        <div class="col"></div>
+        <div class="col-md-6">
+            <h1 class="display-4">{{ caption }}</h1>
         </div>
+        <div class="col"></div>
+    </div>
 
-        <div class="form-group">
-            <label for="input-date">Dates of the trip</label>
-            <input class="form-control" type="text" id="input-date" name="daterange" value="{{ trip['from_date'] }} - {{ trip['till_date'] }}"/>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="row my-3">
+        <div class="col"></div>
+        {% for message in messages %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
         </div>
+        {% endfor %}
+        <div class="col"></div>
+    </div>
+    {% endif %}
+    {% endwith %}
 
-        <div class="form-group">
-            <label for="input-attendees">How many people go to this trip?</label>
-            <input class="form-control" type="text" id="input-attendees" name="attendees" value="{{ trip['attendees'] }}"/>
+    <div class="row my-3">
+        <div class="col"></div>
+        <div class="col-md-6 border shadow">
+            <form class="m-3" id="input-form" action="{{ submit_url }}" method="POST">
+                <div class="form-group">
+                    <label for="input-name">Trip name</label>
+                    <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help"
+                        placeholder="Enter name" value="{{ trip['name'] if trip else '' }}" autofocus>
+                    <small id="name-help" class="form-text text-muted">This is the name of your trip. Make sure this is
+                        a great name.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="input-date">Dates of the trip</label>
+                    <input class="form-control" type="text" id="input-date" name="daterange"
+                        value="{{ trip['from_date'] if trip else '2019-01-01' }} - {{ trip['till_date'] if trip else '2019-01-01' }}" />
+                </div>
+
+                <div class="form-group">
+                    <label for="input-attendees">How many people go to this trip?</label>
+                    <input class="form-control" type="text" id="input-attendees" name="attendees"
+                        value="{{ trip['attendees'] if trip else '1' }}" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">{{ submit_caption }}</button>
+                <a class="btn btn-secondary" href="{{ close_url }}">
+                    Close
+                </a>
+                {% if archive_button %}
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#archive-modal">
+                    Archive
+                </button>
+                {% endif %}
+            </form>
         </div>
+        <div class="col"></div>
+    </div>
 
-        <button type="submit" class="btn btn-primary">Edit</button>
-        <a class="btn btn-secondary" href="{{ url_for('meals.days_view', trip_id=trip['id']) }}">Close</a>
-        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#archive-modal">Archive</button>
-    </form>
-</div>
-
-<div class="modal fade" id="archive-modal" tabindex="-1" role="dialog" aria-labelledby="archive-modal-title"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="archive-modal-title">Archive a trip?</h5>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to archive this trip?</p>
-            </div>
-            <div class="modal-footer">
-                <a class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">Archive</a>
-                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+    {% if archive_button %}
+    <div class="modal fade" id="archive-modal" tabindex="-1" role="dialog" aria-labelledby="archive-modal-title"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="archive-modal-title">Archive a trip?</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to archive this trip?</p>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">Archive</a>
+                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>

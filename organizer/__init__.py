@@ -7,9 +7,9 @@ from flask import Flask, current_app
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    if 'DATABASE_URL' in os.environ:
-        db_url = os.environ['DATABASE_URL']
-    else:
+    if 'DATABASE_URL' in os.environ:  # pragma: no cover
+        db_url = os.environ['DATABASE_URL']  # pragma: no cover
+    else: 
         db_url = 'sqlite:///' + os.path.join(app.instance_path, 'flaskr.sqlite')
 
     secret_key = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ else 'dev'

@@ -3,11 +3,20 @@ from datetime import datetime
 from organizer.schema import Trip, Product, MealRecord, User, AccessGroup
 
 def init_fake_data_internal(session):
-    taganay_trip = Trip(name="Taganay trip",
-                        from_date=datetime.strptime("2019-01-01", "%Y-%m-%d"),
-                        till_date=datetime.strptime("2019-01-09", "%Y-%m-%d"),
-                        attendees=3)
-    session.add(taganay_trip)
+    trip1 = Trip(name="Taganay trip",
+                 from_date=datetime.strptime("2019-01-01", "%Y-%m-%d"),
+                 till_date=datetime.strptime("2019-01-05", "%Y-%m-%d"),
+                 attendees=3)
+    trip2 = Trip(name="Archived trip",
+                 from_date=datetime.strptime("2019-06-06", "%Y-%m-%d"),
+                 till_date=datetime.strptime("2019-06-08", "%Y-%m-%d"),
+                 attendees=1,
+                 archived=True)
+    trip3 = Trip(name="Admin trip",
+                 from_date=datetime.strptime("2019-06-06", "%Y-%m-%d"),
+                 till_date=datetime.strptime("2019-06-08", "%Y-%m-%d"),
+                 attendees=1)
+    session.add_all([trip1, trip2, trip3])
 
     session.add(Product(name="Multigrain cereal", calories=362, proteins=11, fats=2, carbs=75))
     session.add(Product(name="Mango", calories=64, proteins=1, fats=1, carbs=78))
@@ -25,7 +34,7 @@ def init_fake_data_internal(session):
     session.add(Product(name="Step snack", calories=455.9, proteins=9.6, fats=26.1, carbs=47.3, grams=12.0))
     session.add(Product(name="Archived thingy :)", calories=51, proteins=2, fats=3, carbs=3, archived=True))
 
-    for x in range(10):
+    for x in range(5):
         session.add_all([
             MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=1, mass=60),
             MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=2, mass=20),
@@ -44,16 +53,19 @@ def init_fake_data_internal(session):
         ])
 
     # password 'qwerty'
-    session.add(User(name="Administrator",
-                     password="pbkdf2:sha256:150000$y8RuRagx$371e6520ae64c1c4c367adb82b076b081068333511ef3f2c3ccab0107494d5f0",
-                     access_group=AccessGroup.Administrator))
+    admin = User(name="Administrator",
+                 password="pbkdf2:sha256:150000$y8RuRagx$371e6520ae64c1c4c367adb82b076b081068333511ef3f2c3ccab0107494d5f0",
+                 access_group=AccessGroup.Administrator)
+    session.add(admin)
+    trip3.users.append(admin)
 
     # password 'org'
     org = User(name="Organizer",
                password="pbkdf2:sha256:150000$3ngYsSXZ$4a693ab6cacc753ed1b18ce51757e6d9d85c25ed02c422ec66dae70b92ea11b2",
                access_group=AccessGroup.TripManager)
     session.add(org)
-    taganay_trip.users.append(org)
+    trip1.users.append(org)
+    trip2.users.append(org)
 
     # password 'user1'
     session.add(User(name="User",
