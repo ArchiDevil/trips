@@ -4,7 +4,7 @@ from typing import List
 from flask import Blueprint, render_template, get_template_attribute, abort, g
 
 from organizer.db import get_session
-from organizer.schema import Trip, MealRecord, Product, AccessGroup, TripAccess
+from organizer.schema import Trip, MealRecord, Product, AccessGroup, TripAccess, User
 from organizer.auth import login_required_group
 
 bp = Blueprint('meals', __name__, url_prefix='/meals')
@@ -94,15 +94,15 @@ def calculate_total_days_info(first_date, last_date, meals_info):
 @login_required_group(AccessGroup.Guest)
 def days_view(trip_id):
     with get_session() as session:
-        trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
+        trip_info: Trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip_info:
             abort(404)
 
-        trip_access = session.query(TripAccess).filter(TripAccess.trip_id == trip_id,
-                                                       TripAccess.user_id == g.user.id).first()
-        if not trip_access:
-            session.add(TripAccess(trip_id=trip_id, user_id=g.user.id))
-            session.commit()
+        if trip_info.created_by != g.user.id:
+            user = session.query(User).filter(User.id == g.user.id).one()
+            if not trip_info in user.shared_trips:
+                user.shared_trips.append(trip_info)
+                session.commit()
 
         meals_info = session.query(MealRecord.id,
                                    MealRecord.trip_id,

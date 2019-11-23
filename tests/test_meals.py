@@ -1,3 +1,7 @@
+from organizer.db import get_session
+from organizer.schema import TripAccess
+
+
 def test_meals_rejects_not_logged_in(client):
     response = client.get('/meals/1')
     assert response.status_code == 302
@@ -47,6 +51,17 @@ def test_meals_adds_trip_to_user(user_logged_client):
     response = user_logged_client.get('/meals/1')
     response = user_logged_client.get('/')
     assert b'Taganay' in response.data
+
+
+def test_meals_sharing_does_not_duplicate_existing_access(user_logged_client, app):
+    response = user_logged_client.get('/meals/1')
+    response = user_logged_client.get('/meals/1')
+
+    with app.test_client() as c:
+        rv = c.get('/')
+        with get_session() as session:
+            result = session.query(TripAccess).filter(TripAccess.trip_id == 1, TripAccess.user_id == 3).all()
+            assert len(result) == 1
 
 
 def test_meals_day_rejects_not_logged_in(client):

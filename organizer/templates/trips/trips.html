@@ -54,19 +54,40 @@
     </div>
     {% endif %}
 
-    {% for day in trip_days %}
+    {% if user_trips %}
+    {% for trip in user_trips %}
+    {% if not trip['archived'] %}
     <div class="card shadow m-3" style="width: 18rem;">
         <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
-        <h5 class="card-header">{{ day['name'] }}</h5>
+        <h5 class="card-header">{{ trip['name'] }}</h5>
         <div class="card-body">
-            <p class="card-text">Starts: {{ day['from_date'].strftime('%d-%m-%y') }}</p>
-            <p class="card-text">Ends: {{ day['till_date'].strftime('%d-%m-%y') }}</p>
-            <!-- <p class="card-text"><small class="text-muted">Last updated: {{ day['last_update'] }}</small></p> -->
-            <a href="{{ url_for('meals.days_view', trip_id=day['id']) }}"
-                class="btn btn-secondary stretched-link">Open</a>
+            <p class="card-text">Starts: {{ trip['from_date'].strftime('%d-%m-%y') }}</p>
+            <p class="card-text">Ends: {{ trip['till_date'].strftime('%d-%m-%y') }}</p>
+            <!-- <p class="card-text"><small class="text-muted">Last updated: {{ trip['last_update'] }}</small></p> -->
+            <a href="{{ url_for('meals.days_view', trip_id=trip['id']) }}" class="btn btn-secondary w-100">Open</a>
         </div>
     </div>
+    {% endif %}
     {% endfor %}
+    {% endif %}
+
+    {% if shared_trips %}
+    {% for trip in shared_trips %}
+    {% if not trip['archived'] %}
+    <div class="card shadow m-3" style="width: 18rem;">
+        <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
+        <h5 class="card-header"><i class="fas fa-share-alt" title="This trip is shared with you"></i> {{ trip['name'] }}</h5>
+        <div class="card-body">
+            <p class="card-text">Starts: {{ trip['from_date'].strftime('%d-%m-%y') }}</p>
+            <p class="card-text">Ends: {{ trip['till_date'].strftime('%d-%m-%y') }}</p>
+            <!-- <p class="card-text"><small class="text-muted">Last updated: {{ trip['last_update'] }}</small></p> -->
+            <a href="{{ url_for('meals.days_view', trip_id=trip['id']) }}" class="btn btn-secondary w-50">Open</a>
+            <a href="{{ url_for('trips.forget', trip_id=trip['id']) }}" class="btn btn-link mx-3">Hide</a>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
 </div>
 
 {% endif %}

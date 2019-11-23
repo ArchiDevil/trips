@@ -30,46 +30,48 @@
 <div class="container">
     <div class="row my-3">
         <div class="col">
-            <h1 class="display-4">Add a user</h1>
+            <h1 class="display-4">{{ form_caption }}</h1>
         </div>
     </div>
 
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
     <div class="row my-3">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
         {% for message in messages %}
         <div class="alert alert-danger" role="alert">
             {{ message }}
         </div>
         {% endfor %}
-        {% endif %}
-        {% endwith %}
     </div>
+    {% endif %}
+    {% endwith %}
 
     <div class="row my-3">
         <div class="col">
-            <form class="p-4 border shadow bg-light" id="input-form" action="{{ url_for('users.add') }}" method="POST">
+            <form class="p-4 border shadow bg-white" id="input-form" action="{{ url_for('users.add') }}" method="POST">
                 <div class="form-group">
-                    <label for="input-name">User name</label>
-                    <input type="text" class="form-control" id="input-name" name="name" placeholder="Enter name"
-                        autofocus>
+                    <label for="input-name">User login</label>
+                    <input type="text" class="form-control" id="input-name" name="login" placeholder="Login" autofocus
+                        value="{{ user.login if user }}" autocomplete="off">
                 </div>
 
+                {% if not user %}
                 <div class="form-group">
                     <label for="input-password">User password</label>
-                    <input class="form-control" type="password" id="input-password" name="password" />
+                    <input class="form-control" type="password" id="input-password" name="password"/>
                 </div>
+                {% endif %}
 
                 <div class="form-group">
                     <label for="input-group">Access group</label>
                     <select class="form-control custom-select" id="input-group" name="group">
                         {% for option in groups %}
-                        <option>{{ option }}</option>
+                        <option {{ 'selected' if user and user.access_group.name == option }}>{{ option }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Add</button>
+                <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
                 <a class="btn btn-secondary" href="{{ url_for('users.index') }}">Close</a>
             </form>
         </div>

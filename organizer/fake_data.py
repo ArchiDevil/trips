@@ -3,6 +3,23 @@ from datetime import datetime
 from organizer.schema import Trip, Product, MealRecord, User, AccessGroup
 
 def init_fake_data_internal(session):
+    # password 'qwerty'
+    admin = User(login="Administrator",
+                 password="pbkdf2:sha256:150000$y8RuRagx$371e6520ae64c1c4c367adb82b076b081068333511ef3f2c3ccab0107494d5f0",
+                 access_group=AccessGroup.Administrator)
+    session.add(admin)
+
+    # password 'org'
+    org = User(login="Organizer",
+               password="pbkdf2:sha256:150000$3ngYsSXZ$4a693ab6cacc753ed1b18ce51757e6d9d85c25ed02c422ec66dae70b92ea11b2",
+               access_group=AccessGroup.TripManager)
+    session.add(org)
+
+    # password 'user1'
+    session.add(User(login="User",
+                     password="pbkdf2:sha256:150000$LXwcrYlk$45da8f74b50caf71fa6933de95bff3d959618c8098b2f0d45967cba2623cede3",
+                     access_group=AccessGroup.Guest))
+    
     trip1 = Trip(name="Taganay trip",
                  from_date=datetime.strptime("2019-01-01", "%Y-%m-%d"),
                  till_date=datetime.strptime("2019-01-05", "%Y-%m-%d"),
@@ -16,7 +33,10 @@ def init_fake_data_internal(session):
                  from_date=datetime.strptime("2019-06-06", "%Y-%m-%d"),
                  till_date=datetime.strptime("2019-06-08", "%Y-%m-%d"),
                  attendees=1)
-    session.add_all([trip1, trip2, trip3])
+
+    org.trips.append(trip1)
+    org.trips.append(trip2)
+    admin.trips.append(trip3)
 
     session.add(Product(name="Multigrain cereal", calories=362, proteins=11, fats=2, carbs=75))
     session.add(Product(name="Mango", calories=64, proteins=1, fats=1, carbs=78))
@@ -51,25 +71,5 @@ def init_fake_data_internal(session):
             MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=13, mass=30),
             MealRecord(trip_id=1, day_number=x + 1, meal_number=3, product_id=14, mass=60)
         ])
-
-    # password 'qwerty'
-    admin = User(name="Administrator",
-                 password="pbkdf2:sha256:150000$y8RuRagx$371e6520ae64c1c4c367adb82b076b081068333511ef3f2c3ccab0107494d5f0",
-                 access_group=AccessGroup.Administrator)
-    session.add(admin)
-    trip3.users.append(admin)
-
-    # password 'org'
-    org = User(name="Organizer",
-               password="pbkdf2:sha256:150000$3ngYsSXZ$4a693ab6cacc753ed1b18ce51757e6d9d85c25ed02c422ec66dae70b92ea11b2",
-               access_group=AccessGroup.TripManager)
-    session.add(org)
-    trip1.users.append(org)
-    trip2.users.append(org)
-
-    # password 'user1'
-    session.add(User(name="User",
-                     password="pbkdf2:sha256:150000$LXwcrYlk$45da8f74b50caf71fa6933de95bff3d959618c8098b2f0d45967cba2623cede3",
-                     access_group=AccessGroup.Guest))
 
     session.commit()

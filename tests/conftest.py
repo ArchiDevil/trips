@@ -13,6 +13,7 @@ def app():
     application = create_app({
         'TESTING': True,
         'DATABASE': 'sqlite:///' + db_path,
+        'VK_CLIENT_ID': 'test_vk_client_id'
     })
 
     with application.app_context():

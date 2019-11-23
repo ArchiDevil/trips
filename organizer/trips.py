@@ -13,14 +13,19 @@ bp = Blueprint('trips', __name__)
 @login_required_group(AccessGroup.Guest)
 def index():
     with get_session() as session:
+        user = session.query(User).filter(User.id == g.user.id).one()
+
+        user_trips = None
+        shared_trips = None
+
         if g.user.access_group == AccessGroup.Administrator:
-            eligible_trips = session.query(Trip).filter(Trip.archived == False).all()
+            user_trips = session.query(Trip).filter(Trip.archived == False).all()
         else:
-            eligible_trips = [y for _, y in session.query(TripAccess,
-                                                          Trip).filter(TripAccess.user_id == g.user.id,
-                                                                       Trip.id == TripAccess.trip_id,
-                                                                       Trip.archived == False).all()]
-        return render_template('trips/trips.html', trip_days=eligible_trips, no_trips=bool(not eligible_trips))
+            user_trips = user.trips
+            shared_trips = user.shared_trips
+        return render_template('trips/trips.html', user_trips=user_trips,
+                               shared_trips=shared_trips,
+                               no_trips=bool(not user_trips and not shared_trips))
 
 
 def validate_input_data():
@@ -49,6 +54,7 @@ def validate_input_data():
         raise RuntimeError('Incorrect dates provided')
     return name, attendees, from_date, till_date
 
+
 @bp.route('/trips/add', methods=['GET', 'POST'])
 @login_required_group(AccessGroup.TripManager)
 def add():
@@ -71,15 +77,12 @@ def add():
 
         with get_session() as session:
             new_trip = Trip(name=name, from_date=from_date,
-                            till_date=till_date, attendees=attendees)
+                            till_date=till_date, attendees=attendees,
+                            created_by=g.user.id)
             session.add(new_trip)
             session.commit()
-
-            user = session.query(User).filter(User.id == g.user.id).one()
-            user.trips.append(new_trip)
-            session.commit()
-
         return redirect(end_url)
+
     return render_template(template_file,
                            caption=caption,
                            submit_caption=submit_caption,
@@ -145,3 +148,21 @@ def archive(trip_id):
         session.commit()
 
     return redirect(url_for('trips.index'))
+
+
+@bp.route('/trips/forget/<int:trip_id>')
+@login_required_group(AccessGroup.Guest)
+def forget(trip_id):
+    with get_session() as session:
+        trip = session.query(Trip).filter(Trip.id == trip_id).first()
+        if not trip:
+            abort(404)
+
+        trip_access = session.query(TripAccess).filter(TripAccess.trip_id == trip_id,
+                                                       TripAccess.user_id == g.user.id).first()
+        if trip_access:
+            session.query(TripAccess).filter(TripAccess.trip_id == trip_id,
+                                             TripAccess.user_id == g.user.id).delete()
+            session.commit()
+
+        return redirect(url_for('trips.index'))

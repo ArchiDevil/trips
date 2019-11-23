@@ -23,21 +23,39 @@
                 <thead>
                     <th>Id</th>
                     <th>Login</th>
-                    <th>Has pass</th>
+                    <th>Name</th>
+                    <th>Pass?</th>
                     <th>Group</th>
+                    <th>Type</th>
+                    <th>Last login</th>
+                    <th>Actions</th>
                 </thead>
 
                 <tbody>
                     {% for user in users %}
                     <tr class="showhim">
-                        <th scope="row" style="width: 10%;">{{ user.id }}</th>
-                        <td style="width: 60%;">{{ user.name }}</td>
-                        <td style="width: 10%;">{% if user.password %} Yes {% else %} No {% endif %}</td>
-                        <td style="width: 20%;">{{ user.access_group.name }}
+                        <th scope="row" style="width: 5%;">{{ user.id }}</th>
+                        <td style="width: 20%;">{{ user.login }}</td>
+                        <td style="width: 20%;">{{ user.displayed_name }}</td>
+                        <td style="width: 5%;">
+                            {% if user.password %}
+                            <i class="fas fa-check"></i>
+                            {% else %}
+                            <i class="fas fa-times"></i>
+                            {% endif %}
+                        </td>
+                        <td style="width: 10%;">{{ user.access_group.name }}</td>
+                        <td style="width: 10%;">{{ user.user_type.name }}</td>
+                        <td style="width: 15%;">{{ user.last_logged_in.strftime('%H:%M - %d-%m-%Y') }}</td>
+                        <td style="width: 3%;">
                             <span class="text-right float-right mx-1 showme">
-                                <a class="showme" data-remove-link="{{ url_for('users.delete', user_id=user.id) }}"
-                                    data-toggle="modal" data-target="#delete-modal" href="#">
-                                    Delete
+                                <a class="showme" data-remove-link="{{ url_for('users.delete', user_id=user.id) }}" data-toggle="modal" data-target="#delete-modal" href="#">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </span>
+                            <span class="text-right float-right mx-1 showme">
+                                <a class="showme" href="{{ url_for('users.edit', user_id=user.id) }}">
+                                    <i class="fas fa-edit"></i>
                                 </a>
                             </span>
                         </td>

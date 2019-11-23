@@ -14,11 +14,20 @@ def create_app(test_config=None):
 
     secret_key = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ else 'dev'
     session_lifetime = datetime.timedelta(days=14)
+    server_name = None
+    if not test_config:
+        server_name = os.environ['SERVER_NAME'] if 'SERVER_NAME' in os.environ else 'localhost:5000'
+
+    vk_client_id = os.environ['VK_CLIENT_ID'] if 'VK_CLIENT_ID' in os.environ else None
+    vk_app_secret = os.environ['VK_APP_SECRET'] if 'VK_APP_SECRET' in os.environ else None
 
     app.config.from_mapping(
         SECRET_KEY=secret_key,
         DATABASE=db_url,
-        PERMANENT_SESSION_LIFETIME=session_lifetime
+        PERMANENT_SESSION_LIFETIME=session_lifetime,
+        SERVER_NAME=server_name,
+        VK_CLIENT_ID=vk_client_id,
+        VK_APP_SECRET=vk_app_secret
     )
 
     if test_config is None:

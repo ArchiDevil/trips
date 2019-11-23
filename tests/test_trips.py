@@ -338,3 +338,24 @@ def test_trips_can_archive(org_logged_client):
 def test_trips_archive_returns_404_for_non_existing_trip(org_logged_client):
     response = org_logged_client.get('/trips/archive/100')
     assert response.status_code == 404
+
+
+def test_trips_forget_rejects_not_logged_in(client):
+    response = client.get('/trips/forget/1')
+    assert response.status_code == 302
+    assert 'auth/login' in response.location
+
+
+def test_trips_forget_returns_404_for_non_existing_trip(user_logged_client):
+    response = user_logged_client.get('/trips/forget/100')
+    assert response.status_code == 404
+
+
+def test_trips_forget_forgets_trip(user_logged_client):
+    user_logged_client.get('/meals/1')
+    response = user_logged_client.get('/trips/forget/1')
+    assert response.status_code == 302
+    assert '/' in response.location
+
+    response = user_logged_client.get('/')
+    assert b'Taganay' not in response.data
