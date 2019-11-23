@@ -38,6 +38,8 @@ def init_fake_data_internal(session):
     org.trips.append(trip2)
     admin.trips.append(trip3)
 
+    session.commit()
+
     session.add(Product(name="Multigrain cereal", calories=362, proteins=11, fats=2, carbs=75))
     session.add(Product(name="Mango", calories=64, proteins=1, fats=1, carbs=78))
     session.add(Product(name="Cream cheese", calories=303, proteins=10, fats=27, carbs=5))
@@ -53,6 +55,8 @@ def init_fake_data_internal(session):
     session.add(Product(name="Chocolate", calories=550, proteins=6.9, fats=35.7, carbs=54.4))
     session.add(Product(name="Step snack", calories=455.9, proteins=9.6, fats=26.1, carbs=47.3, grams=12.0))
     session.add(Product(name="Archived thingy :)", calories=51, proteins=2, fats=3, carbs=3, archived=True))
+
+    session.commit()
 
     for x in range(5):
         session.add_all([
