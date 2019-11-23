@@ -37,18 +37,18 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav mr-auto mt-2 mt-lg-0">
                 {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-                <a id="trips-link" class="nav-item nav-link" href="{{ url_for('trips.index') }}">Trips</a>
+                <a id="trips-link" class="nav-item nav-link" href="{{ url_for('trips.index') }}"><i class="fas fa-route"></i> Trips</a>
                 {% endif %}
-                <a id="products-link" class="nav-item nav-link" href="{{ url_for('products.index') }}">Products</a>
+                <a id="products-link" class="nav-item nav-link" href="{{ url_for('products.index') }}"><i class="fas fa-pizza-slice"></i> Products</a>
                 {% if g.user.access_group == AccessGroup.Administrator %}
-                <a id="users-link" class="nav-item nav-link" href="{{ url_for('users.index') }}">Users</a>
-                <a id="developer-console-link" class="nav-item nav-link" href="{{ url_for('developer.console') }}">Console</a>
+                <a id="users-link" class="nav-item nav-link" href="{{ url_for('users.index') }}"><i class="fas fa-users"></i> Users</a>
+                <a id="developer-console-link" class="nav-item nav-link" href="{{ url_for('developer.console') }}"><i class="fas fa-terminal"></i> Console</a>
                 {% endif %}
             </div>
 
             <form class="form-inline my-2 my-lg-0">
                 <label class="mx-3">{{ g.user.name }}</label>
-                <a class="btn btn-outline-success my-2 my-sm-0" href="{{ url_for('auth.logout') }}">Logout</a>
+                <a class="btn btn-outline-success my-2 my-sm-0" href="{{ url_for('auth.logout') }}">Logout <i class="fas fa-sign-out-alt"></i></a>
             </form>
         </div>
     </nav>

@@ -103,15 +103,16 @@
                                    data-link="{{ url_for('products.edit', product_id=product['id']) }}"
                                    data-bname="Edit"
                                    href="javascript:void(0);">
-                                   Edit
+                                    <i class="fas fa-edit"></i>
                                 </a>
                             </span>
                             <span class="text-right float-right mx-1 showme">
                                 <a data-toggle="modal"
                                    data-target="#archive-modal"
                                    data-archive="{{ url_for('products.archive', product_id=product['id']) }}"
-                                   href="javascript:void(0);">
-                                    Archive
+                                   href="javascript:void(0);"
+                                   alt="Archive">
+                                    <i class="text-danger fas fa-archive"></i>
                                 </a>
                             </span>
                             {% endif %}

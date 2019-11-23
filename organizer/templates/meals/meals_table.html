@@ -16,7 +16,9 @@
                         data-toggle="modal"
                         data-target="#add-product-modal"
                         data-day="{{ day['number'] }}"
-                        data-mealtype="{{ datatype }}">+</button>
+                        data-mealtype="{{ datatype }}">
+                    <i class="fas fa-plus"></i>
+                </button>
             </td>
             {% endif %}
         </tr>
@@ -26,7 +28,9 @@
                 <span>{{ meal['name'] }}</span>
                 {% if g.user.access_group.value != 0 %}
                 <span class="text-right float-right showme">
-                    <a onclick="removeProduct({{day['number']}}, {{meal['id']}})" href="javascript:void(0);">Delete</a>
+                    <a onclick="removeProduct({{day['number']}}, {{meal['id']}})" href="javascript:void(0);">
+                        <i class="fas fa-trash"></i>
+                    </a>
                 </span>
                 {% endif %}
             </td>
