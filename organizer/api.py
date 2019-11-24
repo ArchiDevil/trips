@@ -43,7 +43,7 @@ def product_units():
 
     with get_session() as session:
         product = session.query(Product).filter(Product.id == product_id,
-                                                Product.archived == 0).first()
+                                                Product.archived == False).first()
 
         if not product:
             return {'result': False}
