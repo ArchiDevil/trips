@@ -10,6 +10,7 @@ def test_index_page_shows_products(user_logged_client):
     assert b'Multigrain cereal' in result.data
     assert b'Mango' in result.data
     assert b'Cream cheese' in result.data
+    assert b'Next' in result.data
 
 
 def test_index_page_does_not_show_archived(user_logged_client):
@@ -20,6 +21,26 @@ def test_index_page_does_not_show_archived(user_logged_client):
 def test_index_page_is_not_filtered(user_logged_client):
     result = user_logged_client.get('/products/')
     assert b'is filtered with search result' not in result.data
+
+
+def test_index_page_change_pages(user_logged_client):
+    result = user_logged_client.get('/products/?page=0')
+    assert result.status_code == 200
+    assert b'Multigrain cereal' in result.data
+    assert b'Mango' in result.data
+    assert b'Cream cheese' in result.data
+    assert b'Sausage' not in result.data
+    assert b'Chocolate' not in result.data
+    assert b'Step snack' not in result.data
+
+    result = user_logged_client.get('/products/?page=1')
+    assert result.status_code == 200
+    assert b'Multigrain cereal' not in result.data
+    assert b'Mango' not in result.data
+    assert b'Cream cheese' not in result.data
+    assert b'Sausage' in result.data
+    assert b'Chocolate' in result.data
+    assert b'Step snack' in result.data
 
 
 def test_add_page_rejects_not_logged_in(client):
@@ -67,7 +88,7 @@ def test_add_page_adds_product(org_logged_client):
                                         'fats': '5.1',
                                         'carbs': '1.1'
                                     })
-    result = org_logged_client.get('/products/')
+    result = org_logged_client.get('/products/?search=product')
     assert b'Test product' in result.data
     assert b'21.2' in result.data
     assert b'4.0' in result.data
@@ -86,7 +107,7 @@ def test_add_page_adds_product_with_grams(org_logged_client):
                                         'grams': '14.4'
                                     })
     # TODO: there is no way to understand was it added or not
-    result = org_logged_client.get('/products/')
+    result = org_logged_client.get('/products/?search=product')
     assert b'Test product' in result.data
     assert b'21.2' in result.data
     assert b'4.0' in result.data
@@ -341,13 +362,6 @@ def test_add_page_reacts_to_nan_grams(org_logged_client):
     assert b'17.1' not in result.data
 
 
-def test_index_page_rejects_search_for_not_logged_in(client):
-    result = client.post('/products/search',
-                         data={'request': 'something'})
-    assert 'auth/login' in result.location
-    assert result.status_code == 302  # redirect to auth page
-
-
 def test_archive_page_rejects_not_logged_in(client):
     result = client.get('/products/archive/1')
     assert 'auth/login' in result.location
@@ -376,27 +390,31 @@ def test_archive_page_archives_product(org_logged_client):
     assert b'Mango' not in result.data
 
 
-def test_search_page_uses_correct_method(user_logged_client):
-    result = user_logged_client.get('/products/search',
-                                    data={'request': 'jerk'})
-    assert result.status_code == 405
-
-
-def test_search_page_searches(user_logged_client):
-    result = user_logged_client.post('/products/search',
-                                     data={'request': 'jerk'})
+def test_index_page_searches(user_logged_client):
+    result = user_logged_client.get('/products/?search=jerk')
     assert result.status_code == 200
     assert b'is filtered with search result' in result.data
     assert b'jerk' in result.data
     assert b'Mango' not in result.data
 
 
-def test_search_is_sql_injection_resistant(user_logged_client):
-    result = user_logged_client.post('/products/search',
-                                     data={'request': "'%;DROP TABLE products;'"})
+def test_index_is_sql_injection_resistant(user_logged_client):
+    result = user_logged_client.get('/products/?search="%;DROP TABLE products;"')
     assert result.status_code == 200
     assert b'is filtered with search result' in result.data
     assert b'Mango' not in result.data
+
+
+def test_index_page_change_pages_while_seaching(user_logged_client):
+    result = user_logged_client.get('/products/?search=Mango&page=0')
+    assert result.status_code == 200
+    assert b'>Mango<' in result.data
+    assert b'>Cream cheese<' not in result.data
+
+    result = user_logged_client.get('/products/?search=Mango&page=1')
+    assert result.status_code == 200
+    assert b'>Mango<' not in result.data
+    assert b'>Cream cheese<' not in result.data
 
 
 def test_edit_rejects_not_logged_in(client):

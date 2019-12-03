@@ -1,4 +1,60 @@
-{% import 'meals/meals_table.html' as meals_table %}
+{% macro cell(data, additional_style='') %}
+<td style="width: 8%" class="text-right text-truncate {{ additional_style }}">{{ data }}</td>
+{%- endmacro %}
+
+{% macro table(table_style, title, day, datatype, total_datatype, results=False) %}
+<table class="table table-sm table-{{ table_style }} table-hover">
+    <tbody>
+        <tr>
+            <td>
+                <h5><strong>{{ title }}</strong></h5>
+            </td>
+            <td></td>
+            <td class="d-none d-sm-table-cell"></td>
+            <td class="d-none d-sm-table-cell"></td>
+            <td class="d-none d-sm-table-cell"></td>
+            {% if not results and g.user.access_group.value != 0 %}
+            <td class="text-right">
+                <button type="button" class="btn btn-{{ table_style }} btn-sm"
+                        data-toggle="modal" data-target="#add-product-modal"
+                        data-day="{{ day['number'] }}" data-mealtype="{{ datatype }}">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </td>
+            {% else %}
+            <td></td>
+            {% endif %}
+        </tr>
+        {% for meal in day[datatype] %}
+        <tr class="showhim">
+            <td style="width: 60%">
+                <span>{{ meal['name'] }}</span>
+                {% if g.user.access_group.value != 0 %}
+                <span class="text-right float-right showme">
+                    <a onclick="removeProduct({{day['number']}}, {{meal['id']}})" href="javascript:void(0);">
+                        <i class="fas fa-trash" title="Remove"></i>
+                    </a>
+                </span>
+                {% endif %}
+            </td>
+            {{ cell(meal['mass']) }}
+            {{ cell("{:.1f}".format(meal['proteins']), 'd-none d-sm-table-cell') }}
+            {{ cell("{:.1f}".format(meal['fats']), 'd-none d-sm-table-cell') }}
+            {{ cell("{:.1f}".format(meal['carbs']), 'd-none d-sm-table-cell') }}
+            {{ cell("{:.1f}".format(meal['cals'])) }}
+        </tr>
+        {% endfor %}
+        <tr>
+            <td style="width: 60%" class="text-right font-weight-bold">Total</td>
+            {{ cell(day[total_datatype]['mass']) }}
+            {{ cell("{:.1f}".format(day[total_datatype]['proteins']), 'd-none d-sm-table-cell') }}
+            {{ cell("{:.1f}".format(day[total_datatype]['fats']), 'd-none d-sm-table-cell') }}
+            {{ cell("{:.1f}".format(day[total_datatype]['carbs']), 'd-none d-sm-table-cell') }}
+            {{ cell("{:.1f}".format(day[total_datatype]['cals'])) }}
+        </tr>
+    </tbody>
+</table>
+{%- endmacro %}
 
 {% macro day(day_info) %}
 <div class="card shadow mb-3" id="day{{day_info['number']}}">
@@ -10,17 +66,17 @@
             <thead>
                 <th style="width: 60%">Name</th>
                 <th style="width: 8%" class="text-right">Mass</th>
-                <th style="width: 8%" class="text-right">P</th>
-                <th style="width: 8%" class="text-right">F</th>
-                <th style="width: 8%" class="text-right">C</th>
+                <th style="width: 8%" class="text-right d-none d-sm-table-cell">P</th>
+                <th style="width: 8%" class="text-right d-none d-sm-table-cell">F</th>
+                <th style="width: 8%" class="text-right d-none d-sm-table-cell">C</th>
                 <th style="width: 8%" class="text-right">Cals</th>
             </thead>
         </table>
-        {{ meals_table.table('success',   'Breakfast', day_info, 'breakfast', 'breakfast_total') }}
-        {{ meals_table.table('warning',   'Lunch',     day_info, 'lunch',     'lunch_total') }}
-        {{ meals_table.table('info',      'Dinner',    day_info, 'dinner',    'dinner_total') }}
-        {{ meals_table.table('secondary', 'Snacks',    day_info, 'snacks',    'snacks_total') }}
-        {{ meals_table.table('danger',    'Results',   day_info, '',          'total_total', results=True) }}
+        {{ table('success',   'Breakfast', day_info, 'breakfast', 'breakfast_total') }}
+        {{ table('warning',   'Lunch',     day_info, 'lunch',     'lunch_total') }}
+        {{ table('info',      'Dinner',    day_info, 'dinner',    'dinner_total') }}
+        {{ table('secondary', 'Snacks',    day_info, 'snacks',    'snacks_total') }}
+        {{ table('danger',    'Results',   day_info, '',          'total_total', results=True) }}
     </div>
 </div>
 {%- endmacro %}

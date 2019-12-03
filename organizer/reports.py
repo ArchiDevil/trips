@@ -2,7 +2,9 @@ from flask import Blueprint, render_template, abort, redirect, url_for
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, Product, MealRecord, AccessGroup
+from organizer.schema import Trip, Product, MealRecord, AccessGroup, Group
+
+from sqlalchemy.sql import func
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
 
@@ -11,10 +13,11 @@ bp = Blueprint('reports', __name__, url_prefix='/reports')
 @login_required_group(AccessGroup.Guest)
 def shopping(trip_id):
     with get_session() as session:
-        trip = session.query(Trip.name, Trip.attendees).filter(Trip.id == trip_id).first()
+        trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
 
+        persons_count = session.query(func.sum(Group.persons)).filter(Group.trip_id == trip_id).scalar()
         meals = session.query(MealRecord.mass,
                               Product.id,
                               Product.name,
@@ -31,10 +34,10 @@ def shopping(trip_id):
             if meal.grams is not None:
                 products[meal.id]['pieces'] = 0
 
-        products[meal.id]['mass'] += meal.mass * trip.attendees
+        products[meal.id]['mass'] += meal.mass * persons_count
 
         if meal.grams is not None:
-            products[meal.id]['pieces'] += meal.mass * trip.attendees / meal.grams
+            products[meal.id]['pieces'] += meal.mass * persons_count / meal.grams
 
     return render_template('reports/shopping.html', trip=trip, products=products)
 
@@ -60,7 +63,11 @@ def packing_ext(trip_id, columns_count):
         meals = session.query(MealRecord.day_number,
                               MealRecord.meal_number,
                               MealRecord.mass,
-                              Product.name).join(Product).filter(MealRecord.trip_id == trip_id).all()
+                              Product.name,
+                              Product.grams).join(Product).filter(MealRecord.trip_id == trip_id).all()
+
+        trip_groups = session.query(Group.persons).distinct().filter(Group.trip_id == trip_id).all()
+        person_groups = [group.persons for group in trip_groups]
 
     products = {}
     for meal in meals:
@@ -71,10 +78,15 @@ def packing_ext(trip_id, columns_count):
         products[day].append({
             'name': meal.name,
             'meal_number': meal.meal_number,
-            'mass': meal.mass * trip.attendees,
+            'mass': [meal.mass * persons for persons in person_groups],
         })
+
+        if meal.grams is not None:
+            products[day][-1]['grams'] = meal.grams
 
     for arr in products.values():
         arr.sort(key=lambda x: x['meal_number'])
 
-    return render_template('reports/packing.html', trip=trip, products=products, columns_count=columns_count)
+    return render_template('reports/packing.html', trip=trip,
+                           products=products, columns_count=columns_count,
+                           person_groups=person_groups)

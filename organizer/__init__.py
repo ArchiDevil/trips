@@ -1,7 +1,16 @@
 import datetime
 import os
 
-from flask import Flask, current_app
+from flask import Flask, current_app, render_template
+
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk import last_event_id
+
+if 'SENTRY_DSN' in os.environ:  # pragma: no cover
+    sentry_sdk.init(os.environ['SENTRY_DSN'],  # pragma: no cover
+                    integrations=[FlaskIntegration(), SqlalchemyIntegration()])  # pragma: no cover
 
 
 def create_app(test_config=None):
@@ -76,5 +85,9 @@ def create_app(test_config=None):
     def inject_props():
         from . import schema
         return dict(AccessGroup=schema.AccessGroup)
+
+    @app.errorhandler(500)
+    def server_error_handler(error):
+        return render_template("500.html", sentry_event_id=last_event_id()), 500
 
     return app

@@ -50,7 +50,7 @@
                 {% if g.user.photo_url %}
                 <img src="{{ g.user.photo_url }}" class="img-fluid rounded-circle" style="height: 2em;">
                 {% endif %}
-                <label class="mx-3">{{ g.user.displayed_name if g.user.displayed_name else g.user.login }}</label>
+                <label class="mr-3">{{ g.user.displayed_name if g.user.displayed_name else g.user.login }}</label>
                 <a class="btn btn-outline-success my-2 my-sm-0" href="{{ url_for('auth.logout') }}">Logout <i class="fas fa-sign-out-alt"></i></a>
             </form>
         </div>

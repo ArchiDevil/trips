@@ -6,6 +6,8 @@ from urllib.parse import urlencode
 from flask import Blueprint, render_template, request, g, redirect, url_for, session, flash, abort, current_app
 from werkzeug.security import check_password_hash
 
+from sentry_sdk import configure_scope
+
 from organizer.db import get_session
 from organizer.schema import User, AccessGroup, VkUser, UserType
 
@@ -20,6 +22,11 @@ def login_required_group(group):
                 return redirect(url_for('auth.login'))
             if g.user.access_group.value < group.value:
                 abort(403)
+            with configure_scope() as scope:
+                scope.user = {
+                    'id': str(g.user.id),
+                    'username': '{}'.format(g.user.displayed_name if g.user.displayed_name else g.user.login)
+                }
             return view(**kwargs)
         return wrapped_view_grouped
     return login_required_grouped
@@ -75,6 +82,8 @@ def login():
 @bp.route('/logout')
 @login_required_group(AccessGroup.Guest)
 def logout():
+    with configure_scope() as scope:
+        scope.user = None
     session.clear()
     return redirect(url_for('trips.index'))
 

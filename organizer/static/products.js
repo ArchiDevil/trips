@@ -71,7 +71,6 @@ var vm = new Vue({
     methods: {
         lockCalories: function () {
             this.caloriesLock = !this.caloriesLock;
-            console.log('lock val:', this.caloriesLock)
         }
     }
 
@@ -88,6 +87,19 @@ $(document).on('show.bs.modal', '#edit-modal', function(event) {
     var fats = button.data('fats');
     var carbs = button.data('carbs');
     var grams = button.data('grams');
+
+    var editingMode = name !== undefined;
+
+    if (editingMode) {
+        vm.modalTitle = 'Edit \'' + name + '\''
+        vm.caloriesLock = false
+        var lockButton = document.getElementById('button-addon-lock')
+        lockButton.classList.remove('active')
+        lockButton.setAttribute('aria-pressed', 'false')
+    }
+    else {
+        vm.modalTitle = 'Add a product'
+    }
 
     vm.productName = name ? name : '';
     vm.calories = calories ? calories : 0;

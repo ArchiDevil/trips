@@ -5,12 +5,24 @@
     $("#trips-link").addClass("active");
 </script>
 
-{% if no_trips %}
-
 <div class="container">
     <div class="row my-3">
-        <h1 class="display-4">Trips</h1>
+        <div class="col-4">
+            <h1 class="display-4">Trips</h1>
+        </div>
+
+        {% if not trips %}
+        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
+        <div class="col d-flex flex-row-reverse align-items-end">
+            <a class="btn btn-primary mb-3 d-block d-lg-none" type="button" href="{{ url_for('trips.add') }}">
+                Create new
+            </a>
+        </div>
+        {% endif %}
+        {% endif %}
     </div>
+
+    {% if not trips %}
 
     {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
     <div class="row my-3">
@@ -28,68 +40,93 @@
     <div class="row my-3">
         <div class="jumbotron shadow">
             <h1 class="display-4">Welcome!</h1>
-            <p class="lead">Seems like no one shared any trips with you. Ask you trip manager or anyone from your team to provide
-                you a link with the information.</p>
+            <p class="lead">Seems like no one shared any trips with you. Ask you trip manager or anyone from your team
+                to provide you a link with the information.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+
+    <div class="row my-3">
+        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
+        <div class="col-auto d-none d-lg-block">
+            <div class="card shadow" style="width: 18rem;">
+                <img src="{{ url_for('static', filename='trip.jpg') }}" class="card-img-top" alt="...">
+                <h5 class="card-header">Create something new</h5>
+                <div class="card-body">
+                    <p class="card-text">
+                        Start doing a great things by clicking this button. Let's start a new adventure!
+                    </p>
+                    <a href="{{ url_for('trips.add') }}" class="btn btn-primary w-100" role="button">
+                        <i class="fas fa-plus"></i> Create new trip
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="col">
+            {% if trips %}
+            {% for trip in trips %}
+            {% if not trip['trip_record'].archived %}
+            <div class="card shadow mb-3">
+                <div class="row no-gutters">
+                    <div class="d-none d-md-block col-4">
+                        <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                {% if trip['type'] == 'shared' %}
+                                <i class="fas fa-share-alt" title="This trip is shared with you"></i>
+                                {% endif %}
+                                {{ trip['trip_record'].name }}
+                            </h4>
+                            <p class="card-text">
+                                <i class="fas fa-hourglass-start"></i>
+                                {{ trip['trip_record'].from_date.strftime('%d-%m-%y') }} -
+                                <i class="fas fa-hourglass-end"></i>
+                                {{ trip['trip_record'].till_date.strftime('%d-%m-%y') }}
+                            </p>
+                            <p class="card-text">
+                                <i class="fas fa-walking"></i> {{ trip['attendees'] }} participants
+                            </p>
+                            <!-- <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
+                            <div class="row">
+                                <div class="col">
+                                    <a href="{{ url_for('meals.days_view', trip_id=trip['trip_record'].id) }}"
+                                        class="btn btn-primary w-100">
+                                        Open
+                                    </a>
+                                </div>
+                                {% if trip['type'] == 'user' %}
+                                <div class="col">
+                                    <a href="{{ url_for('trips.edit', trip_id=trip['trip_record'].id) }}"
+                                       class="btn btn-secondary w-100">
+                                        Edit
+                                    </a>
+                                </div>
+                                {% else %}
+                                <div class="col">
+                                    <a href="{{ url_for('trips.forget', trip_id=trip['trip_record'].id) }}"
+                                       class="btn btn-outline-secondary w-100">
+                                        Hide
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
         </div>
     </div>
     {% endif %}
 </div>
 
-{% else %}
-
-<div class="container-fluid">
-    <h1 class="display-4 m-3">Trips</h1>
-</div>
-
-<div class="container-fluid d-inline-flex flex-wrap">
-    {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-    <div class="card shadow m-3" style="width: 18rem;">
-        <img src="{{ url_for('static', filename='trip.jpg') }}" class="card-img-top" alt="...">
-        <h5 class="card-header">Create something new</h5>
-        <div class="card-body">
-            <!-- <h5 class="card-title">Adventure is out there!</h5> -->
-            <p class="card-text">Start doing a great things by clicking this button. Let's start a new adventure!</p>
-            <a href="{{ url_for('trips.add') }}" class="btn btn-primary stretched-link" role="button">Add a new trip</a>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if user_trips %}
-    {% for trip in user_trips %}
-    {% if not trip['archived'] %}
-    <div class="card shadow m-3" style="width: 18rem;">
-        <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
-        <h5 class="card-header">{{ trip['name'] }}</h5>
-        <div class="card-body">
-            <p class="card-text">Starts: {{ trip['from_date'].strftime('%d-%m-%y') }}</p>
-            <p class="card-text">Ends: {{ trip['till_date'].strftime('%d-%m-%y') }}</p>
-            <!-- <p class="card-text"><small class="text-muted">Last updated: {{ trip['last_update'] }}</small></p> -->
-            <a href="{{ url_for('meals.days_view', trip_id=trip['id']) }}" class="btn btn-secondary w-100">Open</a>
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
-    {% endif %}
-
-    {% if shared_trips %}
-    {% for trip in shared_trips %}
-    {% if not trip['archived'] %}
-    <div class="card shadow m-3" style="width: 18rem;">
-        <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
-        <h5 class="card-header"><i class="fas fa-share-alt" title="This trip is shared with you"></i> {{ trip['name'] }}</h5>
-        <div class="card-body">
-            <p class="card-text">Starts: {{ trip['from_date'].strftime('%d-%m-%y') }}</p>
-            <p class="card-text">Ends: {{ trip['till_date'].strftime('%d-%m-%y') }}</p>
-            <!-- <p class="card-text"><small class="text-muted">Last updated: {{ trip['last_update'] }}</small></p> -->
-            <a href="{{ url_for('meals.days_view', trip_id=trip['id']) }}" class="btn btn-secondary w-50">Open</a>
-            <a href="{{ url_for('trips.forget', trip_id=trip['id']) }}" class="btn btn-link mx-3">Hide</a>
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
-    {% endif %}
-</div>
-
-{% endif %}
 
 {% endblock %}

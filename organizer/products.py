@@ -72,8 +72,27 @@ def check_input_data():
 @login_required_group(AccessGroup.Guest)
 def index():
     with get_session() as session:
-        products = session.query(Product).filter(Product.archived == False)
-        return render_template('products/products.html', products=products, filtered=False)
+        page = 0
+        products_per_page = 10
+        if 'page' in request.args:
+            page = int(request.args['page'])
+
+        search = None
+        if 'search' in request.args:
+            search = request.args['search']
+
+        if search:
+            search_pattern = "%{}%".format(search)
+            products_count = session.query(Product.id).filter(Product.name.ilike(search_pattern),
+                                                              Product.archived == False).count()
+            products = session.query(Product).filter(Product.name.ilike(search_pattern),
+                                                     Product.archived == False).offset(page * products_per_page).limit(products_per_page).all()
+        else:
+            products_count = session.query(Product.id).filter(Product.archived == False).count()
+            products = session.query(Product).filter(Product.archived == False).offset(page * products_per_page).limit(products_per_page).all()
+        return render_template('products/products.html', products=products,
+                               search=search, page=page,
+                               last_page=math.ceil(products_count / products_per_page) - 1)
 
 
 @bp.route('/add', methods=['POST'])
@@ -114,20 +133,6 @@ def archive(product_id):
         prod.archived = True
         session.commit()
         return redirect(url_for('products.index'))
-
-
-@bp.route('/search', methods=['POST'])
-@login_required_group(AccessGroup.Guest)
-def search():
-    search_request = request.form['request']
-    search_request = "%{}%".format(search_request)
-
-    with get_session() as session:
-        found_products = session.query(Product).filter(Product.name.like(search_request),
-                                                       Product.archived == False).all()
-        return render_template('products/products.html',
-                               products=found_products,
-                               filtered=True)
 
 
 @bp.route('/edit/<int:product_id>', methods=['POST'])

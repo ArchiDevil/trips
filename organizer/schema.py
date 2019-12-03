@@ -44,13 +44,23 @@ class Trip(BASE):
     name = Column(String, nullable=False)
     from_date = Column(Date, nullable=False)
     till_date = Column(Date, nullable=False)
-    attendees = Column(Integer, nullable=False)
     created_by = Column(Integer, ForeignKey(User.__tablename__ + '.id'), nullable=False)
     last_update = Column(DateTime, nullable=False,
                          default=datetime.datetime.utcnow)
     archived = Column(Boolean, default=False, nullable=False)
 
     user = relationship('User', back_populates='trips')
+    groups = relationship('Group')
+
+
+class Group(BASE):
+    __tablename__ = 'groups'
+
+    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'), primary_key=True)
+    group_number = Column(Integer, primary_key=True)
+    persons = Column(Integer, nullable=False)
+
+    trip = relationship('Trip')
 
 
 class Product(BASE):

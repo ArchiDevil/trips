@@ -17,43 +17,19 @@
         });
     });
 
-    $(document).ready(function () {
-        $("#input-form").validate({
-            rules: {
-                name: {
-                    required: true,
-                },
-                attendees: {
-                    required: true,
-                    number: true,
-                    min: 0
-                }
-            },
-            errorPlacement: function (error, element) {
-                errorLabelName = element.attr("id") + "_invalid";
-                var oldElement = $("#" + errorLabelName);
-                if (oldElement !== undefined) {
-                    oldElement.remove();
-                }
-                error.appendTo(element.parent());
-                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
-            },
-            errorClass: "is-invalid",
-            validClass: "is-valid",
-            errorElement: "div"
-        });
-    });
+    var initialName = "{{ trip['name'] if trip else '' }}"
+    var initialDates = "{{ trip['from_date'] if trip else '2019-01-01' }} - {{ trip['till_date'] if trip else '2019-01-01' }}"
+    function getInitialGroups() {
+        return [
+            {% if groups: %} {% for group in groups: %}
+            { id: {{ loop.index }}, number: {{ loop.index }}, name: 'group{{ loop.index }}', count: {{ group }} },
+            {% endfor %} {% endif %}
+        ]
+    }
+
 </script>
 
-<div class="container">
-    <div class="row my-3">
-        <div class="col"></div>
-        <div class="col-md-6">
-            <h1 class="display-4">{{ caption }}</h1>
-        </div>
-        <div class="col"></div>
-    </div>
-
+<div id="edit-app" class="container">
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     <div class="row my-3">
@@ -70,37 +46,75 @@
 
     <div class="row my-3">
         <div class="col"></div>
-        <div class="col-md-6 border shadow">
-            <form class="m-3" id="input-form" action="{{ submit_url }}" method="POST">
+        <div class="col-md-6">
+            <form class="p-4 m-3 border shadow bg-white" id="input-form" action="{{ submit_url }}" method="POST" novalidate>
+                <h2 class="text-center my-3">{{ caption }}</h2>
+
                 <div class="form-group">
-                    <label for="input-name">Trip name</label>
-                    <input type="text" class="form-control" id="input-name" name="name" aria-describedby="name-help"
-                        placeholder="Enter name" value="{{ trip['name'] if trip else '' }}" autofocus>
-                    <small id="name-help" class="form-text text-muted">This is the name of your trip. Make sure this is
-                        a great name.</small>
+                    <label for="input-name">Title</label>
+                    <input type="text" class="form-control"
+                           id="input-name" name="name"
+                           aria-describedby="name-help" placeholder="Enter name"
+                           autofocus autocomplete="off"
+                           v-model="tripName"
+                           v-bind:class="{ 'is-valid': validation.name, 'is-invalid': !validation.name }">
+                    <div class="invalid-feedback">This field must not be empty</div>
                 </div>
 
                 <div class="form-group">
                     <label for="input-date">Dates of the trip</label>
-                    <input class="form-control" type="text" id="input-date" name="daterange"
-                        value="{{ trip['from_date'] if trip else '2019-01-01' }} - {{ trip['till_date'] if trip else '2019-01-01' }}" />
+                    <input class="form-control" name="daterange"
+                           autocomplete="off" type="text" id="input-date"
+                           v-model="tripDates"
+                           v-bind:class="{ 'is-valid': validation.dates, 'is-invalid': !validation.dates }">
+                    <div class="invalid-feedback">The dates must be in a format like '2019-01-01 - 2019-01-31'</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="input-attendees">How many people go to this trip?</label>
-                    <input class="form-control" type="text" id="input-attendees" name="attendees"
-                        value="{{ trip['attendees'] if trip else '1' }}" />
+                    <p class="font-weight-bold mt-4 mb-1">Groups configuration</p>
+                    <label for="input-attendees">How many people groups you have?</label>
+                    <select class="custom-select" @change="changeGroups()"
+                            v-model="selectedGroupsCount"
+                            v-bind:class="{ 'is-valid': validation.groupsSelector, 'is-invalid': !validation.groupsSelector }">
+                        <option value="1">1 group</option>
+                        <option value="2">2 groups</option>
+                        <option value="3">3 groups</option>
+                        <option value="4">4 groups</option>
+                        <option value="5">5 groups</option>
+                    </select>
+                    <small class="form-text text-muted">People group is a group where all persons eat from one pot.</small>
                 </div>
 
-                <button type="submit" class="btn btn-primary">{{ submit_caption }}</button>
-                <a class="btn btn-secondary" href="{{ close_url }}">
-                    Close
-                </a>
-                {% if archive_button %}
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#archive-modal">
-                    Archive
-                </button>
-                {% endif %}
+                <!-- HERE GO GROUPS -->
+                <div class="form-group">
+                    <user-group
+                        v-for="group in groups"
+                        v-bind:key="group.id"
+                        v-bind:group="group"
+                        v-bind:validator="function(n) { console.log(n); return /^[0-9]+$/.test(n) && +n > 0; }"
+                    ></user-group>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-8">
+                        <div class="row">
+                            <div class="col pr-1">
+                                <button type="submit" class="btn btn-primary w-100">{{ submit_caption }}</button>
+                            </div>
+                            <div class="col pl-1">
+                                <a class="btn btn-secondary w-100" href="{{ close_url }}">Close</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col"></div>
+                    <div class="col-auto">
+                        {% if archive_button %}
+                        <button type="button" class="btn btn-danger w-100" data-toggle="modal" data-target="#archive-modal">
+                            <i class="fas fa-archive"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
             </form>
         </div>
         <div class="col"></div>
@@ -128,5 +142,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<!-- production version, optimized for size and speed -->
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script type="application/javascript" src="{{ url_for('static', filename='trip_edit.js') }}"></script>
 
 {% endblock %}

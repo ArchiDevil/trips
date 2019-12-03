@@ -12,7 +12,7 @@ def test_meals_shows_page(user_logged_client):
     response = user_logged_client.get('/meals/1')
     assert response.status_code == 200
     assert b'Mango' in response.data
-    assert b'Taganay' in response.data
+    assert b'Taganay trip' in response.data
     assert b'Day 1' in response.data
     assert b'Day 2' in response.data
     assert b'Day 3' in response.data
@@ -81,9 +81,9 @@ def test_meals_day_returns_404_for_non_existing_day(user_logged_client):
 
 
 def test_meals_day_returns_day_table(user_logged_client):
-    response = user_logged_client.get('/meals/1/day_table/2')
+    response = user_logged_client.get('/meals/1/day_table/5')
     assert response.status_code == 200
-    assert b'Day 2' in response.data
+    assert b'Day 5' in response.data
     assert b'Mango' in response.data
     assert b'Breakfast' in response.data
     assert b'Lunch' in response.data

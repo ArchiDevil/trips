@@ -64,12 +64,31 @@ def test_api_add_adds_a_product_successfully(org_logged_client):
                                         'trip_id': 1,
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
-                                        'mass': 10,
+                                        'mass': 987,
+                                        'unit': 'grams',
+                                        'product_id': 5
+                                    })
+
+    assert result.json['result']
+    result = org_logged_client.get('/meals/1')
+    assert b'987' in result.data
+    assert b'Borsch concentrate' in result.data
+
+
+def test_api_add_merges_existing_product(org_logged_client):
+    result = org_logged_client.post('/api/v1/meals/add',
+                                    data={
+                                        'trip_id': 1,
+                                        'meal_name': 'breakfast',
+                                        'day_number': 1,
+                                        'mass': 442,
                                         'unit': 'grams',
                                         'product_id': 1
                                     })
-    # TODO: actually, it is not possible to inderstand if product was added or not
+
     assert result.json['result']
+    result = org_logged_client.get('/meals/1')
+    assert b'502' in result.data # 442 + existing 60 for multigrain cereal
 
 
 def test_api_add_adds_a_product_with_pcs(org_logged_client):

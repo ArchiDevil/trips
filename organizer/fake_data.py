@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from organizer.schema import Trip, Product, MealRecord, User, AccessGroup
+from organizer.schema import Trip, Product, MealRecord, User, AccessGroup, Group
+
 
 def init_fake_data_internal(session):
     # password 'qwerty'
@@ -19,20 +20,23 @@ def init_fake_data_internal(session):
     session.add(User(login="User",
                      password="pbkdf2:sha256:150000$LXwcrYlk$45da8f74b50caf71fa6933de95bff3d959618c8098b2f0d45967cba2623cede3",
                      access_group=AccessGroup.Guest))
-    
+
     trip1 = Trip(name="Taganay trip",
                  from_date=datetime.strptime("2019-01-01", "%Y-%m-%d"),
-                 till_date=datetime.strptime("2019-01-05", "%Y-%m-%d"),
-                 attendees=3)
+                 till_date=datetime.strptime("2019-01-05", "%Y-%m-%d"))
+    trip1.groups.append(Group(group_number=0, persons=2))
+    trip1.groups.append(Group(group_number=1, persons=3))
+
     trip2 = Trip(name="Archived trip",
                  from_date=datetime.strptime("2019-06-06", "%Y-%m-%d"),
                  till_date=datetime.strptime("2019-06-08", "%Y-%m-%d"),
-                 attendees=1,
                  archived=True)
+    trip2.groups.append(Group(group_number=0, persons=1))
+
     trip3 = Trip(name="Admin trip",
                  from_date=datetime.strptime("2019-06-06", "%Y-%m-%d"),
-                 till_date=datetime.strptime("2019-06-08", "%Y-%m-%d"),
-                 attendees=1)
+                 till_date=datetime.strptime("2019-06-08", "%Y-%m-%d"))
+    trip3.groups.append(Group(group_number=1, persons=1))
 
     org.trips.append(trip1)
     org.trips.append(trip2)

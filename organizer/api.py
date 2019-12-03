@@ -119,11 +119,19 @@ def meals_add():
             mass = grams * mass
 
         meal_number = meals_map[meal_name]
-        session.add(MealRecord(trip_id=trip_id,
-                               product_id=found_product.id,
-                               day_number=day_number,
-                               meal_number=meal_number,
-                               mass=mass))
+        
+        existing_record: MealRecord = session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
+                                                                       MealRecord.product_id == found_product.id,
+                                                                       MealRecord.day_number == day_number,
+                                                                       MealRecord.meal_number == meal_number).first()
+        if existing_record:
+            existing_record.mass += mass
+        else:
+            session.add(MealRecord(trip_id=trip_id,
+                                   product_id=found_product.id,
+                                   day_number=day_number,
+                                   meal_number=meal_number,
+                                   mass=mass))
         session.commit()
 
         # update the last time trip was touched

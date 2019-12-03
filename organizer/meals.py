@@ -1,4 +1,5 @@
 import datetime
+import functools
 from typing import List
 
 from flask import Blueprint, render_template, get_template_attribute, abort, g
@@ -116,10 +117,19 @@ def days_view(trip_id):
                                    Product.carbs).join(Product).filter(MealRecord.trip_id == trip_id).all()
         trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
 
+        trip = {
+            'id': trip_info.id,
+            'name': trip_info.name,
+            'from_date': trip_info.from_date,
+            'till_date': trip_info.till_date,
+            'attendees': functools.reduce(lambda x, y: x+y, [group.persons for group in trip_info.groups])
+        }
+
     first_date = trip_info.from_date
     last_date = trip_info.till_date
     days = calculate_total_days_info(first_date, last_date, meals_info)
-    return render_template('meals/meals.html', trip=trip_info, days=days)
+
+    return render_template('meals/meals.html', trip=trip, days=days)
 
 
 @bp.route('/<int:trip_id>/day_table/<int:day_number>')
@@ -130,7 +140,7 @@ def day_tables(trip_id, day_number):
         if not trip_info:
             abort(404)
 
-        if (trip_info.till_date - trip_info.from_date).days < day_number:
+        if (trip_info.till_date - trip_info.from_date).days + 1 < day_number:
             abort(404)
 
         meals_info = session.query(MealRecord.id,

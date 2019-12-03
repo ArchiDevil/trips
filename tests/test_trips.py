@@ -30,7 +30,7 @@ def test_trips_shows_all_trips_for_admin(admin_logged_client):
 
 def test_trips_shows_add_for_org(org_logged_client):
     response = org_logged_client.get('/')
-    assert b'Add a new' in response.data
+    assert b'Create new trip' in response.data
 
 
 def test_trips_add_rejects_not_logged_in(client):
@@ -55,7 +55,8 @@ def test_trips_can_add_trip(org_logged_client):
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert response.status_code == 302
 
@@ -63,6 +64,7 @@ def test_trips_can_add_trip(org_logged_client):
     assert b'Test trip' in response.data
     assert b'10-09-19' in response.data
     assert b'12-09-19' in response.data
+    assert b'9 participants' in response.data
 
 
 def test_trips_add_rejects_wrong_name(org_logged_client):
@@ -70,13 +72,15 @@ def test_trips_add_rejects_wrong_name(org_logged_client):
                                       data={
                                           'name': '',
                                           'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert b'Incorrect name provided' in response.data
 
     response = org_logged_client.get('/')
     assert b'10-09-19' not in response.data
     assert b'12-09-19' not in response.data
+    assert b'9 participants' not in response.data
 
 
 def test_trips_add_rejects_wrong_dates_format(org_logged_client):
@@ -84,7 +88,8 @@ def test_trips_add_rejects_wrong_dates_format(org_logged_client):
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 ! 2019-09-12',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert b'Incorrect dates provided' in response.data
 
@@ -92,14 +97,16 @@ def test_trips_add_rejects_wrong_dates_format(org_logged_client):
     assert b'Test trip' not in response.data
     assert b'10-09-19' not in response.data
     assert b'12-09-19' not in response.data
+    assert b'9 participants' not in response.data
 
 
-def test_trips_add_rejects_wrong_dates_format(org_logged_client):
+def test_trips_add_rejects_wrong_dates_values(org_logged_client):
     response = org_logged_client.post('/trips/add',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-42 - 2019-09-56',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert b'Incorrect dates provided' in response.data
 
@@ -107,6 +114,7 @@ def test_trips_add_rejects_wrong_dates_format(org_logged_client):
     assert b'Test trip' not in response.data
     assert b'42-09-19' not in response.data
     assert b'56-09-19' not in response.data
+    assert b'9 participants' not in response.data
 
 
 def test_trips_add_rejects_swapped_dates(org_logged_client):
@@ -114,7 +122,8 @@ def test_trips_add_rejects_swapped_dates(org_logged_client):
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 - 2019-09-08',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert b'Incorrect dates provided' in response.data
 
@@ -122,16 +131,16 @@ def test_trips_add_rejects_swapped_dates(org_logged_client):
     assert b'Test trip' not in response.data
     assert b'10-09-19' not in response.data
     assert b'08-09-19' not in response.data
+    assert b'9 participants' not in response.data
 
 
-def test_trips_add_rejects_empty_attendees(org_logged_client):
+def test_trips_add_rejects_empty_groups(org_logged_client):
     response = org_logged_client.post('/trips/add',
                                       data={
                                           'name': 'Test trip',
-                                          'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': ''
+                                          'daterange': '2019-09-10 - 2019-09-12'
                                       })
-    assert b'Incorrect attendees count provided' in response.data
+    assert b'Incorrect groups provided' in response.data
 
     response = org_logged_client.get('/')
     assert b'Test trip' not in response.data
@@ -139,14 +148,15 @@ def test_trips_add_rejects_empty_attendees(org_logged_client):
     assert b'12-09-19' not in response.data
 
 
-def test_trips_add_rejects_negative_attendees(org_logged_client):
+def test_trips_add_rejects_zeroes_group_values(org_logged_client):
     response = org_logged_client.post('/trips/add',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': '-4'
+                                          'group1': '3',
+                                          'group2': '0'
                                       })
-    assert b'Incorrect attendees count provided' in response.data
+    assert b'Incorrect groups provided' in response.data
 
     response = org_logged_client.get('/')
     assert b'Test trip' not in response.data
@@ -154,14 +164,31 @@ def test_trips_add_rejects_negative_attendees(org_logged_client):
     assert b'12-09-19' not in response.data
 
 
-def test_trips_add_rejects_nan_attendees(org_logged_client):
+def test_trips_add_rejects_negative_group_values(org_logged_client):
     response = org_logged_client.post('/trips/add',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': 'nan'
+                                          'group1': '3',
+                                          'group2': '-6'
                                       })
-    assert b'Incorrect attendees count provided' in response.data
+    assert b'Incorrect groups provided' in response.data
+
+    response = org_logged_client.get('/')
+    assert b'Test trip' not in response.data
+    assert b'10-09-19' not in response.data
+    assert b'12-09-19' not in response.data
+
+
+def test_trips_add_rejects_nan_group_values(org_logged_client):
+    response = org_logged_client.post('/trips/add',
+                                      data={
+                                          'name': 'Test trip',
+                                          'daterange': '2019-09-10 - 2019-09-12',
+                                          'group1': 'nan',
+                                          'group2': '4'
+                                      })
+    assert b'Incorrect groups provided' in response.data
 
     response = org_logged_client.get('/')
     assert b'Test trip' not in response.data
@@ -197,7 +224,8 @@ def test_trips_can_edit_trip(org_logged_client):
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert response.status_code == 302
 
@@ -208,6 +236,8 @@ def test_trips_can_edit_trip(org_logged_client):
     assert b'01-01-19' not in response.data
     assert b'12-09-19' in response.data
     assert b'05-01-19' not in response.data
+    assert b'9 participants' in response.data
+    assert b'5 participants' not in response.data
 
 
 def test_trips_edit_rejects_wrong_name(org_logged_client):
@@ -215,7 +245,8 @@ def test_trips_edit_rejects_wrong_name(org_logged_client):
                                       data={
                                           'name': '',
                                           'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert b'Incorrect name provided' in response.data
 
@@ -223,6 +254,7 @@ def test_trips_edit_rejects_wrong_name(org_logged_client):
     assert b'Taganay' in response.data
     assert b'10-09-19' not in response.data
     assert b'12-09-19' not in response.data
+    assert b'5 participants' in response.data
 
 
 def test_trips_edit_rejects_wrong_dates_format(org_logged_client):
@@ -230,7 +262,8 @@ def test_trips_edit_rejects_wrong_dates_format(org_logged_client):
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 ! 2019-09-12',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert b'Incorrect dates provided' in response.data
 
@@ -238,14 +271,16 @@ def test_trips_edit_rejects_wrong_dates_format(org_logged_client):
     assert b'Test trip' not in response.data
     assert b'10-09-19' not in response.data
     assert b'12-09-19' not in response.data
+    assert b'5 participants' in response.data
 
 
-def test_trips_edit_rejects_wrong_dates_format(org_logged_client):
+def test_trips_edit_rejects_wrong_dates_values(org_logged_client):
     response = org_logged_client.post('/trips/edit/1',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-42 - 2019-09-56',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert b'Incorrect dates provided' in response.data
 
@@ -253,6 +288,7 @@ def test_trips_edit_rejects_wrong_dates_format(org_logged_client):
     assert b'Test trip' not in response.data
     assert b'42-09-19' not in response.data
     assert b'56-09-19' not in response.data
+    assert b'5 participants' in response.data
 
 
 def test_trips_edit_rejects_swapped_dates(org_logged_client):
@@ -260,7 +296,8 @@ def test_trips_edit_rejects_swapped_dates(org_logged_client):
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 - 2019-09-08',
-                                          'attendees': '3'
+                                          'group1': '3',
+                                          'group2': '6'
                                       })
     assert b'Incorrect dates provided' in response.data
 
@@ -268,51 +305,73 @@ def test_trips_edit_rejects_swapped_dates(org_logged_client):
     assert b'Test trip' not in response.data
     assert b'10-09-19' not in response.data
     assert b'08-09-19' not in response.data
+    assert b'5 participants' in response.data
 
 
-def test_trips_edit_rejects_empty_attendees(org_logged_client):
+def test_trips_edit_rejects_empty_groups(org_logged_client):
     response = org_logged_client.post('/trips/edit/1',
                                       data={
                                           'name': 'Test trip',
-                                          'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': ''
+                                          'daterange': '2019-09-10 - 2019-09-12'
                                       })
-    assert b'Incorrect attendees count provided' in response.data
+    assert b'Incorrect groups provided' in response.data
 
     response = org_logged_client.get('/')
     assert b'Test trip' not in response.data
     assert b'10-09-19' not in response.data
     assert b'12-09-19' not in response.data
+    assert b'5 participants' in response.data
 
 
-def test_trips_edit_rejects_negative_attendees(org_logged_client):
+def test_trips_edit_rejects_zeroes_group_values(org_logged_client):
     response = org_logged_client.post('/trips/edit/1',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': '-4'
+                                          'group1': '3',
+                                          'group2': '0'
                                       })
-    assert b'Incorrect attendees count provided' in response.data
+    assert b'Incorrect groups provided' in response.data
 
     response = org_logged_client.get('/')
     assert b'Test trip' not in response.data
     assert b'10-09-19' not in response.data
     assert b'12-09-19' not in response.data
+    assert b'5 participants' in response.data
 
 
-def test_trips_edit_rejects_nan_attendees(org_logged_client):
+def test_trips_edit_rejects_negative_group_values(org_logged_client):
     response = org_logged_client.post('/trips/edit/1',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '2019-09-10 - 2019-09-12',
-                                          'attendees': 'nan'
+                                          'group1': '3',
+                                          'group2': '-6'
                                       })
-    assert b'Incorrect attendees count provided' in response.data
+    assert b'Incorrect groups provided' in response.data
 
     response = org_logged_client.get('/')
     assert b'Test trip' not in response.data
     assert b'10-09-19' not in response.data
     assert b'12-09-19' not in response.data
+    assert b'5 participants' in response.data
+
+
+def test_trips_edit_rejects_nan_group_values(org_logged_client):
+    response = org_logged_client.post('/trips/edit/1',
+                                      data={
+                                          'name': 'Test trip',
+                                          'daterange': '2019-09-10 - 2019-09-12',
+                                          'group1': 'nan',
+                                          'group2': '4'
+                                      })
+    assert b'Incorrect groups provided' in response.data
+
+    response = org_logged_client.get('/')
+    assert b'Test trip' not in response.data
+    assert b'10-09-19' not in response.data
+    assert b'12-09-19' not in response.data
+    assert b'5 participants' in response.data
 
 
 def test_trips_archive_rejects_not_logged_in(client):

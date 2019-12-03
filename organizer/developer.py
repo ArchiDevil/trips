@@ -20,5 +20,6 @@ def execute_sql():
 
     with get_session() as session:
         session.execute(sql_code)
+        session.commit()
 
     return redirect(url_for('developer.console'))

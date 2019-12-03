@@ -24,8 +24,8 @@
         <div class="col-auto d-none d-lg-block">
             <div class="card shadow" style="width: 18rem;">
                 <img src="{{ url_for('static', filename='food.jpg') }}" class="card-img-top" alt="...">
+                <h5 class="card-header">Want to edit food?</h5>
                 <div class="card-body">
-                    <h5 class="card-title">Want to edit food?</h5>
                     <p class="card-text">If you cannot find something in this database, just add any product you want.
                         Be ready to fill up information about nutrition.</p>
                     <button type="button"
@@ -51,14 +51,15 @@
             {% endfor %}
             {% endif %}
             {% endwith %}
-            <form method="POST" action="{{ url_for('products.search') }}">
+
+            <form method="GET" action="{{ url_for('products.index') }}">
                 <div class="input-group mb-3">
                     <input type="text"
                            class="form-control"
                            placeholder="Search for a product"
                            aria-label="Search for a product"
                            aria-describedby="button-addon2"
-                           name="request"
+                           name="search"
                            id="input-search">
                     <div class="input-group-append">
                         <button class="btn btn-outline-success" id="button-addon2" type="submit">Search</button>
@@ -66,7 +67,7 @@
                 </div>
             </form>
 
-            {% if filtered %}
+            {% if search %}
             <p class="text-success">
                 Table is filtered with search result.
                 <a href="{{ url_for('products.index') }}">Get back?</a>
@@ -77,11 +78,14 @@
                 <thead class="thead-light">
                     <tr>
                         <th scope="col" style="width: 8%">#</th>
-                        <th scope="col" style="width: 60%">Name</th>
-                        <th scope="col" style="width: 8%">Cals</th>
-                        <th class="d-none d-sm-table-cell" scope="col" style="width: 8%">P</th>
-                        <th class="d-none d-sm-table-cell" scope="col" style="width: 8%">F</th>
-                        <th class="d-none d-sm-table-cell" scope="col" style="width: 8%">C</th>
+                        <th scope="col" style="width: 54%">Name</th>
+                        <th class="text-right" scope="col" style="width: 8%">Cals</th>
+                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">P</th>
+                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">F</th>
+                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">C</th>
+                        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
+                        <th class="text-right" scope="col" style="width: 6%">A</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -91,7 +95,7 @@
                         <td>
                             <span>{{ product['name'] }}</span>
                             {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-                            <span class="text-right float-right mx-1 showme">
+                            <span class="text-right float-right mx-1 showme mx-3">
                                 <a data-toggle="modal"
                                    data-target="#edit-modal"
                                    data-name="{{ product['name'] }}"
@@ -103,28 +107,48 @@
                                    data-link="{{ url_for('products.edit', product_id=product['id']) }}"
                                    data-bname="Edit"
                                    href="javascript:void(0);">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="fas fa-edit" title="Edit"></i>
                                 </a>
                             </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">{{ "{:.1f}".format(product['calories']) }}</td>
+                        <td class="text-right d-none d-sm-table-cell">{{ "{:.1f}".format(product['proteins']) }}</td>
+                        <td class="text-right d-none d-sm-table-cell">{{ "{:.1f}".format(product['fats']) }}</td>
+                        <td class="text-right d-none d-sm-table-cell">{{ "{:.1f}".format(product['carbs']) }}</td>
+                        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
+                        <td>
                             <span class="text-right float-right mx-1 showme">
                                 <a data-toggle="modal"
                                    data-target="#archive-modal"
                                    data-archive="{{ url_for('products.archive', product_id=product['id']) }}"
                                    href="javascript:void(0);"
                                    alt="Archive">
-                                    <i class="text-danger fas fa-archive"></i>
+                                    <i class="text-danger fas fa-archive" title="Archive"></i>
                                 </a>
                             </span>
-                            {% endif %}
                         </td>
-                        <td>{{ product['calories'] }}</td>
-                        <td class="d-none d-sm-table-cell">{{ product['proteins'] }}</td>
-                        <td class="d-none d-sm-table-cell">{{ product['fats'] }}</td>
-                        <td class="d-none d-sm-table-cell">{{ product['carbs'] }}</td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+            <nav>
+                <ul class="pagination">
+                    {% if page == 0 %}
+                    <li class="page-item disabled"><a class="page-link">Previous</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('products.index', page=page - 1, search=search) }}">Previous</a></li>
+                    {% endif %}
+
+                    {% if page == last_page %}
+                    <li class="page-item disabled"><a class="page-link">Next</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('products.index', page=page + 1, search=search) }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
     </div>
 
@@ -146,7 +170,7 @@
                                 <input type="text" class="form-control" name="name" id="add-name-input"
                                     placeholder="Product name" v-model="productName"
                                     v-bind:class="{ 'is-valid': validation.name, 'is-invalid': !validation.name }"
-                                    autocomplete="off">
+                                    autocomplete="off" tabindex="1">
                                 <div class="invalid-feedback">Field must not be empty</div>
                             </div>
                         </div>
@@ -162,7 +186,8 @@
                                            autocomplete="off"
                                            v-model="calories"
                                            v-bind:class="{ 'is-valid': validation.cals, 'is-invalid': !validation.cals }"
-                                           v-bind:readonly="caloriesLock">
+                                           v-bind:readonly="caloriesLock"
+                                           tabindex="2">
                                     <div class="input-group-append">
                                         <button class="btn btn-outline-secondary"
                                                 type="button"
@@ -170,7 +195,8 @@
                                                 data-toggle="button"
                                                 autocomplete="off"
                                                 aria-pressed="false"
-                                                v-on:click="lockCalories">
+                                                v-on:click="lockCalories"
+                                                tabindex="3">
                                             Lock
                                         </button>
                                     </div>
@@ -181,27 +207,27 @@
                         <div class="form-group row">
                             <label for="add-proteins-input" class="col-sm-2 col-form-label">Proteins</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="proteins" id="add-proteins-input" v-model="proteins"
-                                v-bind:class="{ 'is-valid': validation.proteins, 'is-invalid': !validation.proteins }"
-                                autocomplete="off">
+                                <input type="text" class="form-control" name="proteins" id="add-proteins-input"
+                                       v-model="proteins" v-bind:class="{ 'is-valid': validation.proteins, 'is-invalid': !validation.proteins }"
+                                       autocomplete="off" tabindex="4">
                                 <div class="invalid-feedback">Please enter the correct number</div>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="add-fats-input" class="col-sm-2 col-form-label">Fats</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="fats" id="add-fats-input" v-model="fats"
-                                v-bind:class="{ 'is-valid': validation.fats, 'is-invalid': !validation.fats }"
-                                autocomplete="off">
+                                <input type="text" class="form-control" name="fats" id="add-fats-input"
+                                       v-model="fats" v-bind:class="{ 'is-valid': validation.fats, 'is-invalid': !validation.fats }"
+                                       autocomplete="off" tabindex="5">
                                 <div class="invalid-feedback">Please enter the correct number</div>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="add-carbs-input" class="col-sm-2 col-form-label">Carbs</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="carbs" id="add-carbs-input" v-model="carbs"
-                                v-bind:class="{ 'is-valid': validation.carbs, 'is-invalid': !validation.carbs }"
-                                autocomplete="off">
+                                <input type="text" class="form-control" name="carbs" id="add-carbs-input"
+                                       v-model="carbs" v-bind:class="{ 'is-valid': validation.carbs, 'is-invalid': !validation.carbs }"
+                                       autocomplete="off" tabindex="6">
                                 <div class="invalid-feedback">Please enter the correct number</div>
                             </div>
                         </div>
@@ -217,7 +243,7 @@
                             <div class="col-sm-2 col-form-label"></div>
                             <div class="col-sm-10 custom-control custom-checkbox my-1">
                                 <div class="form-check pl-3">
-                                    <input type="checkbox" class="custom-control-input align-middle" id="add-custom-weight" v-model="custom">
+                                    <input type="checkbox" class="custom-control-input align-middle" id="add-custom-weight" v-model="custom" tabindex="7">
                                     <label class="custom-control-label align-middle" for="add-custom-weight">Use pieces instead of grams</label>
                                 </div>
                             </div>
@@ -229,17 +255,17 @@
                         <div class="form-group row" v-if="custom">
                             <label for="add-gpp-input" class="col-sm-2 col-form-label">Mass</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="grams" id="add-gpp-input" v-model="grams"
-                                v-bind:class="{ 'is-valid': validation.grams, 'is-invalid': !validation.grams }"
-                                autocomplete="off">
+                                <input type="text" class="form-control" name="grams" id="add-gpp-input"
+                                       v-model="grams" v-bind:class="{ 'is-valid': validation.grams, 'is-invalid': !validation.grams }"
+                                       autocomplete="off" tabindex="8">
                                 <div class="invalid-feedback">Please enter the number greater than 0.1</div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-secondary" data-dismiss="modal" type="button" tabindex="10">Close</button>
                         <button class="btn btn-primary" type="submit"
-                                v-bind:disabled="!formValid">
+                                v-bind:disabled="!formValid" tabindex="9">
                             {{buttonName}}
                         </button>
                     </div>
@@ -270,9 +296,9 @@
     {% endif %}
 </div>
 
-<!-- development version, includes helpful console warnings -->
 <!-- should be included before products.js -->
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- production version, optimized for size and speed -->
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 <script type="application/javascript" src="{{ url_for('static', filename='products.js') }}"></script>
 
 {% endblock %}

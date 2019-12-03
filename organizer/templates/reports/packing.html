@@ -8,71 +8,81 @@
         <div class="col-2 d-flex align-items-end">
             <div class="dropdown my-2">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="columns-count-dropdown-button"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Select days per row
                 </button>
                 <div class="dropdown-menu" aria-labelledby="columns-count-dropdown-button">
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=1) }}">1xN</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=2) }}">2xN</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=3) }}">3xN</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=4) }}">4xN</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=5) }}">5xN</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=6) }}">6xN</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=1) }}">1 columns</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=2) }}">2 columns</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=3) }}">3 columns</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=4) }}">4 columns</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=5) }}">5 columns</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=6) }}">6 columns</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- <div class="container">
-    <div class="row">
-        <div class="col-12">
-            <h1>Current breakpoint is:
-                <span class="d-inline d-sm-none">XS</span>
-                <span class="d-none d-sm-inline d-md-none">SM</span>
-                <span class="d-none d-md-inline d-lg-none">MD</span>
-                <span class="d-none d-lg-inline d-xl-none">LG</span>
-                <span class="d-none d-xl-inline">XL</span>
-            </h1>
-        </div>
-    </div>
-</div> -->
-
 <div class="container-fluid">
     <div class="row">
         {% for day in products.keys(): %}
-        <div class="col-sm col-xs-12">
+        <div class="col-sm col-xs-12 p-1">
             <h5>Day {{ loop.index }}</h5>
             <table class="table table-sm">
                 <thead>
+                    <th class="d-none d-print-table-cell">T</th>
                     <th>Name</th>
-                    <th>Total</th>
+                    {% for person_group in person_groups: %}
+                    <th class="text-right">{{ person_group }}p</th>
+                    {% endfor %}
                 </thead>
                 <tbody>
                     {% for product in products[day] %}
-                    {% if product['meal_number'] == 0 %}
-                    <tr class="table-success">
-                    {% endif %}
-                    {% if product['meal_number'] == 1 %}
-                    <tr class="table-warning">
-                    {% endif %}
-                    {% if product['meal_number'] == 2 %}
-                    <tr class="table-info">
-                    {% endif %}
-                    {% if product['meal_number'] == 3 %}
-                    <tr class="table-secondary">
-                    {% endif %}
-                        <td>{{ product['name'] }}</td>
-                        <td>{{ product['mass'] }}</td>
-                    </tr>
+                        {% if product['meal_number'] == 0 %}
+                        <tr class="table-success">
+                        {% endif %}
+                        {% if product['meal_number'] == 1 %}
+                        <tr class="table-warning">
+                        {% endif %}
+                        {% if product['meal_number'] == 2 %}
+                        <tr class="table-info">
+                        {% endif %}
+                        {% if product['meal_number'] == 3 %}
+                        <tr class="table-secondary">
+                        {% endif %}
+                            <td class="d-none d-print-table-cell">
+                                {% if product['meal_number'] == 0 %}
+                                <i class="fas fa-carrot"></i>
+                                {% elif product['meal_number'] == 1 %}
+                                <i class="fas fa-fish"></i>
+                                {% elif product['meal_number'] == 2 %}
+                                <i class="fas fa-pizza-slice"></i>
+                                {% elif product['meal_number'] == 3 %}
+                                <i class="fas fa-candy-cane"></i>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ product['name'] }}</td>
+
+                            {% for person_group in person_groups: %}
+                            <td class="text-right">
+                                {% if 'grams' in product %}
+                                {{ (product['mass'][loop.index - 1] / product['grams'])|round(method='ceil')|int }} pcs
+                                {% else %}
+                                {{ product['mass'][loop.index - 1] }} g
+                                {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
         {% if loop.index is divisibleby columns_count %}
-        </div>
-        <div class="row">
+    </div>
+    <div class="row">
         {% endif %}
 
         {% endfor %}

@@ -28,12 +28,6 @@
 </script>
 
 <div class="container">
-    <div class="row my-3">
-        <div class="col">
-            <h1 class="display-4">{{ form_caption }}</h1>
-        </div>
-    </div>
-
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     <div class="row my-3">
@@ -47,8 +41,11 @@
     {% endwith %}
 
     <div class="row my-3">
-        <div class="col">
-            <form class="p-4 border shadow bg-white" id="input-form" action="{{ url_for('users.add') }}" method="POST">
+        <div class="col"></div>
+        <div class="col-md-6">
+            <form class="p-4 m-3 border shadow bg-white" id="input-form" action="{{ url_for('users.add') }}" method="POST">
+                <h2 class="text-center my-3">{{ form_caption }}</h2>
+
                 <div class="form-group">
                     <label for="input-name">User login</label>
                     <input type="text" class="form-control" id="input-name" name="login" placeholder="Login" autofocus
@@ -58,7 +55,7 @@
                 {% if not user %}
                 <div class="form-group">
                     <label for="input-password">User password</label>
-                    <input class="form-control" type="password" id="input-password" name="password"/>
+                    <input class="form-control" type="password" id="input-password" placeholder="Password" name="password"/>
                 </div>
                 {% endif %}
 
@@ -75,6 +72,7 @@
                 <a class="btn btn-secondary" href="{{ url_for('users.index') }}">Close</a>
             </form>
         </div>
+        <div class="col"></div>
     </div>
 </div>
 

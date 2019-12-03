@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://browser.sentry-cdn.com/5.9.1/bundle.min.js"
+        integrity="sha384-/x1aHz0nKRd6zVUazsV6CbQvjJvr6zQL2CHbQZf3yoLkezyEtZUpqUNnOLW9Nt3v"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    {% if sentry_event_id %}
+    <script>
+        Sentry.init({ dsn: 'https://a198fb0c66fb462c9391e0352f4499f0@sentry.io/1842107' });
+        Sentry.showReportDialog({
+            eventId: '{{ sentry_event_id }}',
+            title: 'It looks like we’re having issues.',
+            subtitle: 'Our team has been notified.',
+            subtitle2: 'If you’d like to help, tell us what happened below.',
+            labelName: 'Name',
+            labelEmail: 'Email',
+            labelComments: 'What happened?',
+            labelClose: 'Close',
+            labelSubmit: 'Submit',
+            errorGeneric: 'Some error happened during submission. Please, try again.',
+            errorFormEntry: 'Some fields were invalid. Please correct the errors and try again.',
+            successMessage: 'Your feedback has been sent. Thank you!',
+        })
+    </script>
+    {% endif %}
+
+    <h1>Internal error happened on the server. Sorry for the error. We are trying our best to fix it.</h1>
+</body>
+
+</html>

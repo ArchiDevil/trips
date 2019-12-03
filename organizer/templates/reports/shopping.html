@@ -1,11 +1,13 @@
 {% extends 'base.html' %} {% block content %}
 
 <div class="container">
-    <h1 class="display-4 my-3 d-print-none">{{ trip['name'] }} - shopping report</h1>
-</div>
+    <div class="row my-3 d-print-none">
+        <div class="col">
+            <h1 class="display-4">{{ trip['name'] }} - shopping report</h1>
+        </div>
+    </div>
 
-<div class="container">
-    <div class="row">
+    <div class="row my-3">
         <div class="col col-auto d-none d-lg-block d-print-none">
             <div class="card shadow" style="width: 18rem;">
                 <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="">
@@ -23,7 +25,7 @@
                 <thead class="thead-light">
                     <th style="width: 3%;" class="d-print-none">#</th>
                     <th style="width: 30%;">Name</th>
-                    <th style="width: 15%;">Mass</th>
+                    <th class="text-right" style="width: 15%;">Mass</th>
                     <th class="d-none d-print-table-cell">Notes</th>
                 </thead>
                 <tbody>
@@ -31,7 +33,7 @@
                     <tr>
                         <th scope="row" class="d-print-none">{{ product['id'] }}</th>
                         <td>{{ product['name'] }}</td>
-                        <td>{{ product['mass'] }} g{% if 'pieces' in product.keys() %}
+                        <td class="text-right">{{ product['mass'] }} g{% if 'pieces' in product.keys() %}
                             ({{ "{:.1f}".format(product['pieces']) }}
                             pcs){% endif %}</td>
                         <td class="d-none d-print-table-cell"></td>
