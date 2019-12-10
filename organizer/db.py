@@ -7,7 +7,9 @@ import click
 from flask import current_app, g
 from flask.cli import with_appcontext
 
-from organizer.schema import init_schema as init_schema_internal, BASE
+from werkzeug.security import generate_password_hash
+
+from organizer.schema import init_schema as init_schema_internal, BASE, User, AccessGroup
 from organizer.fake_data import init_fake_data_internal
 
 
@@ -49,6 +51,15 @@ def init_fake_data():
         init_fake_data_internal(session)
 
 
+def create_admin(login, password):
+    with get_session() as session:
+        pass_hash = generate_password_hash(password)
+        admin: User = User(login=login, password=pass_hash,
+                           access_group=AccessGroup.Administrator)
+        session.add(admin)
+        session.commit()
+
+
 @click.command('init-empty-db')
 @with_appcontext
 def init_empty_db_command():
@@ -68,7 +79,19 @@ def init_fake_data_command():
     click.echo('Tables filled with fake data')
 
 
+@click.command('create-admin')
+@click.argument('login')
+@click.argument('password')
+@with_appcontext
+def create_admin_command(login, password):
+    """Create a new administrator with the provided login and password"""
+    init_connection()
+    create_admin(login, password)
+    click.echo('Successfully created admin "{}"'.format(login))
+
+
 def init_app(app):
     app.teardown_appcontext(close_connection)
     app.cli.add_command(init_empty_db_command)
     app.cli.add_command(init_fake_data_command)
+    app.cli.add_command(create_admin_command)

@@ -1,3 +1,5 @@
+from organizer.strings import STRING_TABLE
+
 def test_index_page_rejects_not_logged_in(client):
     result = client.get('/products/')
     assert 'auth/login' in result.location
@@ -10,7 +12,6 @@ def test_index_page_shows_products(user_logged_client):
     assert b'Multigrain cereal' in result.data
     assert b'Mango' in result.data
     assert b'Cream cheese' in result.data
-    assert b'Next' in result.data
 
 
 def test_index_page_does_not_show_archived(user_logged_client):
@@ -20,7 +21,7 @@ def test_index_page_does_not_show_archived(user_logged_client):
 
 def test_index_page_is_not_filtered(user_logged_client):
     result = user_logged_client.get('/products/')
-    assert b'is filtered with search result' not in result.data
+    assert STRING_TABLE['Products search notification'].encode() not in result.data
 
 
 def test_index_page_change_pages(user_logged_client):
@@ -41,6 +42,33 @@ def test_index_page_change_pages(user_logged_client):
     assert b'Sausage' in result.data
     assert b'Chocolate' in result.data
     assert b'Step snack' in result.data
+
+
+def test_index_page_searches(user_logged_client):
+    result = user_logged_client.get('/products/?search=jerk')
+    assert result.status_code == 200
+    assert STRING_TABLE['Products search notification'].encode() in result.data
+    assert b'jerk' in result.data
+    assert b'Mango' not in result.data
+
+
+def test_index_is_sql_injection_resistant(user_logged_client):
+    result = user_logged_client.get('/products/?search="%;DROP TABLE products;"')
+    assert result.status_code == 200
+    assert STRING_TABLE['Products search notification'].encode() in result.data
+    assert b'Mango' not in result.data
+
+
+def test_index_page_change_pages_while_seaching(user_logged_client):
+    result = user_logged_client.get('/products/?search=Mango&page=0')
+    assert result.status_code == 200
+    assert b'>Mango<' in result.data
+    assert b'>Cream cheese<' not in result.data
+
+    result = user_logged_client.get('/products/?search=Mango&page=1')
+    assert result.status_code == 200
+    assert b'>Mango<' not in result.data
+    assert b'>Cream cheese<' not in result.data
 
 
 def test_add_page_rejects_not_logged_in(client):
@@ -106,6 +134,8 @@ def test_add_page_adds_product_with_grams(org_logged_client):
                                         'carbs': '1.1',
                                         'grams': '14.4'
                                     })
+    assert result.status_code == 302
+
     # TODO: there is no way to understand was it added or not
     result = org_logged_client.get('/products/?search=product')
     assert b'Test product' in result.data
@@ -113,6 +143,21 @@ def test_add_page_adds_product_with_grams(org_logged_client):
     assert b'4.0' in result.data
     assert b'5.1' in result.data
     assert b'1.1' in result.data
+
+
+def test_add_page_redirects_after_adding(org_logged_client):
+    result = org_logged_client.post('/products/add',
+                                    headers=[('Referer', '/chaoticgods')],
+                                    data={
+                                        'name': 'Test product',
+                                        'calories': '21.2',
+                                        'proteins': '4.0',
+                                        'fats': '5.1',
+                                        'carbs': '1.1',
+                                        'grams': '14.4'
+                                    })
+    assert result.status_code == 302
+    assert '/chaoticgods' in result.location
 
 
 def test_add_page_reacts_to_incorrect_name(org_logged_client):
@@ -125,7 +170,7 @@ def test_add_page_reacts_to_incorrect_name(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect name' in result.data
+    assert STRING_TABLE['Products error incorrect name'].encode() in result.data
     assert b'21.8' not in result.data
     assert b'4.9' not in result.data
     assert b'5.6' not in result.data
@@ -142,7 +187,7 @@ def test_add_page_reacts_to_negative_cals(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect calories' in result.data
+    assert STRING_TABLE['Products error incorrect calories'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'4.9' not in result.data
     assert b'5.6' not in result.data
@@ -159,7 +204,7 @@ def test_add_page_reacts_to_nan_cals(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect calories' in result.data
+    assert STRING_TABLE['Products error incorrect calories'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'4.9' not in result.data
     assert b'5.6' not in result.data
@@ -176,7 +221,7 @@ def test_add_page_reacts_to_negative_proteins(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect proteins' in result.data
+    assert STRING_TABLE['Products error incorrect proteins'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'120.0' not in result.data
     assert b'5.6' not in result.data
@@ -193,7 +238,7 @@ def test_add_page_reacts_to_nan_proteins(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect proteins' in result.data
+    assert STRING_TABLE['Products error incorrect proteins'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'120.0' not in result.data
     assert b'5.6' not in result.data
@@ -210,7 +255,7 @@ def test_add_page_reacts_to_much_proteins(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect proteins' in result.data
+    assert STRING_TABLE['Products error incorrect proteins'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'101.4' not in result.data
     assert b'120.0' not in result.data
@@ -228,7 +273,7 @@ def test_add_page_reacts_to_negative_fats(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect fats' in result.data
+    assert STRING_TABLE['Products error incorrect fats'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'120.0' not in result.data
     assert b'5.6' not in result.data
@@ -245,7 +290,7 @@ def test_add_page_reacts_to_nan_fats(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect fats' in result.data
+    assert STRING_TABLE['Products error incorrect fats'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'120.0' not in result.data
     assert b'5.6' not in result.data
@@ -262,7 +307,7 @@ def test_add_page_reacts_to_much_fats(org_logged_client):
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect fats' in result.data
+    assert STRING_TABLE['Products error incorrect fats'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'101.4' not in result.data
     assert b'120.0' not in result.data
@@ -280,7 +325,7 @@ def test_add_page_reacts_to_negative_carbs(org_logged_client):
                                         'carbs': '-10.0'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect carbohydrates' in result.data
+    assert STRING_TABLE['Products error incorrect carbs'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'120.0' not in result.data
     assert b'5.6' not in result.data
@@ -297,7 +342,7 @@ def test_add_page_reacts_to_nan_carbs(org_logged_client):
                                         'carbs': 'nan'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect carbohydrates' in result.data
+    assert STRING_TABLE['Products error incorrect carbs'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'120.0' not in result.data
     assert b'5.6' not in result.data
@@ -314,7 +359,7 @@ def test_add_page_reacts_to_much_carbs(org_logged_client):
                                         'carbs': '101.4'
                                     })
     result = org_logged_client.get('/products/')
-    assert b'Incorrect carbohydrates' in result.data
+    assert STRING_TABLE['Products error incorrect carbs'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'101.4' not in result.data
     assert b'120.0' not in result.data
@@ -334,7 +379,7 @@ def test_add_page_reacts_to_negative_grams(org_logged_client):
                                     })
     # TODO: there is no way to understand was it added or not
     result = org_logged_client.get('/products/')
-    assert b'Incorrect grams per piece' in result.data
+    assert STRING_TABLE['Products error incorrect grams'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'120.0' not in result.data
     assert b'19.9' not in result.data
@@ -354,7 +399,7 @@ def test_add_page_reacts_to_nan_grams(org_logged_client):
                                     })
     # TODO: there is no way to understand was it added or not
     result = org_logged_client.get('/products/')
-    assert b'Incorrect grams per piece' in result.data
+    assert STRING_TABLE['Products error incorrect grams'].encode() in result.data
     assert b'Test product' not in result.data
     assert b'120.0' not in result.data
     assert b'19.9' not in result.data
@@ -385,36 +430,20 @@ def test_archive_page_returns_404_for_non_existing_product(org_logged_client):
 
 
 def test_archive_page_archives_product(org_logged_client):
-    org_logged_client.get('/products/archive/2')
+    result = org_logged_client.get('/products/archive/2')
+    assert result.status_code == 302
+
     result = org_logged_client.get('/products/')
     assert b'Mango' not in result.data
 
 
-def test_index_page_searches(user_logged_client):
-    result = user_logged_client.get('/products/?search=jerk')
-    assert result.status_code == 200
-    assert b'is filtered with search result' in result.data
-    assert b'jerk' in result.data
+def test_archive_page_redirects_to_the_same_page(org_logged_client):
+    result = org_logged_client.get('/products/archive/2', headers=[('Referer', '/chaoticgods')])
+    assert result.status_code == 302
+    assert '/chaoticgods' in result.location
+
+    result = org_logged_client.get('/products/')
     assert b'Mango' not in result.data
-
-
-def test_index_is_sql_injection_resistant(user_logged_client):
-    result = user_logged_client.get('/products/?search="%;DROP TABLE products;"')
-    assert result.status_code == 200
-    assert b'is filtered with search result' in result.data
-    assert b'Mango' not in result.data
-
-
-def test_index_page_change_pages_while_seaching(user_logged_client):
-    result = user_logged_client.get('/products/?search=Mango&page=0')
-    assert result.status_code == 200
-    assert b'>Mango<' in result.data
-    assert b'>Cream cheese<' not in result.data
-
-    result = user_logged_client.get('/products/?search=Mango&page=1')
-    assert result.status_code == 200
-    assert b'>Mango<' not in result.data
-    assert b'>Cream cheese<' not in result.data
 
 
 def test_edit_rejects_not_logged_in(client):
@@ -494,6 +523,8 @@ def test_edit_page_edits_with_grams(org_logged_client):
                                         'carbs': '41.9',
                                         'grams': '250.0'
                                     })
+    assert result.status_code == 302
+
     result = org_logged_client.get('/products/')
     # TODO: there is no way to understand if grams were added or not :(
     assert b'Test product' in result.data
@@ -501,6 +532,21 @@ def test_edit_page_edits_with_grams(org_logged_client):
     assert b'16.6' in result.data
     assert b'71.9' in result.data
     assert b'41.9' in result.data
+
+
+def test_edit_page_redirects_after_editing(org_logged_client):
+    result = org_logged_client.post('/products/edit/1',
+                                    headers=[('Referer', '/chaoticgods')],
+                                    data={
+                                        'name': 'Test product',
+                                        'calories': '21.2',
+                                        'proteins': '4.0',
+                                        'fats': '5.1',
+                                        'carbs': '1.1',
+                                        'grams': '14.4'
+                                    })
+    assert result.status_code == 302
+    assert '/chaoticgods' in result.location
 
 
 def test_edit_page_reacts_to_incorrect_name(org_logged_client):

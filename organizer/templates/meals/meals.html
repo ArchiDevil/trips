@@ -1,11 +1,10 @@
 {% extends 'base.html' %} {% block content %}
 
-{% raw %}
 <div class="modal fade" id="add-product-modal" tabindex="-1" role="dialog" aria-labelledby="add-product-modal-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="add-product-modal-label">Add a product</h5>
+                <h5 class="modal-title" id="add-product-modal-label">{{ string_table['Meals add modal title'] }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -13,75 +12,116 @@
             <div class="modal-body">
                 <form id="add-meal-form" name="meal" novalidate>
                     <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Product:</label>
+                        <label class="col-sm-2 col-form-label">
+                            {{ string_table['Meals add modal product title'] }}
+                        </label>
                         <div class="input-group col-sm-10">
-                            <input type="text" class="form-control w-75" v-model="currentProductName" disabled>
-                            <div class="input-group-append w-25">
-                                <button tabindex="7" class="btn btn-outline-secondary w-100 text-truncate" type="button" v-on:click="clearProduct()">Clear product</button>
+                            <input type="text" class="form-control col-7 col-md-8" v-model="currentProductName" disabled>
+                            <div class="input-group-append col-5 col-md-4 px-0">
+                                <button tabindex="7" class="btn btn-outline-secondary w-100 text-truncate" type="button" v-on:click="clearProduct()">
+                                    {{ string_table['Meals add modal clear product button'] }}
+                                </button>
                             </div>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="mass-input" class="col-sm-2 col-form-label">Mass:</label>
+                        <label for="mass-input" class="col-sm-2 col-form-label">
+                            {{ string_table['Meals add modal mass title'] }}
+                        </label>
                         <div class="input-group col-sm-10">
-                            <input tabindex="2" class="form-control w-75" id="mass-input" name="mass" placeholder="Enter the mass" v-model="mass" autocomplete="off"/>
-                            <select tabindex="3" class="custom-select input-group-append w-25" v-model="unit">
-                                <option v-for="unit in units" v-bind:value="unit.name">{{unit.name}}</option>
+                            <input tabindex="2" class="form-control col-7 col-md-8" id="mass-input" name="mass"
+                                   placeholder="{{ string_table['Meals add modal mass placeholder'] }}"
+                                   v-model="mass"
+                                   autocomplete="off"
+                                   v-bind:class="{ 'is-valid': validation.mass, 'is-invalid': !validation.mass }"
+                                   @keyup="addMealKey"/>
+                            <select tabindex="3" class="custom-select input-group-append col-5 col-md-4 rounded-right"
+                                    v-model="unit">
+                                {% raw %}
+                                    <option v-for="unit in units" v-bind:value="unit.value">{{unit.name}}</option>
+                                {% endraw %}
                             </select>
+                            <div class="invalid-feedback">
+                                {{ string_table['Meals add modal invalid mass error'] }}
+                            </div>
+                        </div>
+                        <div class="input-group">
+
                         </div>
                     </div>
                 </form>
                 <div class="border-bottom"></div>
 
                 <div class="input-group my-3">
-                    <input tabindex="6" type="text" id="search-product-input" class="form-control" placeholder="Search for a product" v-on:input="searchProducts">
+                    <input tabindex="6"
+                           type="text"
+                           id="search-product-input"
+                           class="form-control"
+                           placeholder="{{ string_table['Meals add modal search placeholder'] }}"
+                           v-on:input="searchProducts">
                 </div>
                 <table class="table table-sm table-hover">
                     <thead>
                         <tr>
-                            <th style="width: 10%">#</th>
-                            <th>Name</th>
+                            <th style="width: 8%">{{ string_table['Meals add modal id title'] }}</th>
+                            <th>{{ string_table['Meals add modal name title'] }}</th>
                         </tr>
                     </thead>
                     <tbody id="found-products">
                         <tr v-for="product in products" v-on:click="setProduct(product.id, product.name)">
                             <th scope="row">
-                                {{ product.id }}
+                                {% raw %}
+                                    {{ product.id }}
+                                {% endraw %}
                             </th>
                             <td>
-                                <a tabindex="-1" v-on:click="setProduct(product.id, product.name)" href="javascript:void(0);">{{ product.name }}</a>
+                                <a tabindex="-1" v-on:click="setProduct(product.id, product.name)" href="javascript:void(0);">
+                                    {% raw %}
+                                        {{ product.name }}
+                                    {% endraw %}
+                                </a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div class="modal-footer">
-                <span id="error-message" class="align-middle text-danger mx-3" v-if="errorMessageVisible">{{errorMessage}}</span>
-                <button tabindex="5" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button tabindex="4" id="add-product-button" type="button" class="btn btn-primary" v-bind:disabled="submitDisabled" v-on:click="addMeal">
+                <span id="error-message" class="align-middle text-danger mx-3" v-if="errorMessageVisible">
+                    {% raw %}
+                        {{ errorMessage }}
+                    {% endraw %}
+                </span>
+                <button tabindex="5" type="button" class="btn btn-secondary col-3" data-dismiss="modal">
+                    {{ string_table['Meals add modal close button'] }}
+                </button>
+                <button tabindex="4" id="add-product-button" type="button" class="btn btn-primary col-3"
+                        v-bind:disabled="submitDisabled" @click="addMeal">
                     <span class="spinner-border spinner-border-sm" v-if="spinnerVisible" role="status"></span>
-                    Add
+                    {{ string_table['Meals add modal add button'] }}
                 </button>
             </div>
         </div>
     </div>
 </div>
-{% endraw %}
 
 <div class="modal fade" id="fatal-error-modal" tabindex="-1" role="dialog" aria-labelledby="fatal-error-modal-label" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="fatal-error-modal-label">Connection error</h5>
+                <h5 class="modal-title" id="fatal-error-modal-label">
+                    {{ string_table['Meals error modal title'] }}
+                </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                Connection to the server lost or there is internal error happened. You can reload the page.
+                {{ string_table['Meals error modal text'] }}
             </div>
             <div class="modal-footer">
-                <button id="reload-page-button" type="button" class="btn btn-primary">Reload</button>
+                <button id="reload-page-button" type="button" class="btn btn-primary">
+                    {{ string_table['Meals error modal reload button'] }}
+                </button>
             </div>
         </div>
     </div>
@@ -94,10 +134,10 @@
         </div>
 
         {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-        <div class="col d-flex flex-row-reverse align-items-end">
+        <div class="col-auto d-flex flex-row-reverse align-items-end">
             <a class="btn btn-primary mb-3 d-block d-lg-none"
                 href="{{ url_for('trips.edit', trip_id=trip['id']) }}">
-                Edit the trip
+                {{ string_table['Meals edit trip short button'] }}
             </a>
         </div>
         {% endif %}
@@ -106,23 +146,28 @@
     <div class="row my-3">
         <div class="col-auto d-none d-lg-block">
             <div class="card shadow" style="width: 18rem;">
-                <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="">
-                <h5 class="card-header">Trip information</h5>
+                <img src="{{ url_for('static', filename='img/trips/{}.png'.format(trip['magic'])) }}" class="card-img-top" alt="">
+                <h5 class="card-header">
+                    {{ string_table['Meals card header'] }}
+                </h5>
                 <div class="card-body">
                     <p class="card-text">
-                        <i class="fas fa-hourglass-start"></i>
-                        {{ trip['from_date'].strftime('%d-%m-%y') }} -
-                        <i class="fas fa-hourglass-end"></i>
-                        {{ trip['till_date'].strftime('%d-%m-%y') }}
+                        <i class="fas fa-calendar-day"></i> {{ trip['from_date'].strftime('%d/%m') }} - {{ trip['till_date'].strftime('%d/%m') }}
                     </p>
                     <p class="card-text">
-                        <i class="fas fa-walking"></i> {{ trip['attendees'] }} participants
+                        <i class="fas fa-walking"></i> {{ string_table['Meals card participants'] }}: {{ trip['attendees'] }} 
                     </p>
                     {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-                    <a class="btn btn-primary w-100 my-1" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">Edit the trip</a>
+                    <a class="btn btn-primary w-100 my-1" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">
+                        <i class="fas fa-pen"></i> {{ string_table['Meals card edit button'] }}
+                    </a>
                     {% endif %}
-                    <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.shopping', trip_id=trip['id']) }}">Shopping report</a>
-                    <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.packing', trip_id=trip['id']) }}">Packing report</a>
+                    <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.shopping', trip_id=trip['id']) }}">
+                        <i class="fas fa-shopping-cart"></i> {{ string_table['Meals card shopping report button'] }}
+                    </a>
+                    <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.packing', trip_id=trip['id']) }}">
+                        <i class="fas fa-hiking"></i> {{ string_table['Meals card packing report button'] }}
+                    </a>
                 </div>
             </div>
 
@@ -131,7 +176,7 @@
                     {% for day in days %}
                     <a class="btn btn-outline-secondary btn-block" href="#day{{day['number']}}">
                         <i class="fas fa-angle-double-right"></i>
-                        Day {{day['number']}}
+                        {{ string_table['Meals day number prefix'] }} {{day['number']}}
                     </a>
                     {% endfor %}
                 </div>
@@ -141,7 +186,7 @@
         <div class="col">
             {% import 'meals/meals_day.html' as meals_day %}
             {% for day in days %}
-            {{ meals_day.day(day_info=day) }}
+            {{ meals_day.day(day_info=day, string_table=string_table) }}
             {% endfor %}
         </div>
     </div>
@@ -151,32 +196,33 @@
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
 <script>
-    var defaults = {
-        currentProductId: 0,
-        currentProductName: '',
-        mass: 0,
-        unit: 'grams',
-        products: [],
-        units: [],
-        submitDisabled: true,
-        spinnerVisible: false,
-        errorMessageVisible: false,
-        errorMessage: ''
-    };
-
     vm = new Vue({
         el: '#add-product-modal',
         data: {
             currentProductId: 0,
             currentProductName: '',
-            mass: 0,
-            unit: 'grams',
+            mass: '',
+            unit: undefined,
             products: [],
             units: [],
-            submitDisabled: true,
             spinnerVisible: false,
-            errorMessageVisible: false,
             errorMessage: ''
+        },
+        computed: {
+            validation: function() {
+                return {
+                    mass: +this.mass > 0
+                }
+            },
+            errorMessageVisible: function() {
+                return this.errorMessage.length > 0
+            },
+            submitDisabled: function() {
+                return this.currentProductId === 0 ||
+                       this.validation.mass === false ||
+                       this.units.length === 0 ||
+                       this.spinnerVisible === true
+            }
         },
         methods: {
             setProduct: function(productId, productName) {
@@ -190,24 +236,26 @@
                         'id': this.currentProductId
                     },
                     success: function (msg) {
-                        console.log(msg);
                         if (msg.result == false) {
-                            vm.submitDisabled = false;
+                            vm.units = []
                             return;
                         }
 
                         vm.units = []
                         for (unit of msg.units) {
-                            vm.units.push({name: unit})
+                            var name = unit === 0 ? '{{ string_table["Meals grams unit"] }}' : '{{ string_table["Meals pcs unit"] }}'
+                            vm.units.push({
+                                name: name,
+                                value: unit
+                            })
                         }
-                        vm.submitDisabled = vm.currentProductName === '' ? true : false;
+                        vm.unit = 0;
                     }
                 })
             },
             clearProduct: function() {
                 this.currentProductId = 0;
                 this.currentProductName = '';
-                this.submitDisabled = true;
             },
             searchProducts: function(event) {
                 updateList($(event.target).val());
@@ -215,11 +263,10 @@
             addMeal: function(event) {
                 var day = $("#found-products").data("day");
                 var mealName = $("#found-products").data("mealtype");
-                if ($('#add-meal-form').valid() != true)
+                if (this.validation.mass === false)
                     return;
 
                 this.spinnerVisible = true;
-                this.submitDisabled = true;
 
                 $.ajax({
                     type: "POST",
@@ -234,52 +281,32 @@
                     },
                     success: function (msg) {
                         if (msg['result'] != true) {
-                            vm.submitDisabled = false;
-                            vm.errorMessageVisible = true;
-                            vm.errorMessage = 'Unable to add a meal';
+                            vm.errorMessage = '{{ string_table["Meals unable to add meal error"] }}';
                         }
                         else {
-                            vm.submitDisabled = true;
                             reloadDay(day);
                             vm.currentProductId = 0;
                             vm.currentProductName = '';
-                            vm.mass = 0;
-                            vm.unit = 'grams';
-                            vm.errorMessageVisible = false;
+                            vm.mass = '';
+                            vm.units = [];
+                            vm.unit = undefined;
+                            vm.errorMessage = '';
                         }
                         vm.spinnerVisible = false;
                     }
                 })
+            },
+            addMealKey: function(event) {
+                if (event.key !== "Enter")
+                    return;
+                this.addMeal(event);
+                event.preventDefault();
             }
         }
     })
 
     $(document).ready(function () {
         updateList('');
-
-        var validationRules = {
-            rules: {
-                mass: {
-                    required: true,
-                    number: true,
-                    min: 1
-                }
-            },
-            errorPlacement: function (error, element) {
-                errorLabelName = element.attr("id") + "_invalid";
-                var oldElement = $("#" + errorLabelName);
-                if (oldElement !== undefined) {
-                    oldElement.remove();
-                }
-                error.appendTo(element.parent());
-                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
-            },
-            errorClass: "is-invalid",
-            validClass: "is-valid",
-            errorElement: "div"
-        };
-
-        $("#add-meal-form").validate(validationRules);
     });
 
     $(document).on('show.bs.modal', '#add-product-modal', function (event) {
@@ -290,11 +317,11 @@
         modal.find("#found-products").data("day", day);
         modal.find("#found-products").data("mealtype", mealType);
 
-        vm.submitDisabled = true;
         vm.currentProductId = 0;
         vm.currentProductName = '';
-        vm.mass = 0;
-        vm.unit = 'grams';
+        vm.mass = '';
+        vm.units = []
+        vm.unit = undefined;
         vm.errorMessageVisible = false;
 
         setTimeout(() => {
@@ -362,8 +389,6 @@
                     'count': '10'
                 },
                 success: function (msg) {
-                    // trigger just to show things right from the beginning
-                    $('#add-meal-form').valid();
                     lastRequestHandle = undefined;
 
                     if (msg.result !== true)
@@ -376,6 +401,11 @@
                             name: product['name']
                         })
                     }
+                },
+                error: function () {
+                    $("#fatal-error-modal").modal({
+                        backdrop: 'static'
+                    });
                 }
             })
         }, 500)

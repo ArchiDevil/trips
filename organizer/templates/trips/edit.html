@@ -3,22 +3,45 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <script>
-    $("#trips-link").addClass("active");
-
     $(function () {
         $('input[name="daterange"]').daterangepicker({
-            opens: 'right',
             autoApply: true,
+            autoUpdateInput: true,
             locale: {
-                format: "YYYY-MM-DD"
+                format: "DD-MM-YYYY",
+                separator: " - ",
+                daysOfWeek: [
+                    "{{ string_table['Monday dp'] }}",
+                    "{{ string_table['Tuesday dp'] }}",
+                    "{{ string_table['Wednesday dp'] }}",
+                    "{{ string_table['Thursday dp'] }}",
+                    "{{ string_table['Friday dp'] }}",
+                    "{{ string_table['Saturday dp'] }}",
+                    "{{ string_table['Sunday dp'] }}"
+                ],
+                "monthNames": [
+                    "{{ string_table['January dp'] }}",
+                    "{{ string_table['February dp'] }}",
+                    "{{ string_table['March dp'] }}",
+                    "{{ string_table['April dp'] }}",
+                    "{{ string_table['May dp'] }}",
+                    "{{ string_table['June dp'] }}",
+                    "{{ string_table['July dp'] }}",
+                    "{{ string_table['August dp'] }}",
+                    "{{ string_table['September dp'] }}",
+                    "{{ string_table['October dp'] }}",
+                    "{{ string_table['November dp'] }}",
+                    "{{ string_table['December dp'] }}"
+                ],
+                "firstDay": 0
             }
         }, function (start, end, label) {
-            console.log(end.diff(start, 'days'));
+                vm.tripDates = start.format(this.locale.format) + this.locale.separator + end.format(this.locale.format)
         });
     });
 
     var initialName = "{{ trip['name'] if trip else '' }}"
-    var initialDates = "{{ trip['from_date'] if trip else '2019-01-01' }} - {{ trip['till_date'] if trip else '2019-01-01' }}"
+    var initialDates = "{{ trip['from_date'] if trip else today_date }} - {{ trip['till_date'] if trip else today_date }}"
     function getInitialGroups() {
         return [
             {% if groups: %} {% for group in groups: %}
@@ -26,64 +49,61 @@
             {% endfor %} {% endif %}
         ]
     }
-
 </script>
 
 <div id="edit-app" class="container">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
     <div class="row my-3">
         <div class="col"></div>
-        {% for message in messages %}
-        <div class="alert alert-danger" role="alert">
-            {{ message }}
-        </div>
-        {% endfor %}
-        <div class="col"></div>
-    </div>
-    {% endif %}
-    {% endwith %}
-
-    <div class="row my-3">
-        <div class="col"></div>
-        <div class="col-md-6">
+        <div class="col-xl-6 col-lg-7 col-md-9 col-xs-12">
             <form class="p-4 m-3 border shadow bg-white" id="input-form" action="{{ submit_url }}" method="POST" novalidate>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
                 <h2 class="text-center my-3">{{ caption }}</h2>
 
                 <div class="form-group">
-                    <label for="input-name">Title</label>
+                    <label for="input-name">{{ string_table['Trips edit title field'] }}</label>
                     <input type="text" class="form-control"
                            id="input-name" name="name"
-                           aria-describedby="name-help" placeholder="Enter name"
+                           aria-describedby="name-help" placeholder="{{ string_table['Trips edit title placeholder'] }}"
                            autofocus autocomplete="off"
                            v-model="tripName"
                            v-bind:class="{ 'is-valid': validation.name, 'is-invalid': !validation.name }">
-                    <div class="invalid-feedback">This field must not be empty</div>
+                    <div class="invalid-feedback">{{ string_table['Trips edit error empty title'] }}</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="input-date">Dates of the trip</label>
+                    <label for="input-date">{{ string_table['Trips edit dates field'] }}</label>
                     <input class="form-control" name="daterange"
                            autocomplete="off" type="text" id="input-date"
                            v-model="tripDates"
                            v-bind:class="{ 'is-valid': validation.dates, 'is-invalid': !validation.dates }">
-                    <div class="invalid-feedback">The dates must be in a format like '2019-01-01 - 2019-01-31'</div>
+                    <div class="invalid-feedback">{{ string_table['Trips edit error wrong dates'] }}</div>
                 </div>
 
                 <div class="form-group">
-                    <p class="font-weight-bold mt-4 mb-1">Groups configuration</p>
-                    <label for="input-attendees">How many people groups you have?</label>
+                    <p class="font-weight-bold mt-4 mb-1">{{ string_table['Trips edit groups config section'] }}</p>
+                    <label for="input-attendees">{{ string_table['Trips edit groups field'] }}</label>
                     <select class="custom-select" @change="changeGroups()"
                             v-model="selectedGroupsCount"
                             v-bind:class="{ 'is-valid': validation.groupsSelector, 'is-invalid': !validation.groupsSelector }">
-                        <option value="1">1 group</option>
-                        <option value="2">2 groups</option>
-                        <option value="3">3 groups</option>
-                        <option value="4">4 groups</option>
-                        <option value="5">5 groups</option>
+                        <option value="1">{{ string_table['Trips edit groups count 1'] }}</option>
+                        <option value="2">{{ string_table['Trips edit groups count 2'] }}</option>
+                        <option value="3">{{ string_table['Trips edit groups count 3'] }}</option>
+                        <option value="4">{{ string_table['Trips edit groups count 4'] }}</option>
+                        <option value="5">{{ string_table['Trips edit groups count 5'] }}</option>
                     </select>
-                    <small class="form-text text-muted">People group is a group where all persons eat from one pot.</small>
+                    <small class="form-text text-muted">{{ string_table['Trips edit groups description'] }}</small>
                 </div>
+
+                <input class="d-none" name="redirect" value="{{ redirect }}">
 
                 <!-- HERE GO GROUPS -->
                 <div class="form-group">
@@ -91,26 +111,26 @@
                         v-for="group in groups"
                         v-bind:key="group.id"
                         v-bind:group="group"
-                        v-bind:validator="function(n) { console.log(n); return /^[0-9]+$/.test(n) && +n > 0; }"
+                        v-bind:validator="function(n) { return /^[0-9]+$/.test(n) && +n > 0; }"
+                        group_name_prefix="{{ string_table['Trips edit group prefix'] }}"
+                        error_message="{{ string_table['Trips edit error group count'] }}"
                     ></user-group>
                 </div>
 
                 <div class="form-group row">
-                    <div class="col-8">
-                        <div class="row">
-                            <div class="col pr-1">
-                                <button type="submit" class="btn btn-primary w-100">{{ submit_caption }}</button>
-                            </div>
-                            <div class="col pl-1">
-                                <a class="btn btn-secondary w-100" href="{{ close_url }}">Close</a>
-                            </div>
-                        </div>
+                    <div class="col-12 col-sm-4 my-2 my-sm-0 pr-sm-1">
+                        <button type="submit" class="btn btn-primary w-100">{{ submit_caption }}</button>
                     </div>
-                    <div class="col"></div>
-                    <div class="col-auto">
+                    <div class="col-12 col-sm-4 my-2 my-sm-0 px-sm-1">
+                        <a class="btn btn-secondary w-100" href="{{ close_url }}">
+                            {{ string_table['Trips edit close button'] }}
+                        </a>
+                    </div>
+                    <div class="col d-none d-sm-block"></div>
+                    <div class="col-12 col-sm-auto my-2 my-sm-0 pl-sm-1">
                         {% if archive_button %}
                         <button type="button" class="btn btn-danger w-100" data-toggle="modal" data-target="#archive-modal">
-                            <i class="fas fa-archive"></i>
+                            <i class="fas fa-archive"></i> <span class="d-inline d-sm-none">{{ string_table['Trips edit archive button'] }}</span>
                         </button>
                         {% endif %}
                     </div>
@@ -126,14 +146,18 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="archive-modal-title">Archive a trip?</h5>
+                    <h5 class="modal-title" id="archive-modal-title">{{ string_table['Trips edit archive modal title'] }}</h5>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to archive this trip?</p>
+                    <p>{{ string_table['Trips edit archive modal text'] }}</p>
                 </div>
                 <div class="modal-footer">
-                    <a class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">Archive</a>
-                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <a class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">
+                        {{ string_table['Trips edit archive modal archive button'] }}
+                    </a>
+                    <button class="btn btn-secondary" data-dismiss="modal">
+                        {{ string_table['Trips edit archive modal close button'] }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -144,6 +168,6 @@
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <!-- production version, optimized for size and speed -->
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-<script type="application/javascript" src="{{ url_for('static', filename='trip_edit.js') }}"></script>
+<script type="application/javascript" src="{{ url_for('static', filename='js/trip_edit.js') }}"></script>
 
 {% endblock %}

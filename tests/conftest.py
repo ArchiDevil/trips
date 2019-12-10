@@ -37,7 +37,8 @@ def user_logged_client(client):
     client.post('/auth/login',
                 data={
                     'login': 'User',
-                    'password': 'user1'
+                    'password': 'user1',
+                    'redirect': '/'
                 })
     return client
 
@@ -47,7 +48,8 @@ def org_logged_client(client):
     client.post('/auth/login',
                 data={
                     'login': 'Organizer',
-                    'password': 'org'
+                    'password': 'org',
+                    'redirect': '/'
                 })
     return client
 
@@ -57,7 +59,8 @@ def admin_logged_client(client):
     client.post('/auth/login',
                 data={
                     'login': 'Administrator',
-                    'password': 'qwerty'
+                    'password': 'qwerty',
+                    'redirect': '/'
                 })
     return client
 

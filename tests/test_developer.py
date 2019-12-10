@@ -1,3 +1,5 @@
+from organizer.strings import STRING_TABLE
+
 def test_developer_requires_log_in(client):
     response = client.get('/developer/console')
     assert response.status_code == 302
@@ -11,7 +13,7 @@ def test_developer_requires_admin_user(org_logged_client):
 
 def test_developer_shows_console(admin_logged_client):
     response = admin_logged_client.get('/developer/console')
-    assert b'Developer console' in response.data
+    assert STRING_TABLE['Developer console title'].encode() in response.data
 
 
 def test_developer_execute_sql_requires_log_in(client):

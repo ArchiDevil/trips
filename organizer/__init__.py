@@ -81,10 +81,18 @@ def create_app(test_config=None):
     from . import developer
     app.register_blueprint(developer.bp)
 
+    from . import info
+    app.register_blueprint(info.bp)
+
     @app.context_processor
     def inject_props():
         from . import schema
-        return dict(AccessGroup=schema.AccessGroup)
+        from . import strings
+        return {
+            'AccessGroup': schema.AccessGroup,
+            'string_table': strings.STRING_TABLE,
+            'today_date': datetime.datetime.today().strftime('%d-%m-%Y')
+        }
 
     @app.errorhandler(500)
     def server_error_handler(error):

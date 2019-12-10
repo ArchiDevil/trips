@@ -8,43 +8,33 @@
 <div class="container">
     <div class="row my-3">
         <div class="col-4">
-            <h1 class="display-4">Trips</h1>
+            <h1 class="display-4">{{ string_table['Trips title'] }}</h1>
         </div>
 
-        {% if not trips %}
         {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
         <div class="col d-flex flex-row-reverse align-items-end">
             <a class="btn btn-primary mb-3 d-block d-lg-none" type="button" href="{{ url_for('trips.add') }}">
-                Create new
+                {{ string_table['Trips create new short button'] }}
             </a>
         </div>
-        {% endif %}
         {% endif %}
     </div>
 
     {% if not trips %}
 
+    <div class="row my-3">
+        <div class="jumbotron shadow">
+            <h1 class="display-4">{{ string_table['Trips jumbotron title'] }}</h1>
     {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-    <div class="row my-3">
-        <div class="jumbotron shadow">
-            <h1 class="display-4">Welcome!</h1>
-            <p class="lead">We have discovered that you have no trips planned. The whole beatiful world is waiting for
-                you to open it. Let's discover the world together!</p>
+            <p class="lead">{{ string_table['Trips jumbotron text tripmanager'] }}</p>
             <hr class="my-4">
-            <p>Start doing great things by clicking this button. We just need a bit info from you, this won't take a
-                long time.</p>
-            <a class="btn btn-primary btn-lg" href="{{ url_for('trips.add') }}" role="button">Create first trip</a>
-        </div>
-    </div>
+            <p>{{ string_table['Trips jumbotron text2'] }}</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('trips.add') }}" role="button">{{ string_table['Trips jumbotron create button'] }}</a>
     {% else %}
-    <div class="row my-3">
-        <div class="jumbotron shadow">
-            <h1 class="display-4">Welcome!</h1>
-            <p class="lead">Seems like no one shared any trips with you. Ask you trip manager or anyone from your team
-                to provide you a link with the information.</p>
+            <p class="lead">{{ string_table['Trips jumbotron text guest'] }}</p>
+    {% endif %}
         </div>
     </div>
-    {% endif %}
 
     {% else %}
 
@@ -52,14 +42,12 @@
         {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
         <div class="col-auto d-none d-lg-block">
             <div class="card shadow" style="width: 18rem;">
-                <img src="{{ url_for('static', filename='trip.jpg') }}" class="card-img-top" alt="...">
-                <h5 class="card-header">Create something new</h5>
+                <img src="{{ url_for('static', filename='img/sketches/1.png') }}" class="card-img-top bg-light" alt="">
+                <h5 class="card-header">{{ string_table['Trips card title'] }}</h5>
                 <div class="card-body">
-                    <p class="card-text">
-                        Start doing a great things by clicking this button. Let's start a new adventure!
-                    </p>
+                    <p class="card-text">{{ string_table['Trips card text'] }}</p>
                     <a href="{{ url_for('trips.add') }}" class="btn btn-primary w-100" role="button">
-                        <i class="fas fa-plus"></i> Create new trip
+                        <i class="fas fa-plus"></i> {{ string_table['Trips card create button'] }}
                     </a>
                 </div>
             </div>
@@ -72,46 +60,44 @@
             {% if not trip['trip_record'].archived %}
             <div class="card shadow mb-3">
                 <div class="row no-gutters">
-                    <div class="d-none d-md-block col-4">
-                        <img src="{{ url_for('static', filename='image.jpg') }}" class="card-img-top" alt="...">
+                    <div class="d-none d-md-block col-md-4 col-xl-3">
+                        <img src="{{ url_for('static', filename='img/trips/{}.png'.format(trip['magic'])) }}" class="w-100 rounded-left" alt="">
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
                             <h4 class="card-title">
                                 {% if trip['type'] == 'shared' %}
-                                <i class="fas fa-share-alt" title="This trip is shared with you"></i>
+                                <i class="fas fa-share-alt" title="{{ string_table['Trips shared info title'] }}"></i>
                                 {% endif %}
                                 {{ trip['trip_record'].name }}
                             </h4>
-                            <p class="card-text">
-                                <i class="fas fa-hourglass-start"></i>
-                                {{ trip['trip_record'].from_date.strftime('%d-%m-%y') }} -
-                                <i class="fas fa-hourglass-end"></i>
-                                {{ trip['trip_record'].till_date.strftime('%d-%m-%y') }}
+                            <p class="card-text mb-2">
+                                <i class="fas fa-calendar-day"></i> {{ trip['trip_record'].from_date.strftime('%d/%m') }} -
+                                {{ trip['trip_record'].till_date.strftime('%d/%m') }}
                             </p>
                             <p class="card-text">
-                                <i class="fas fa-walking"></i> {{ trip['attendees'] }} participants
+                                <i class="fas fa-walking"></i> {{ string_table['Trips participants count title'] }}: {{ trip['attendees'] }}
                             </p>
                             <!-- <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
                             <div class="row">
                                 <div class="col">
                                     <a href="{{ url_for('meals.days_view', trip_id=trip['trip_record'].id) }}"
                                         class="btn btn-primary w-100">
-                                        Open
+                                        {{ string_table['Trips open button'] }}
                                     </a>
                                 </div>
                                 {% if trip['type'] == 'user' %}
                                 <div class="col">
                                     <a href="{{ url_for('trips.edit', trip_id=trip['trip_record'].id) }}"
                                        class="btn btn-secondary w-100">
-                                        Edit
+                                        {{ string_table['Trips edit button'] }}
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="col">
                                     <a href="{{ url_for('trips.forget', trip_id=trip['trip_record'].id) }}"
                                        class="btn btn-outline-secondary w-100">
-                                        Hide
+                                        {{ string_table['Trips hide button'] }}
                                     </a>
                                 </div>
                                 {% endif %}
@@ -127,6 +113,5 @@
     </div>
     {% endif %}
 </div>
-
 
 {% endblock %}

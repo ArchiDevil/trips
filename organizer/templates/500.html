@@ -13,22 +13,22 @@
         Sentry.init({ dsn: 'https://a198fb0c66fb462c9391e0352f4499f0@sentry.io/1842107' });
         Sentry.showReportDialog({
             eventId: '{{ sentry_event_id }}',
-            title: 'It looks like we’re having issues.',
-            subtitle: 'Our team has been notified.',
-            subtitle2: 'If you’d like to help, tell us what happened below.',
-            labelName: 'Name',
-            labelEmail: 'Email',
-            labelComments: 'What happened?',
-            labelClose: 'Close',
-            labelSubmit: 'Submit',
-            errorGeneric: 'Some error happened during submission. Please, try again.',
-            errorFormEntry: 'Some fields were invalid. Please correct the errors and try again.',
-            successMessage: 'Your feedback has been sent. Thank you!',
+            title: '{{ string_table["Sentry title"] }}',
+            subtitle: '{{ string_table["Sentry subtitle"] }}',
+            subtitle2: '{{ string_table["Sentry subtitle2"] }}',
+            labelName: '{{ string_table["Sentry label name"] }}',
+            labelEmail: '{{ string_table["Sentry label email"] }}',
+            labelComments: '{{ string_table["Sentry label comments"] }}',
+            labelClose: '{{ string_table["Sentry label close"] }}',
+            labelSubmit: '{{ string_table["Sentry label submit"] }}',
+            errorGeneric: '{{ string_table["Sentry error generic"] }}',
+            errorFormEntry: '{{ string_table["Sentry error form entry"] }}',
+            successMessage: '{{ string_table["Sentry success message"] }}',
         })
     </script>
     {% endif %}
 
-    <h1>Internal error happened on the server. Sorry for the error. We are trying our best to fix it.</h1>
+    <h1>{{ string_table['Internal error 500 message'] }}</h1>
 </body>
 
 </html>

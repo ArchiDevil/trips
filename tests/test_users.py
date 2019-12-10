@@ -1,3 +1,5 @@
+from organizer.strings import STRING_TABLE
+
 def test_users_rejects_not_logged_in(client):
     response = client.get('/users/')
     assert response.status_code == 302
@@ -90,7 +92,7 @@ def test_users_add_rejects_empty_name(admin_logged_client):
                                             'group': 'TripManager'
                                         })
     assert response.status_code == 200
-    assert b'Empty login provided' in response.data
+    assert STRING_TABLE['User edit error empty login'].encode() in response.data
 
 
 def test_users_add_rejects_existing_name(admin_logged_client):
@@ -101,7 +103,7 @@ def test_users_add_rejects_existing_name(admin_logged_client):
                                             'group': 'TripManager'
                                         })
     assert response.status_code == 200
-    assert b'User with the same login already exists' in response.data
+    assert STRING_TABLE['User edit error existing login'].encode() in response.data
 
 
 def test_users_add_rejects_empty_password(admin_logged_client):
@@ -112,7 +114,7 @@ def test_users_add_rejects_empty_password(admin_logged_client):
                                             'group': 'TripManager'
                                         })
     assert response.status_code == 200
-    assert b'Empty password provided' in response.data
+    assert STRING_TABLE['User edit error empty password'].encode() in response.data
 
     response = admin_logged_client.get('/users/')
     assert b'Test user' not in response.data
@@ -126,7 +128,7 @@ def test_users_add_rejects_empty_group(admin_logged_client):
                                             'group': ''
                                         })
     assert response.status_code == 200
-    assert b'Empty group provided' in response.data
+    assert STRING_TABLE['User edit error empty group'].encode() in response.data
 
     response = admin_logged_client.get('/users/')
     assert b'Test user' not in response.data
@@ -140,7 +142,7 @@ def test_users_add_rejects_wrong_group(admin_logged_client):
                                             'group': 'WRONG'
                                         })
     assert response.status_code == 200
-    assert b'Wrong group provided' in response.data
+    assert STRING_TABLE['User edit error wrong group'].encode() in response.data
 
     response = admin_logged_client.get('/users/')
     assert b'Test user' not in response.data
@@ -225,7 +227,7 @@ def test_users_edit_rejects_trip_managers(org_logged_client):
 def test_users_edit_shows_page(admin_logged_client):
     response = admin_logged_client.get('/users/edit/1')
     assert response.status_code == 200
-    assert b'Edit' in response.data
+    assert STRING_TABLE['User edit edit button'].encode() in response.data
     assert b'Administrator' in response.data
 
 
@@ -237,69 +239,52 @@ def test_users_rejects_for_non_existing_user(admin_logged_client):
 def test_users_edit_edits_user(admin_logged_client):
     response = admin_logged_client.post('/users/edit/1',
                                         data={
-                                            'login': 'Test user',
+                                            'group': 'TripManager'
+                                        })
+    assert response.status_code == 302
+    assert '/users/' in response.location
+
+    response = admin_logged_client.get('/users/')
+    assert b'Administrator' not in response.data
+
+
+def test_users_edit_edits_user_group(admin_logged_client):
+    response = admin_logged_client.post('/users/edit/1',
+                                        data={
+                                            'login': 'Organizer',
                                             'group': 'Administrator'
                                         })
     assert response.status_code == 302
     assert '/users/' in response.location
 
     response = admin_logged_client.get('/users/')
-    assert b'Test user' in response.data
-
-
-def test_users_edit_rejects_empty_name(admin_logged_client):
-    response = admin_logged_client.post('/users/edit/1',
-                                        data={
-                                            'login': '',
-                                            'group': 'Administrator'
-                                        })
-    assert response.status_code == 200
-    assert b'Empty login provided' in response.data
+    assert b'Organizer' in response.data
 
 
 def test_users_edit_rejects_empty_group(admin_logged_client):
     response = admin_logged_client.post('/users/edit/1',
                                         data={
-                                            'login': 'Test user',
                                             'group': ''
                                         })
     assert response.status_code == 200
-    assert b'Empty group provided' in response.data
-
-    response = admin_logged_client.get('/users/')
-    assert b'Test user' not in response.data
+    assert STRING_TABLE['User edit error empty group'].encode() in response.data
 
 
 def test_users_edit_rejects_wrong_group(admin_logged_client):
     response = admin_logged_client.post('/users/edit/1',
                                         data={
-                                            'login': 'Test user',
                                             'group': 'WRONG'
                                         })
     assert response.status_code == 200
-    assert b'Wrong group provided' in response.data
+    assert STRING_TABLE['User edit error wrong group'].encode() in response.data
 
     response = admin_logged_client.get('/users/')
-    assert b'Test user' not in response.data
-
-
-def test_users_edit_rejects_existing_name(admin_logged_client):
-    response = admin_logged_client.post('/users/edit/1',
-                                        data={
-                                            'login': 'User',
-                                            'group': 'Administrator'
-                                        })
-    assert response.status_code == 200
-    assert b'User with the same login already exists' in response.data
-
-    response = admin_logged_client.get('/users/')
-    assert b'Test user' not in response.data
+    assert b'WRONG' not in response.data
 
 
 def test_users_edit_rejects_non_existing_id_post(admin_logged_client):
     response = admin_logged_client.post('/users/edit/100',
                                         data={
-                                            'login': 'Some login',
                                             'group': 'Administrator'
                                         })
     assert response.status_code == 404

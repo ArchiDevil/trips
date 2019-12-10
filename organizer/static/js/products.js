@@ -21,7 +21,7 @@ function between(value, min_val, max_val) {
 var vm = new Vue({
     el: '#products-app',
     data: {
-        modalTitle: 'Add a product',
+        modalTitle: '',
         productName: '',
         caloriesInternal: 0,
         proteins: 0,
@@ -58,7 +58,12 @@ var vm = new Vue({
         calories: {
             get: function () {
                 if (this.caloriesLock === true) {
-                    return this.proteins * 4.0 + this.fats * 9.0 + this.carbs * 4.0
+                    value = this.proteins * 4.0 + this.fats * 9.0 + this.carbs * 4.0
+                    return new Intl.NumberFormat('en-US', {
+                        style: "decimal",
+                        maximumFractionDigits: "2",
+                        useGrouping: false
+                    }).format(value);
                 } else {
                     return this.caloriesInternal
                 }
@@ -79,6 +84,7 @@ var vm = new Vue({
 $(document).on('show.bs.modal', '#edit-modal', function(event) {
     var button = $(event.relatedTarget); // Button that triggered the modal
     vm.submitLink = button.data('link');
+    vm.modalTitle = button.data('mname')
     vm.buttonName = button.data('bname');
 
     var name = button.data('name');
@@ -91,14 +97,11 @@ $(document).on('show.bs.modal', '#edit-modal', function(event) {
     var editingMode = name !== undefined;
 
     if (editingMode) {
-        vm.modalTitle = 'Edit \'' + name + '\''
+        vm.modalTitle += ' \'' + name + '\''
         vm.caloriesLock = false
         var lockButton = document.getElementById('button-addon-lock')
         lockButton.classList.remove('active')
         lockButton.setAttribute('aria-pressed', 'false')
-    }
-    else {
-        vm.modalTitle = 'Add a product'
     }
 
     vm.productName = name ? name : '';

@@ -1,15 +1,16 @@
 import functools
 import datetime
-import requests
 from urllib.parse import urlencode
+import requests
 
 from flask import Blueprint, render_template, request, g, redirect, url_for, session, flash, abort, current_app
 from werkzeug.security import check_password_hash
 
-from sentry_sdk import configure_scope
+from sentry_sdk import configure_scope, capture_exception, capture_message
 
 from organizer.db import get_session
 from organizer.schema import User, AccessGroup, VkUser, UserType
+from organizer.strings import STRING_TABLE
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -19,7 +20,7 @@ def login_required_group(group):
         @functools.wraps(view)
         def wrapped_view_grouped(**kwargs):
             if 'user' not in g or g.user is None:
-                return redirect(url_for('auth.login'))
+                return redirect(url_for('auth.login', redirect=request.path))
             if g.user.access_group.value < group.value:
                 abort(403)
             with configure_scope() as scope:
@@ -57,16 +58,21 @@ def login():
     if request.method == 'POST':
         form_login = request.form['login']
         form_password = request.form['password']
-        form_remember = True if 'remember' in request.form.keys() else False
+        form_remember = 'remember' in request.form.keys()
+        if not 'redirect' in request.form:
+            capture_message('No redirect provided')
+            redirect_location = url_for('trips.index')
+        else:
+            redirect_location = request.form['redirect']
 
         with get_session() as sql_session:
             user = sql_session.query(User).filter(User.login == form_login).first()
             if not user:
-                flash('No such user')
+                flash(STRING_TABLE['Login errors no user'])
             elif not user.password:
-                flash('This user has no password. Did you register via Vk?')
+                flash(STRING_TABLE['Login errors no password'])
             elif not check_password_hash(user.password, form_password):
-                flash('Incorrect password')
+                flash(STRING_TABLE['Login errors incorrect password'])
             else: # no issues
                 user.last_logged_in = datetime.datetime.utcnow()
                 sql_session.commit()
@@ -74,9 +80,10 @@ def login():
                 session.clear()
                 session['user_id'] = user.id
                 session.permanent = form_remember
-                return redirect(url_for('trips.index'))
+                return redirect(redirect_location)
 
-    return render_template('auth/login.html')
+    redirect_location = request.args['redirect'] if 'redirect' in request.args else url_for('trips.index')
+    return render_template('auth/login.html', redirect=redirect_location)
 
 
 @bp.route('/logout')
@@ -93,7 +100,8 @@ def vk_login():
     url = 'https://oauth.vk.com/authorize?'
     query = urlencode({
         'client_id': current_app.config['VK_CLIENT_ID'],
-        'redirect_uri': url_for('auth.vk_redirect', _external=True)
+        'redirect_uri': url_for('auth.vk_redirect', _external=True),
+        'state': request.args['redirect']
     })
     return redirect(url + query)
 
@@ -152,7 +160,6 @@ def request_vk_access_token(code):
     if 'error' in json_result:
         raise RuntimeError('Error from vk server [{}]: {}'.format(json_result['error'],
                                                                   json_result['error_description']))
-        return redirect(url_for('auth.login'))
 
     return json_result['access_token'], json_result['expires_in'], json_result['user_id']
 
@@ -168,7 +175,7 @@ def request_vk_user_name_and_photo(access_token):
     json_result = result.json()
     if 'error' in json_result:
         raise RuntimeError('Error from vk server [{}]: {}'.format(json_result['error'],
-                                                     json_result['error_description']))
+                                                                  json_result['error_description']))
 
     response_user = json_result['response'][0]
     return '{} {}'.format(response_user['first_name'], response_user['last_name']), response_user['photo_50']
@@ -177,16 +184,18 @@ def request_vk_user_name_and_photo(access_token):
 @bp.route('/vk_redirect')
 def vk_redirect():
     code = request.args['code']
+    redirect_location = request.args['state']
 
     try:
         access_token, expires_in, vk_user_id = request_vk_access_token(code)
         displayed_name, photo_url = request_vk_user_name_and_photo(access_token)
     except RuntimeError as exc:
-        flash(str(exc))
-        return redirect(url_for('auth.login'))
+        capture_exception(exc)
+        flash(STRING_TABLE['Login errors vk error'])
+        return redirect(url_for('.login'))
 
     login = 'vk_' + str(vk_user_id)
     login_as_vk_user(login, access_token, vk_user_id,
                      displayed_name, expires_in, photo_url)
 
-    return redirect(url_for('trips.index'))
+    return redirect(redirect_location)

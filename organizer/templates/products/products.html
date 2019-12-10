@@ -3,7 +3,7 @@
 <div class="container" id="products-app">
     <div class="row my-3">
         <div class="col-8">
-            <h1 class="display-4">Products</h1>
+            <h1 class="display-4">{{ string_table['Products title'] }}</h1>
         </div>
         {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
         <div class="col d-flex flex-row-reverse align-items-end">
@@ -12,8 +12,9 @@
                     data-toggle="modal"
                     data-target="#edit-modal"
                     data-link="{{ url_for('products.add') }}"
-                    data-bname="Add">
-                Add new
+                    data-mname="{{ string_table['Products edit modal add title'] }}"
+                    data-bname="{{ string_table['Products edit modal add button'] }}">
+                {{ string_table['Products add new short button'] }}
             </button>
         </div>
         {% endif %}
@@ -23,18 +24,18 @@
         {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
         <div class="col-auto d-none d-lg-block">
             <div class="card shadow" style="width: 18rem;">
-                <img src="{{ url_for('static', filename='food.jpg') }}" class="card-img-top" alt="...">
-                <h5 class="card-header">Want to edit food?</h5>
+                <img src="{{ url_for('static', filename='img/sketches/6.png') }}" class="card-img-top bg-light" alt="...">
+                <h5 class="card-header">{{ string_table['Products card header'] }}</h5>
                 <div class="card-body">
-                    <p class="card-text">If you cannot find something in this database, just add any product you want.
-                        Be ready to fill up information about nutrition.</p>
+                    <p class="card-text">{{ string_table['Products card text'] }}</p>
                     <button type="button"
-                            class="btn btn-primary"
+                            class="btn btn-primary w-100"
                             data-toggle="modal"
                             data-target="#edit-modal"
                             data-link="{{ url_for('products.add') }}"
-                            data-bname="Add">
-                        Add a product
+                            data-mname="{{ string_table['Products edit modal add title'] }}"
+                            data-bname="{{ string_table['Products edit modal add button'] }}">
+                        <i class="fas fa-plus"></i> {{ string_table['Products add new button'] }}
                     </button>
                 </div>
             </div>
@@ -56,35 +57,33 @@
                 <div class="input-group mb-3">
                     <input type="text"
                            class="form-control"
-                           placeholder="Search for a product"
-                           aria-label="Search for a product"
-                           aria-describedby="button-addon2"
+                           placeholder="{{ string_table['Products search placeholder'] }}"
                            name="search"
                            id="input-search">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-success" id="button-addon2" type="submit">Search</button>
+                        <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i> {{ string_table['Products search button'] }}</button>
                     </div>
                 </div>
             </form>
 
             {% if search %}
             <p class="text-success">
-                Table is filtered with search result.
-                <a href="{{ url_for('products.index') }}">Get back?</a>
+                {{ string_table['Products search notification'] }}
+                <a href="{{ url_for('products.index') }}">{{ string_table['Products search return'] }}</a>
             </p>
             {% endif %}
 
             <table class="table table-sm table-hover table-responsive-xs">
                 <thead class="thead-light">
                     <tr>
-                        <th scope="col" style="width: 8%">#</th>
-                        <th scope="col" style="width: 54%">Name</th>
-                        <th class="text-right" scope="col" style="width: 8%">Cals</th>
-                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">P</th>
-                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">F</th>
-                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">C</th>
+                        <th scope="col" style="width: 8%">{{ string_table['Products id title'] }}</th>
+                        <th scope="col" style="width: 54%">{{ string_table['Products name title'] }}</th>
+                        <th class="text-right" scope="col" style="width: 8%">{{ string_table['Products calories title'] }}</th>
+                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">{{ string_table['Products proteins title'] }}</th>
+                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">{{ string_table['Products fats title'] }}</th>
+                        <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">{{ string_table['Products carbs title'] }}</th>
                         {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-                        <th class="text-right" scope="col" style="width: 6%">A</th>
+                        <th class="text-right" scope="col" style="width: 6%">{{ string_table['Products archive title'] }}</th>
                         {% endif %}
                     </tr>
                 </thead>
@@ -105,9 +104,10 @@
                                    data-carbs="{{ product['carbs'] }}"
                                    data-grams="{{ product['grams'] if product['grams'] != None else '' }}"
                                    data-link="{{ url_for('products.edit', product_id=product['id']) }}"
-                                   data-bname="Edit"
+                                   data-mname="{{ string_table['Products edit modal edit title'] }}"
+                                   data-bname="{{ string_table['Products edit modal edit button'] }}"
                                    href="javascript:void(0);">
-                                    <i class="fas fa-edit" title="Edit"></i>
+                                    <i class="fas fa-pen" title="{{ string_table['Products edit button title'] }}"></i>
                                 </a>
                             </span>
                             {% endif %}
@@ -122,9 +122,8 @@
                                 <a data-toggle="modal"
                                    data-target="#archive-modal"
                                    data-archive="{{ url_for('products.archive', product_id=product['id']) }}"
-                                   href="javascript:void(0);"
-                                   alt="Archive">
-                                    <i class="text-danger fas fa-archive" title="Archive"></i>
+                                   href="javascript:void(0);">
+                                    <i class="text-danger fas fa-archive" title="{{ string_table['Products archive button title'] }}"></i>
                                 </a>
                             </span>
                         </td>
@@ -137,15 +136,28 @@
             <nav>
                 <ul class="pagination">
                     {% if page == 0 %}
-                    <li class="page-item disabled"><a class="page-link">Previous</a></li>
+                    <li class="page-item disabled">
+                        <a class="page-link">
                     {% else %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('products.index', page=page - 1, search=search) }}">Previous</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('products.index', page=page-1, search=search) }}">
                     {% endif %}
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                    </li>
 
                     {% if page == last_page %}
-                    <li class="page-item disabled"><a class="page-link">Next</a></li>
+                    <li class="page-item disabled">
+                        <a class="page-link">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </li>
                     {% else %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('products.index', page=page + 1, search=search) }}">Next</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('products.index', page=page+1, search=search) }}">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
             </nav>
@@ -153,36 +165,51 @@
     </div>
 
     {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
+
     <!-- Add/edit a product modal -->
-    {% raw %}
     <div id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="edit-modal-title"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form id="edit-form" method="POST" v-bind:action="submitLink" novalidate>
                     <div class="modal-header">
-                        <h5 class="modal-title" id="edit-modal-title">{{ modalTitle }}</h5>
+                        <h5 class="modal-title" id="edit-modal-title">
+                            {% raw %}
+                                {{ modalTitle }}
+                            {% endraw %}
+                        </h5>
                     </div>
                     <div class="modal-body">
                         <div class="form-group row">
-                            <label for="add-name-input" class="col-sm-2 col-form-label">Name</label>
+                            <label for="add-name-input" class="col-sm-2 col-form-label">
+                                {{ string_table['Products edit modal name title'] }}
+                            </label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="name" id="add-name-input"
-                                    placeholder="Product name" v-model="productName"
-                                    v-bind:class="{ 'is-valid': validation.name, 'is-invalid': !validation.name }"
-                                    autocomplete="off" tabindex="1">
-                                <div class="invalid-feedback">Field must not be empty</div>
+                                <input type="text"
+                                       class="form-control"
+                                       name="name"
+                                       id="add-name-input"
+                                       placeholder="{{ string_table['Products edit modal name placeholder'] }}"
+                                       v-model="productName"
+                                       v-bind:class="{ 'is-valid': validation.name, 'is-invalid': !validation.name }"
+                                       autocomplete="off"
+                                       tabindex="1">
+                                <div class="invalid-feedback">
+                                    {{ string_table['Products edit modal error empty name'] }}
+                                </div>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="add-calories-input" class="col-sm-2 col-form-label">Calories</label>
+                            <label for="add-calories-input" class="col-sm-2 col-form-label">
+                                {{ string_table['Products edit modal calories title'] }}
+                            </label>
                             <div class="col-sm-10">
                                 <div class="input-group">
                                     <input type="text"
                                            class="form-control"
                                            name="calories"
                                            id="add-calories-input"
-                                           placeholder="Amount of calories"
+                                           placeholder="{{ string_table['Products edit modal calories placeholder'] }}"
                                            autocomplete="off"
                                            v-model="calories"
                                            v-bind:class="{ 'is-valid': validation.cals, 'is-invalid': !validation.cals }"
@@ -197,76 +224,118 @@
                                                 aria-pressed="false"
                                                 v-on:click="lockCalories"
                                                 tabindex="3">
-                                            Lock
+                                            {{ string_table['Products edit modal lock button'] }}
                                         </button>
                                     </div>
                                 </div>
-                                <div class="invalid-feedback d-block" v-if="!validation.cals">Please enter non-negative number</div>
+                                <div class="invalid-feedback d-block" v-if="!validation.cals">
+                                    {{ string_table['Products edit modal error wrong calories'] }}
+                                </div>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="add-proteins-input" class="col-sm-2 col-form-label">Proteins</label>
+                            <label for="add-proteins-input" class="col-sm-2 col-form-label">
+                                {{ string_table['Products edit modal proteins title'] }}
+                            </label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="proteins" id="add-proteins-input"
-                                       v-model="proteins" v-bind:class="{ 'is-valid': validation.proteins, 'is-invalid': !validation.proteins }"
-                                       autocomplete="off" tabindex="4">
-                                <div class="invalid-feedback">Please enter the correct number</div>
+                                <input type="text"
+                                       class="form-control"
+                                       name="proteins"
+                                       id="add-proteins-input"
+                                       v-model="proteins"
+                                       v-bind:class="{ 'is-valid': validation.proteins, 'is-invalid': !validation.proteins }"
+                                       autocomplete="off"
+                                       tabindex="4">
+                                <div class="invalid-feedback">{{ string_table['Products edit modal wrong nutrient'] }}</div>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="add-fats-input" class="col-sm-2 col-form-label">Fats</label>
+                            <label for="add-fats-input" class="col-sm-2 col-form-label">
+                                {{ string_table['Products edit modal fats title'] }}
+                            </label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="fats" id="add-fats-input"
-                                       v-model="fats" v-bind:class="{ 'is-valid': validation.fats, 'is-invalid': !validation.fats }"
-                                       autocomplete="off" tabindex="5">
-                                <div class="invalid-feedback">Please enter the correct number</div>
+                                <input type="text"
+                                       class="form-control"
+                                       name="fats"
+                                       id="add-fats-input"
+                                       v-model="fats"
+                                       v-bind:class="{ 'is-valid': validation.fats, 'is-invalid': !validation.fats }"
+                                       autocomplete="off"
+                                       tabindex="5">
+                                <div class="invalid-feedback">{{ string_table['Products edit modal wrong nutrient'] }}</div>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="add-carbs-input" class="col-sm-2 col-form-label">Carbs</label>
+                            <label for="add-carbs-input" class="col-sm-2 col-form-label">
+                                {{ string_table['Products edit modal carbs title'] }}
+                            </label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="carbs" id="add-carbs-input"
-                                       v-model="carbs" v-bind:class="{ 'is-valid': validation.carbs, 'is-invalid': !validation.carbs }"
-                                       autocomplete="off" tabindex="6">
-                                <div class="invalid-feedback">Please enter the correct number</div>
+                                <input type="text"
+                                       class="form-control"
+                                       name="carbs"
+                                       id="add-carbs-input"
+                                       v-model="carbs"
+                                       v-bind:class="{ 'is-valid': validation.carbs, 'is-invalid': !validation.carbs }"
+                                       autocomplete="off"
+                                       tabindex="6">
+                                <div class="invalid-feedback">{{ string_table['Products edit modal wrong nutrient'] }}</div>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div class="col-sm-2" v-bind:class="{ 'text-info': validation.nutrition, 'text-danger': !validation.nutrition }">
-                                Note
+                            <div class="col-sm-2"
+                                 v-bind:class="{ 'text-info': validation.nutrition, 'text-danger': !validation.nutrition }">
+                                {{ string_table['Products edit modal note title'] }}
                             </div>
-                            <div class="col-sm-10" v-bind:class="{ 'text-info': validation.nutrition, 'text-danger font-weight-bolder': !validation.nutrition }">
-                                Sum of all nutritional values must not be more than 100
+                            <div class="col-sm-10"
+                                 v-bind:class="{ 'text-info': validation.nutrition, 'text-danger font-weight-bolder': !validation.nutrition }">
+                                {{ string_table['Products edit modal note description'] }}
                             </div>
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-2 col-form-label"></div>
                             <div class="col-sm-10 custom-control custom-checkbox my-1">
                                 <div class="form-check pl-3">
-                                    <input type="checkbox" class="custom-control-input align-middle" id="add-custom-weight" v-model="custom" tabindex="7">
-                                    <label class="custom-control-label align-middle" for="add-custom-weight">Use pieces instead of grams</label>
+                                    <input type="checkbox"
+                                           class="custom-control-input align-middle"
+                                           id="add-custom-weight"
+                                           v-model="custom"
+                                           tabindex="7">
+                                    <label class="custom-control-label align-middle" for="add-custom-weight">
+                                        {{ string_table['Products edit modal grams checkbox description'] }}
+                                    </label>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group row" v-if="custom">
-                            <div class="col-sm-2">Note:</div>
-                            <span class="col-sm-10">Specify how many grams each piece weighs in the field below. You can use rational numbers.</span>
-                        </div>
-                        <div class="form-group row" v-if="custom">
-                            <label for="add-gpp-input" class="col-sm-2 col-form-label">Mass</label>
+                            <label for="add-gpp-input" class="col-sm-2 col-form-label">
+                                {{ string_table['Products edit modal mass'] }}
+                            </label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="grams" id="add-gpp-input"
-                                       v-model="grams" v-bind:class="{ 'is-valid': validation.grams, 'is-invalid': !validation.grams }"
-                                       autocomplete="off" tabindex="8">
-                                <div class="invalid-feedback">Please enter the number greater than 0.1</div>
+                                <input type="text"
+                                       class="form-control"
+                                       name="grams"
+                                       id="add-gpp-input"
+                                       v-model="grams"
+                                       v-bind:class="{ 'is-valid': validation.grams, 'is-invalid': !validation.grams }"
+                                       autocomplete="off"
+                                       tabindex="8">
+                                <div class="invalid-feedback">
+                                    {{ string_table['Products edit modal error wrong'] }}
+                                </div>
+                                <small class="form-text text-muted">
+                                    {{ string_table['Products edit modal mass description'] }}
+                                </small>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal" type="button" tabindex="10">Close</button>
-                        <button class="btn btn-primary" type="submit"
-                                v-bind:disabled="!formValid" tabindex="9">
-                            {{buttonName}}
+                        <button class="btn btn-secondary col-6 col-sm-3" data-dismiss="modal" type="button" tabindex="10">
+                            {{ string_table['Products edit modal close button'] }}
+                        </button>
+                        <button class="btn btn-primary col-6 col-sm-3" type="submit" v-bind:disabled="!formValid" tabindex="9">
+                            {% raw %}
+                                {{ buttonName }}
+                            {% endraw %}
                         </button>
                     </div>
                 </form>
@@ -280,25 +349,28 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="archive-modal-title">Archive a product?</h5>
+                    <h5 class="modal-title" id="archive-modal-title">{{ string_table['Products archive modal title'] }}</h5>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to put this product to the archive?</p>
+                    <p>{{ string_table['Products archive modal text'] }}</p>
                 </div>
                 <div class="modal-footer">
-                    <a id="archive-button" class="btn btn-danger" v-bind:href="archiveLink">Archive</a>
-                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <a class="btn btn-danger" v-bind:href="archiveLink">
+                        {{ string_table['Products archive modal archive button'] }}
+                    </a>
+                    <button class="btn btn-secondary" data-dismiss="modal">
+                        {{ string_table['Products archive modal close button'] }}
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    {% endraw %}
     {% endif %}
 </div>
 
 <!-- should be included before products.js -->
 <!-- production version, optimized for size and speed -->
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-<script type="application/javascript" src="{{ url_for('static', filename='products.js') }}"></script>
+<script type="application/javascript" src="{{ url_for('static', filename='js/products.js') }}"></script>
 
 {% endblock %}

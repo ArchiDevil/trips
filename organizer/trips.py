@@ -1,12 +1,15 @@
 import datetime
 import functools
+import hashlib
 from typing import List
 
 from flask import Blueprint, render_template, request, url_for, redirect, abort, g, flash
+from sentry_sdk import capture_exception
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
 from organizer.schema import Trip, AccessGroup, User, TripAccess, Group
+from organizer.strings import STRING_TABLE
 
 bp = Blueprint('trips', __name__)
 
@@ -32,7 +35,8 @@ def index():
                 trips.append({
                     'trip_record': trip,
                     'type': 'user',
-                    'attendees': functools.reduce(lambda x, y: x+y, [group.persons for group in groups])
+                    'attendees': functools.reduce(lambda x, y: x+y, [group.persons for group in groups]),
+                    'magic': int(hashlib.sha1(trip.name.encode()).hexdigest(), 16) % 8 + 1
                 })
 
         if shared_trips:
@@ -41,7 +45,8 @@ def index():
                 trips.append({
                     'trip_record': trip,
                     'type': 'shared',
-                    'attendees': functools.reduce(lambda x, y: x+y, [group.persons for group in groups])
+                    'attendees': functools.reduce(lambda x, y: x+y, [group.persons for group in groups]),
+                    'magic': int(hashlib.sha1(trip.name.encode()).hexdigest(), 16) % 8 + 1
                 })
 
         return render_template('trips/trips.html',
@@ -51,7 +56,7 @@ def index():
 def validate_input_data():
     name = request.form['name']
     if not name:
-        raise RuntimeError('Incorrect name provided')
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect name'])
 
     groups = []
     try:
@@ -69,17 +74,17 @@ def validate_input_data():
         if not groups:
             raise ValueError
     except ValueError:
-        raise RuntimeError('Incorrect groups provided')
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect groups'])
 
     daterange = request.form['daterange']
     try:
         from_date, till_date = daterange.split(' - ')
-        from_date = datetime.datetime.strptime(from_date, '%Y-%m-%d')
-        till_date = datetime.datetime.strptime(till_date, '%Y-%m-%d')
+        from_date = datetime.datetime.strptime(from_date, '%d-%m-%Y')
+        till_date = datetime.datetime.strptime(till_date, '%d-%m-%Y')
         if till_date < from_date:
             raise ValueError
     except ValueError:
-        raise RuntimeError('Incorrect dates provided')
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect dates'])
     return name, groups, from_date, till_date
 
 
@@ -87,15 +92,16 @@ def validate_input_data():
 @login_required_group(AccessGroup.TripManager)
 def add():
     template_file = 'trips/edit.html'
-    caption = 'Add a new trip'
-    submit_caption = 'Add'
-    add_url = url_for('trips.add')
-    end_url = url_for('trips.index')
+    caption = STRING_TABLE['Trips add title']
+    submit_caption = STRING_TABLE['Trips add edit button']
+    add_url = url_for('.add')
+    end_url = url_for('.index')
 
     if request.method == 'POST':
         try:
             name, groups, from_date, till_date = validate_input_data()
         except RuntimeError as exc:
+            capture_exception(exc)
             flash(exc)
             return render_template(template_file,
                                    caption=caption,
@@ -125,10 +131,12 @@ def add():
 @login_required_group(AccessGroup.TripManager)
 def edit(trip_id):
     template_file = 'trips/edit.html'
-    caption = 'Edit a trip'
-    submit_caption = 'Edit'
+    caption = STRING_TABLE['Trips edit title']
+    submit_caption = STRING_TABLE['Trips edit edit button']
     edit_url = url_for('trips.edit', trip_id=trip_id)
-    end_url = url_for('meals.days_view', trip_id=trip_id)
+    redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
+    if not redirect_location:
+        redirect_location = url_for('.index')
 
     with get_session() as session:
         trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
@@ -140,17 +148,24 @@ def edit(trip_id):
         if request.method == 'POST':
             try:
                 name, groups, from_date, till_date = validate_input_data()
+                if not 'redirect' in request.form:
+                    # actually this error must never be visible by a user
+                    # because this is internal one
+                    raise RuntimeError('No redirect field is provided')
             except RuntimeError as exc:
+                capture_exception(exc)
                 flash(exc)
                 return render_template(template_file,
                                        caption=caption,
                                        trip=trip_info,
                                        archive_button=True,
                                        submit_caption=submit_caption,
-                                       close_url=end_url,
+                                       close_url=url_for('.index'),
                                        submit_url=edit_url,
-                                       groups=trip_groups)
+                                       groups=trip_groups,
+                                       redirect=url_for('.index'))
 
+            redirect_location = request.form['redirect']
             session.query(Group).filter(Group.trip_id == trip_id).delete()
             session.commit()
 
@@ -163,16 +178,17 @@ def edit(trip_id):
 
             trip.last_update = datetime.datetime.utcnow()
             session.commit()
-            return redirect(end_url)
+            return redirect(redirect_location)
 
     return render_template(template_file,
                            trip=trip_info,
                            caption=caption,
                            archive_button=True,
                            submit_caption=submit_caption,
-                           close_url=end_url,
+                           close_url=redirect_location,
                            submit_url=edit_url,
-                           groups=trip_groups)
+                           groups=trip_groups,
+                           redirect=redirect_location)
 
 
 @bp.route('/trips/archive/<int:trip_id>')
@@ -187,7 +203,7 @@ def archive(trip_id):
         trip.last_update = datetime.datetime.utcnow()
         session.commit()
 
-    return redirect(url_for('trips.index'))
+    return redirect(url_for('.index'))
 
 
 @bp.route('/trips/forget/<int:trip_id>')
@@ -205,4 +221,4 @@ def forget(trip_id):
                                              TripAccess.user_id == g.user.id).delete()
             session.commit()
 
-        return redirect(url_for('trips.index'))
+        return redirect(url_for('.index'))

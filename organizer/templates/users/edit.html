@@ -1,66 +1,49 @@
 {% extends 'base.html' %} {% block content %}
 
-<script>
-    $(document).ready(function () {
-        $("#input-form").validate({
-            rules: {
-                name: {
-                    required: true
-                },
-                password: {
-                    required: true
-                }
-            },
-            errorPlacement: function (error, element) {
-                errorLabelName = element.attr("id") + "_invalid";
-                var oldElement = $("#" + errorLabelName);
-                if (oldElement !== undefined) {
-                    oldElement.remove();
-                }
-                error.appendTo(element.parent());
-                $(error).removeClass("is-invalid").addClass("invalid-feedback").attr("id", errorLabelName);
-            },
-            errorClass: "is-invalid",
-            validClass: "is-valid",
-            errorElement: "div"
-        });
-    });
-</script>
-
 <div class="container">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="row my-3">
-        {% for message in messages %}
-        <div class="alert alert-danger" role="alert">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
     <div class="row my-3">
         <div class="col"></div>
-        <div class="col-md-6">
-            <form class="p-4 m-3 border shadow bg-white" id="input-form" action="{{ url_for('users.add') }}" method="POST">
-                <h2 class="text-center my-3">{{ form_caption }}</h2>
-
-                <div class="form-group">
-                    <label for="input-name">User login</label>
-                    <input type="text" class="form-control" id="input-name" name="login" placeholder="Login" autofocus
-                        value="{{ user.login if user }}" autocomplete="off">
+        <div class="col-xl-5 col-lg-6 col-md-8 col-xs-12">
+            <form class="p-4 m-3 border shadow bg-white needs-validation"
+                  id="input-form"
+                  action="{{ url_for('users.add') if not user else url_for('users.edit', user_id=user.id) }}"
+                  method="POST"
+                  novalidate>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
                 </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                <h2 class="text-center my-3">{{ form_caption }} {% if user %}'{{ user.login }}'{% endif %}</h2>
 
                 {% if not user %}
                 <div class="form-group">
-                    <label for="input-password">User password</label>
-                    <input class="form-control" type="password" id="input-password" placeholder="Password" name="password"/>
+                    <label for="input-name">{{ string_table['User edit login title'] }}</label>
+                    <input type="text" class="form-control" id="input-name" name="login"
+                           placeholder="{{ string_table['User edit login placeholder'] }}" autofocus
+                           value="{{ user.login if user }}" autocomplete="off" required>
+                        <div class="invalid-feedback">
+                            {{ string_table['User edit invalid login'] }}
+                        </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="input-password">{{ string_table['User edit password title'] }}</label>
+                    <input class="form-control" type="password" id="input-password"
+                           placeholder="{{ string_table['User edit password placeholder'] }}"
+                           name="password" required/>
+                    <div class="invalid-feedback">
+                        {{ string_table['User edit invalid password'] }}
+                    </div>
                 </div>
                 {% endif %}
 
                 <div class="form-group">
-                    <label for="input-group">Access group</label>
+                    <label for="input-group">{{ string_table['User edit access group title'] }}</label>
                     <select class="form-control custom-select" id="input-group" name="group">
                         {% for option in groups %}
                         <option {{ 'selected' if user and user.access_group.name == option }}>{{ option }}</option>
@@ -68,12 +51,41 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
-                <a class="btn btn-secondary" href="{{ url_for('users.index') }}">Close</a>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        {{ submit_text }}
+                    </button>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-secondary btn-block" href="{{ url_for('users.index') }}">
+                        {{ string_table['User edit close button'] }}
+                    </a>
+                </div>
             </form>
         </div>
         <div class="col"></div>
     </div>
 </div>
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function () {
+    'use strict';
+    window.addEventListener('load', function () {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName('needs-validation');
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function (form) {
+            form.addEventListener('submit', function (event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
 
 {% endblock %}

@@ -1,4 +1,5 @@
 import datetime
+from enum import Enum
 
 from flask import Blueprint, request, g, abort
 
@@ -34,6 +35,11 @@ def products_search():
         }
 
 
+class Units(Enum):
+    Grams = 0
+    Pieces = 1
+
+
 @products_bp.route('/units', methods=['GET'])
 def product_units():
     if 'user' not in g or g.user is None:
@@ -49,9 +55,9 @@ def product_units():
             return {'result': False}
 
         # TODO: put these units in some table
-        units = ['grams']
+        units = [Units.Grams.value]
         if product.grams is not None:
-            units.append('pcs')
+            units.append(Units.Pieces.value)
 
         return {
             'result': True,
@@ -95,9 +101,12 @@ def meals_add():
             assert day_number <= diff.days + 1
 
         assert meal_name in meals_map
+
         mass = int(mass)
         assert mass > 0
-        assert unit in ['grams', 'pcs']
+
+        unit = int(unit)
+        assert unit in [x.value for x in Units]
     except (ValueError, AssertionError):
         return {"result": False}
 
@@ -113,9 +122,9 @@ def meals_add():
         grams = found_product.grams
 
         if grams is None:
-            if unit != 'grams':
+            if unit != Units.Grams.value:
                 return {'result': False}
-        elif unit == 'pcs':
+        elif unit == Units.Pieces.value:
             mass = grams * mass
 
         meal_number = meals_map[meal_name]

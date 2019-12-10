@@ -3,21 +3,21 @@
 <div class="container">
     <div class="row d-print-none">
         <div class="col-10">
-            <h1 class="display-4 my-3">{{ trip['name'] }} - packing report</h1>
+            <h1 class="display-4 my-3">{{ trip['name'] }}: {{ string_table['Packing report title'] }}</h1>
         </div>
         <div class="col-2 d-flex align-items-end">
             <div class="dropdown my-2">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="columns-count-dropdown-button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Select days per row
+                    {{ string_table['Packing report selector title'] }}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="columns-count-dropdown-button">
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=1) }}">1 columns</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=2) }}">2 columns</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=3) }}">3 columns</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=4) }}">4 columns</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=5) }}">5 columns</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=6) }}">6 columns</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=1) }}">{{ string_table['Packing report selector 1'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=2) }}">{{ string_table['Packing report selector 2'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=3) }}">{{ string_table['Packing report selector 3'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=4) }}">{{ string_table['Packing report selector 4'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=5) }}">{{ string_table['Packing report selector 5'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=6) }}">{{ string_table['Packing report selector 6'] }}</a>
                 </div>
             </div>
         </div>
@@ -28,13 +28,13 @@
     <div class="row">
         {% for day in products.keys(): %}
         <div class="col-sm col-xs-12 p-1">
-            <h5>Day {{ loop.index }}</h5>
+            <h5>{{ string_table['Packing report day title'] }} {{ loop.index }}</h5>
             <table class="table table-sm">
                 <thead>
                     <th class="d-none d-print-table-cell">T</th>
-                    <th>Name</th>
+                    <th>{{ string_table['Packing report name column title'] }}</th>
                     {% for person_group in person_groups: %}
-                    <th class="text-right">{{ person_group }}p</th>
+                    <th class="text-right">{{ person_group }}{{ string_table['Packing report persons suffix'] }}</th>
                     {% endfor %}
                 </thead>
                 <tbody>
@@ -68,9 +68,9 @@
                             {% for person_group in person_groups: %}
                             <td class="text-right">
                                 {% if 'grams' in product %}
-                                {{ (product['mass'][loop.index - 1] / product['grams'])|round(method='ceil')|int }} pcs
+                                {{ (product['mass'][loop.index - 1] / product['grams'])|round(method='ceil')|int }} {{ string_table['Packing report pieces suffix'] }}
                                 {% else %}
-                                {{ product['mass'][loop.index - 1] }} g
+                                {{ product['mass'][loop.index - 1] }} {{ string_table['Packing report grams suffix'] }}
                                 {% endif %}
                                 </td>
                             {% endfor %}

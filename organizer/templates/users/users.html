@@ -7,13 +7,13 @@
 <div class="container">
     <div class="row my-3">
         <div class="col">
-            <h1 class="display-4">Users</h1>
+            <h1 class="display-4">{{ string_table['Users title'] }}</h1>
         </div>
     </div>
 
     <div class="row my-3">
         <div class="col">
-            <a class="btn btn-primary" href="{{ url_for('users.add') }}">Add a new user</a>
+            <a class="btn btn-primary" href="{{ url_for('users.add') }}"><i class="fas fa-plus"></i> {{ string_table['Users add new button'] }}</a>
         </div>
     </div>
 
@@ -21,14 +21,14 @@
         <div class="col">
             <table class="table table-hover table-sm">
                 <thead>
-                    <th>Id</th>
-                    <th>Login</th>
-                    <th>Name</th>
-                    <th>Pass?</th>
-                    <th>Group</th>
-                    <th>Type</th>
-                    <th>Last login</th>
-                    <th>Actions</th>
+                    <th>{{ string_table['Users id title'] }}</th>
+                    <th>{{ string_table['Users login title'] }}</th>
+                    <th>{{ string_table['Users name title'] }}</th>
+                    <th>{{ string_table['Users password title'] }}</th>
+                    <th>{{ string_table['Users group title'] }}</th>
+                    <th>{{ string_table['Users type title'] }}</th>
+                    <th>{{ string_table['Users last login title'] }}</th>
+                    <th>{{ string_table['Users actions title'] }}</th>
                 </thead>
 
                 <tbody>
@@ -49,14 +49,14 @@
                         <td style="width: 15%;">{{ user.last_logged_in.strftime('%H:%M - %d-%m-%Y') }}</td>
                         <td style="width: 3%;">
                             <span class="text-right float-right mx-1 showme">
-                                <a class="showme" data-remove-link="{{ url_for('users.delete', user_id=user.id) }}"
+                                <a class="showme text-danger" data-remove-link="{{ url_for('users.delete', user_id=user.id) }}"
                                    data-toggle="modal" data-target="#delete-modal" href="javascript:void(0);">
-                                    <i class="fas fa-trash" title="Remove"></i>
+                                    <i class="fas fa-trash" title="{{ string_table['Users remove button title'] }}"></i>
                                 </a>
                             </span>
                             <span class="text-right float-right mx-1 showme">
                                 <a class="showme" href="{{ url_for('users.edit', user_id=user.id) }}">
-                                    <i class="fas fa-edit" title="Edit"></i>
+                                    <i class="fas fa-pen" title="{{ string_table['Users edit button title'] }}"></i>
                                 </a>
                             </span>
                         </td>
@@ -74,15 +74,15 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="delete-modal-title">Delete the user?</h5>
+                <h5 class="modal-title" id="delete-modal-title">{{ string_table['Users delete user modal title'] }}</h5>
             </div>
             <div class="modal-body">
-                <p class="text-danger">WARNING: THIS CANNOT BE UNDONE!</p>
-                <p>Are you sure you want to delete this user?</p>
+                <p class="text-danger text-uppercase">{{ string_table['Users delete user modal text'] }}</p>
+                <p>{{ string_table['Users delete user modal text2'] }}</p>
             </div>
             <div class="modal-footer">
-                <a id="delete-button" class="btn btn-danger">Delete</a>
-                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a id="delete-button" class="btn btn-danger">{{ string_table['Users delete user modal delete'] }}</a>
+                <button class="btn btn-secondary" data-dismiss="modal">{{ string_table['Users delete user modal close'] }}</button>
             </div>
         </div>
     </div>
@@ -94,10 +94,7 @@
         var removeLink = button.data('remove-link');
         var modal = $(this);
         var deleteButton = modal.find("#delete-button");
-        console.log(removeLink)
-        console.log(deleteButton);
         deleteButton.attr('href', removeLink);
-        console.log(deleteButton);
     })
 </script>
 

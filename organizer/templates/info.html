@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<script>
+    $('#info-link').addClass('active')
+</script>
+
+<div class="container">
+    <div class="row my-3">
+        <div class="col">
+            <h1 class="display-4">{{ string_table['Info title'] }}</h1>
+        </div>
+    </div>
+    <div class="row my-3">
+        <div class="col-8">
+            <h1>{{ string_table['Info page contacts heading'] }}</h1>
+            <p>{{ string_table['Info page contacts text'] }}<a href="mailto: archidevil52@gmail.com">{{ string_table['Info page send mail text'] }}</a></p>
+
+            <h1>{{ string_table['Info page copyrights heading'] }}</h1>
+            <p>{{ string_table['Info page copyrights text'] }}</p>
+            <p>{{ string_table['Info Freepik text'] }}</p>
+            <p><a href="http://www.freepik.com">Designed by macrovector / Freepik</a></p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -39,6 +39,9 @@ def shopping(trip_id):
         if meal.grams is not None:
             products[meal.id]['pieces'] += meal.mass * persons_count / meal.grams
 
+    # sort products by id
+    products = [x for x in products.values()]
+    products.sort(key=lambda x: x['id'])
     return render_template('reports/shopping.html', trip=trip, products=products)
 
 

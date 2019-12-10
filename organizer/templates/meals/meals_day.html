@@ -2,13 +2,14 @@
 <td style="width: 8%" class="text-right text-truncate {{ additional_style }}">{{ data }}</td>
 {%- endmacro %}
 
-{% macro table(table_style, title, day, datatype, total_datatype, results=False) %}
+{% macro table(table_style, title, day, datatype, total_datatype, string_table, results=False) %}
 <table class="table table-sm table-{{ table_style }} table-hover">
     <tbody>
         <tr>
             <td>
                 <h5><strong>{{ title }}</strong></h5>
             </td>
+            <td></td>
             <td></td>
             <td class="d-none d-sm-table-cell"></td>
             <td class="d-none d-sm-table-cell"></td>
@@ -27,12 +28,14 @@
         </tr>
         {% for meal in day[datatype] %}
         <tr class="showhim">
-            <td style="width: 60%">
+            <td style="width: 56%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width:1px;">
                 <span>{{ meal['name'] }}</span>
+            </td>
+            <td style="width: 4%;">
                 {% if g.user.access_group.value != 0 %}
-                <span class="text-right float-right showme">
+                <span class="text-right showme">
                     <a onclick="removeProduct({{day['number']}}, {{meal['id']}})" href="javascript:void(0);">
-                        <i class="fas fa-trash" title="Remove"></i>
+                        <i class="fas fa-trash text-danger" title="{{ string_table['Meals table remove record'] }}"></i>
                     </a>
                 </span>
                 {% endif %}
@@ -45,7 +48,7 @@
         </tr>
         {% endfor %}
         <tr>
-            <td style="width: 60%" class="text-right font-weight-bold">Total</td>
+            <td colspan="2" style="width: 60%" class="text-right font-weight-bold">{{ string_table['Meals table total record'] }}</td>
             {{ cell(day[total_datatype]['mass']) }}
             {{ cell("{:.1f}".format(day[total_datatype]['proteins']), 'd-none d-sm-table-cell') }}
             {{ cell("{:.1f}".format(day[total_datatype]['fats']), 'd-none d-sm-table-cell') }}
@@ -56,27 +59,27 @@
 </table>
 {%- endmacro %}
 
-{% macro day(day_info) %}
+{% macro day(day_info, string_table) %}
 <div class="card shadow mb-3" id="day{{day_info['number']}}">
     <h5 class="card-header text-white bg-success">
-        Day {{day_info['number']}} - {{day_info['date']}}
+        {{ string_table['Meals day number prefix'] }} {{ day_info['number'] }} - {{ day_info['date'] }}
     </h5>
     <div class="card-body">
         <table class="table table-sm">
             <thead>
-                <th style="width: 60%">Name</th>
-                <th style="width: 8%" class="text-right">Mass</th>
-                <th style="width: 8%" class="text-right d-none d-sm-table-cell">P</th>
-                <th style="width: 8%" class="text-right d-none d-sm-table-cell">F</th>
-                <th style="width: 8%" class="text-right d-none d-sm-table-cell">C</th>
-                <th style="width: 8%" class="text-right">Cals</th>
+                <th style="width: 60%">{{ string_table['Meals day name title'] }}</th>
+                <th style="width: 8%" class="text-right">{{ string_table['Meals day mass title'] }}</th>
+                <th style="width: 8%" class="text-right d-none d-sm-table-cell">{{ string_table['Meals day proteins title'] }}</th>
+                <th style="width: 8%" class="text-right d-none d-sm-table-cell">{{ string_table['Meals day fats title'] }}</th>
+                <th style="width: 8%" class="text-right d-none d-sm-table-cell">{{ string_table['Meals day carbs title'] }}</th>
+                <th style="width: 8%" class="text-right">{{ string_table['Meals day calories title'] }}</th>
             </thead>
         </table>
-        {{ table('success',   'Breakfast', day_info, 'breakfast', 'breakfast_total') }}
-        {{ table('warning',   'Lunch',     day_info, 'lunch',     'lunch_total') }}
-        {{ table('info',      'Dinner',    day_info, 'dinner',    'dinner_total') }}
-        {{ table('secondary', 'Snacks',    day_info, 'snacks',    'snacks_total') }}
-        {{ table('danger',    'Results',   day_info, '',          'total_total', results=True) }}
+        {{ table('success',   string_table['Meals breakfast title'], day_info, 'breakfast', 'breakfast_total', string_table) }}
+        {{ table('warning',   string_table['Meals lunch title'],     day_info, 'lunch',     'lunch_total',     string_table) }}
+        {{ table('info',      string_table['Meals dinner title'],    day_info, 'dinner',    'dinner_total',    string_table) }}
+        {{ table('secondary', string_table['Meals snacks title'],    day_info, 'snacks',    'snacks_total',    string_table) }}
+        {{ table('danger',    string_table['Meals results title'],   day_info, '',          'total_total',     string_table, results=True) }}
     </div>
 </div>
 {%- endmacro %}

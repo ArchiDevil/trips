@@ -5,27 +5,28 @@
 </script>
 
 <div class="container">
-    <h1 class="display-4 my-3">Developer console</h1>
-</div>
-
-<div class="container">
-    <div class="row">
-        <div class="col-2">
-            <h5>SQL requests</h5>
+    <div class="row my-3">
+        <div class="col">
+            <h1 class="display-4">{{ string_table['Developer console title'] }}</h1>
         </div>
-        <div class="col-10">
+    </div>
+
+    <div class="row my-3">
+        <div class="col-2">
+            <h5>{{ string_table['SQL requests section'] }}</h5>
+        </div>
+        <div class="col-6">
             <form action="{{ url_for('developer.execute_sql') }}" method="POST">
                 <div class="form-group">
-                    <label for="sql-request-area">SQL request</label>
+                    <label for="sql-request-area">{{ string_table['SQL request'] }}</label>
                     <textarea class="form-control" id="sql-request-area" rows="3" name="code"></textarea>
                 </div>
-                <div class="d-flex flex-row-reverse ">
-                    <button id="execute-request-button" class="btn btn-danger" type="submit">Submit</button>
+                <div class="d-flex flex-row-reverse">
+                    <button id="execute-request-button" class="btn btn-danger" type="submit">{{ string_table['SQL request submit button'] }}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 
 {% endblock %}
