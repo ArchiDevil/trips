@@ -27,12 +27,12 @@
                     <th style="width: 3%;" class="d-print-none">#</th>
                     <th style="width: 30%;">{{ string_table['Shopping report name title'] }}</th>
                     <th class="text-right" style="width: 15%;">{{ string_table['Shopping report mass title'] }}</th>
-                    <th class="d-none d-print-table-cell">{{ string_table['Shopping report notes title'] }}</th>
+                    <th class="d-none d-print-table-cell text-right">{{ string_table['Shopping report notes title'] }}</th>
                 </thead>
                 <tbody>
                     {% for product in products %}
                     <tr>
-                        <th scope="row" class="d-print-none">{{ product['id'] }}</th>
+                        <th scope="row" class="d-print-none">{{ loop.index }}</th>
                         <td>{{ product['name'] }}</td>
                         <td class="text-right">
                             {{ product['mass'] }} {{ string_table['Shopping report grams suffix'] }}
