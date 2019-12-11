@@ -4,20 +4,22 @@
 
 <script>
     $(function () {
-        $('input[name="daterange"]').daterangepicker({
+        $('#daterange').daterangepicker({
             autoApply: true,
             autoUpdateInput: true,
+            startDate: "{{ trip['from_date'].strftime('%d-%m-%Y') if trip else today_date }}",
+            endDate: "{{ trip['till_date'].strftime('%d-%m-%Y') if trip else today_date }}",
             locale: {
                 format: "DD-MM-YYYY",
                 separator: " - ",
                 daysOfWeek: [
+                    "{{ string_table['Sunday dp'] }}",
                     "{{ string_table['Monday dp'] }}",
                     "{{ string_table['Tuesday dp'] }}",
                     "{{ string_table['Wednesday dp'] }}",
                     "{{ string_table['Thursday dp'] }}",
                     "{{ string_table['Friday dp'] }}",
-                    "{{ string_table['Saturday dp'] }}",
-                    "{{ string_table['Sunday dp'] }}"
+                    "{{ string_table['Saturday dp'] }}"
                 ],
                 "monthNames": [
                     "{{ string_table['January dp'] }}",
@@ -33,15 +35,15 @@
                     "{{ string_table['November dp'] }}",
                     "{{ string_table['December dp'] }}"
                 ],
-                "firstDay": 0
+                "firstDay": 1
             }
         }, function (start, end, label) {
-                vm.tripDates = start.format(this.locale.format) + this.locale.separator + end.format(this.locale.format)
+            vm.tripDates = start.format(this.locale.format) + this.locale.separator + end.format(this.locale.format)
         });
     });
 
     var initialName = "{{ trip['name'] if trip else '' }}"
-    var initialDates = "{{ trip['from_date'] if trip else today_date }} - {{ trip['till_date'] if trip else today_date }}"
+    var initialDates = "{{ trip['from_date'].strftime('%d-%m-%Y') if trip else today_date }} - {{ trip['till_date'].strftime('%d-%m-%Y') if trip else today_date }}"
     function getInitialGroups() {
         return [
             {% if groups: %} {% for group in groups: %}
@@ -81,12 +83,14 @@
 
                 <div class="form-group">
                     <label for="input-date">{{ string_table['Trips edit dates field'] }}</label>
-                    <input class="form-control" name="daterange"
-                           autocomplete="off" type="text" id="input-date"
-                           v-model="tripDates"
-                           v-bind:class="{ 'is-valid': validation.dates, 'is-invalid': !validation.dates }">
-                    <div class="invalid-feedback">{{ string_table['Trips edit error wrong dates'] }}</div>
+                    <div id="daterange" class="form-control btn-outline-secondary" style="cursor: pointer;">
+                        {% raw %}
+                        {{ tripDates }}
+                        {% endraw %}
+                    </div>
                 </div>
+
+                <input class="d-none" name="daterange" v-model="tripDates">
 
                 <div class="form-group">
                     <p class="font-weight-bold mt-4 mb-1">{{ string_table['Trips edit groups config section'] }}</p>

@@ -20,12 +20,14 @@ STRING_TABLE = {
 
     'Info title': 'Информация',
     'Info page contacts heading': 'Контакты',
-    'Info page contacts text': '''В случае проблем с сайтом, наличии предложений и просто желании поболтать, вы можете ''',
-    'Info page send mail text': 'написать нам письмо.',
+    'Info page contacts text': '''В случае проблем с сайтом, наличии предложений и просто желании поболтать, вы можете написать нам письмо.''',
+    'Info page email title': 'Email',
+    'Info page email address': 'archidevil52@gmail.com',
+    'Info page telegram title': 'Telegram',
+    'Info page telegram address': '@archidevil',
     'Info page copyrights heading': 'Информация о лицензиях',
     'Info page copyrights text': '''Данный проект не содержит никакой обязательной лицензии. Вся функциональность предоставляется "как есть".
-    Проект не несет никакой ответственности за любые проблемы в походах, вызванные неправильным использованием проекта.
-    Вы используете проект на свой страх и риск.''',
+    Вы используете проект на свой страх и риск. Мы не несем никакой ответственности в случае возникновения проблем, вызванных неправильным использованием проекта.''',
     'Info Freepik text': '''Вся графика на этом сайте взята с Freepick.com.
     Как того требует лицензия для использования графических материалов, мы предоставляем копирайты дизайнеров, выполнивших работы ниже.''',
 
@@ -64,7 +66,7 @@ STRING_TABLE = {
     'Packing report selector 6': '6 дней',
     'Packing report day title': 'День',
     'Packing report name column title': 'Продукт',
-    'Packing report persons suffix': 'ч',
+    'Packing report persons suffix': 'чел',
     'Packing report pieces suffix': 'шт',
     'Packing report grams suffix': 'г',
 
@@ -146,7 +148,6 @@ STRING_TABLE = {
     'Trips edit title placeholder': 'Введите название',
     'Trips edit error empty title': 'Поле не должно быть пустым',
     'Trips edit dates field': 'Даты похода',
-    'Trips edit error wrong dates': 'Даты должны быть в формате 2019-01-01 - 2019-01-31',
     'Trips edit groups config section': 'Конфигурация групп',
     'Trips edit groups field': 'Сколько групп участвует?',
     'Trips edit groups description': 'Группа людей это одна группа, где все едят из одного котелка.',
@@ -171,7 +172,7 @@ STRING_TABLE = {
     'Products title': 'Продукты',
     'Products add new short button': 'Добавить',
     'Products card header': 'Чего-то не хватает?',
-    'Products card text': '''Если вы не можете найти что-то в базе данных, вы всегда можете добавить свой продукт самостоятельно.
+    'Products card text': '''Если вы не можете найти что-то в базе данных, то всегда можно добавить свой продукт самостоятельно.
     Нужно будет только заполнить информацию о пищевой ценности.''',
     'Products add new button': 'Добавить продукт',
     'Products search placeholder': 'Искать продукт',
@@ -257,7 +258,7 @@ STRING_TABLE = {
     'Meals unable to add meal error': 'Невозможно добавить продукт',
     'Meals grams unit': 'г',
     'Meals pcs unit': 'шт',
-    
+
     'Monday dp': 'Пн',
     'Tuesday dp': 'Вт',
     'Wednesday dp': 'Ср',

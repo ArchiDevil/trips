@@ -133,14 +133,27 @@
             <h1 class="display-4">{{ trip['name'] }}</h1>
         </div>
 
-        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
         <div class="col-auto d-flex flex-row-reverse align-items-end">
+            {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
             <a class="btn btn-primary mb-3 d-block d-lg-none"
                 href="{{ url_for('trips.edit', trip_id=trip['id']) }}">
-                {{ string_table['Meals edit trip short button'] }}
+                <i class="fas fa-pen"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row my-lg-0 my-3">
+        <div class="col">
+            <a class="btn btn-secondary w-100 d-block d-lg-none" href="{{ url_for('reports.shopping', trip_id=trip['id']) }}">
+                {{ string_table['Meals card shopping report button'] }}
             </a>
         </div>
-        {% endif %}
+        <div class="col">
+            <a class="btn btn-secondary w-100 d-block d-lg-none" href="{{ url_for('reports.packing', trip_id=trip['id']) }}">
+                {{ string_table['Meals card packing report button'] }}
+            </a>
+        </div>
     </div>
 
     <div class="row my-3">
@@ -171,10 +184,10 @@
                 </div>
             </div>
 
-            <div class="sticky-top py-3 px-4">
-                <div class="w-100">
+            <div class="sticky-top py-3 px-4" style="width: 18rem;">
+                <div class="w-100 d-flex flex-wrap">
                     {% for day in days %}
-                    <a class="btn btn-outline-secondary btn-block" href="#day{{day['number']}}">
+                    <a class="btn btn-outline-secondary m-1" style="width: 45%;" href="#day{{day['number']}}">
                         <i class="fas fa-angle-double-right"></i>
                         {{ string_table['Meals day number prefix'] }} {{day['number']}}
                     </a>

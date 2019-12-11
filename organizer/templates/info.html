@@ -14,7 +14,11 @@
     <div class="row my-3">
         <div class="col-8">
             <h1>{{ string_table['Info page contacts heading'] }}</h1>
-            <p>{{ string_table['Info page contacts text'] }}<a href="mailto: archidevil52@gmail.com">{{ string_table['Info page send mail text'] }}</a></p>
+            <p>{{ string_table['Info page contacts text'] }}</p>
+            <address>
+                {{ string_table['Info page email title'] }}: <a href="mailto: {{ string_table['Info page email address'] }}">{{ string_table['Info page email address'] }}</a><br/>
+                {{ string_table['Info page telegram title'] }}: <a href="https://t.me/archidevil">{{ string_table['Info page telegram address'] }}</a>
+            </address>
 
             <h1>{{ string_table['Info page copyrights heading'] }}</h1>
             <p>{{ string_table['Info page copyrights text'] }}</p>
