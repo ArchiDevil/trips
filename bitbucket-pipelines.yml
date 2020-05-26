@@ -1,0 +1,21 @@
+pipelines:
+  branches:
+    master:
+      - step:
+          name: 'Python 3.7 testing'
+          image: python:3.7
+          caches:
+            - pip
+          script:
+            - pip install -r requirements.txt
+            - python -m pytest
+  pull-requests:
+    feature/*:
+      - step:
+          name: 'Python 3.7 testing'
+          image: python:3.7
+          caches:
+            - pip
+          script:
+            - pip install -r requirements.txt
+            - python -m pytest
