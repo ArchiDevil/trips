@@ -6,4 +6,3 @@ pytest==5.*
 beautifulsoup4==4.9.*
 gunicorn==19.9.*
 psycopg2==2.8.*
-setuptools
