@@ -19,3 +19,19 @@ pipelines:
           script:
             - pip install -r requirements.txt
             - python -m pytest
+  custom:
+    test:
+      - step:
+          name: Build and push to Heroku test environment
+          deployment: test
+          image: python:3.7
+          caches:
+            - pip
+          script:
+            - pip install -r requirements.txt
+            - python setup.py sdist
+            - pipe: atlassian/heroku-deploy:1.1.4
+              variables:
+                HEROKU_API_KEY: $HEROKU_API_KEY
+                HEROKU_APP_NAME: $HEROKU_APP_NAME
+                ZIP_FILE: 'dist/trips_organizer-0.3.tar.gz'

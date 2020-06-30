@@ -1,4 +1,7 @@
 include organizer/schema.sql
 graft organizer/static
 graft organizer/templates
+include Procfile
+include runtime.txt
 global-exclude *.pyc
+prune tests
