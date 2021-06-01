@@ -1,14 +1,16 @@
+import csv
 import datetime
 import functools
 import hashlib
-from typing import List
+import io
+from typing import Any, List
 
-from flask import Blueprint, render_template, request, url_for, redirect, abort, g, flash
+from flask import Blueprint, render_template, request, url_for, redirect, abort, g, flash, send_file
 from sentry_sdk import capture_exception
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, AccessGroup, User, TripAccess, Group
+from organizer.schema import Trip, AccessGroup, User, TripAccess, Group, Product, MealRecord
 from organizer.strings import STRING_TABLE
 
 bp = Blueprint('trips', __name__)
@@ -129,7 +131,7 @@ def add():
 
 @bp.route('/trips/edit/<int:trip_id>', methods=['GET', 'POST'])
 @login_required_group(AccessGroup.TripManager)
-def edit(trip_id):
+def edit(trip_id: int):
     template_file = 'trips/edit.html'
     caption = STRING_TABLE['Trips edit title']
     submit_caption = STRING_TABLE['Trips edit edit button']
@@ -193,7 +195,7 @@ def edit(trip_id):
 
 @bp.route('/trips/archive/<int:trip_id>')
 @login_required_group(AccessGroup.TripManager)
-def archive(trip_id):
+def archive(trip_id: int):
     with get_session() as session:
         trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
@@ -208,7 +210,7 @@ def archive(trip_id):
 
 @bp.route('/trips/forget/<int:trip_id>')
 @login_required_group(AccessGroup.Guest)
-def forget(trip_id):
+def forget(trip_id: int):
     with get_session() as session:
         trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
@@ -222,3 +224,57 @@ def forget(trip_id):
             session.commit()
 
         return redirect(url_for('.index'))
+
+
+def send_csv_file(rows: List[List[Any]]):
+    file = io.StringIO()
+    writer = csv.writer(file, dialect='excel')
+    writer.writerows(rows)
+    file.seek(0, 0)
+
+    file_to_send = io.BytesIO()
+    data = file.read()
+    file_to_send.write(data.encode(encoding='utf-8'))
+    file_to_send.seek(0, 0)
+
+    return send_file(file_to_send, mimetype='text/plain',
+                     as_attachment=True, attachment_filename='data.csv')
+
+
+@bp.route('/trips/download/<int:trip_id>', methods=['GET'])
+@login_required_group(AccessGroup.Guest)
+def download(trip_id: int):
+    csv_content = [[
+        STRING_TABLE['CSV name'],
+        STRING_TABLE['CSV day'],
+        STRING_TABLE['CSV meal'],
+        STRING_TABLE['CSV mass'],
+        STRING_TABLE['CSV cals']
+    ]]
+
+    meals_table = {
+        0: STRING_TABLE['Meals breakfast title'],
+        1: STRING_TABLE['Meals lunch title'],
+        2: STRING_TABLE['Meals dinner title'],
+        3: STRING_TABLE['Meals snacks title']
+    }
+
+    with get_session() as session:
+        trip = session.query(Trip).filter(Trip.id == trip_id).first()
+        if not trip:
+            abort(404)
+
+        data = session.query(MealRecord.mass,
+                             MealRecord.day_number,
+                             MealRecord.meal_number,
+                             Product.name,
+                             Product.calories).join(Product).order_by(MealRecord.day_number,
+                                                                      MealRecord.meal_number).filter(MealRecord.trip_id == trip_id).all()
+        for record in data:
+            csv_content.append([record.name,
+                                record.day_number,
+                                meals_table[record.meal_number],
+                                record.mass,
+                                record.calories])
+
+    return send_csv_file(csv_content)

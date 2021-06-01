@@ -28,6 +28,13 @@ def login_required_group(group):
                     'id': str(g.user.id),
                     'username': '{}'.format(g.user.displayed_name if g.user.displayed_name else g.user.login)
                 }
+
+            # update last user login/access
+            with get_session() as sql_session:
+                user = sql_session.query(User).filter(User.id == g.user.id).first()
+                user.last_logged_in = datetime.datetime.utcnow()
+                sql_session.commit()
+
             return view(**kwargs)
         return wrapped_view_grouped
     return login_required_grouped

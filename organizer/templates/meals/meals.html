@@ -127,7 +127,80 @@
     </div>
 </div>
 
-<div class="container">
+<div class="modal fade" id="cycle-days-modal" tabindex="-1" role="dialog" aria-labelledby="cycle-days-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('meals.cycle_days', trip_id=trip['id']) }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cycle-days-modal-label">{{ string_table['Meals tools cycle days'] }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>{{ string_table['Meals cycle days modal description'] }}</p>
+
+                    <div class="form-group row">
+                        <label class="col-sm-6 col-form-label"><strong>{{ string_table['Meals cycle days modal from title']}}</strong></label>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="input-days-from" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy from day']}}</label>
+                        <div class="col-sm-4">
+                            <select class="custom-select" id="input-days-from" name="src-start">
+                                {% for day in days %}
+                                <option value="{{ loop.index }}">{{ loop.index }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="input-days" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy to day'] }}</label>
+                        <div class="col-sm-4">
+                            <select class="custom-select" id="input-days" name="src-end">
+                                {% for day in days %}
+                                <option value="{{ loop.index }}">{{ loop.index }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-6 col-form-label"><strong>{{ string_table['Meals cycle days modal to title']}}</strong></label>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="input-days-to-start" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal paste from day'] }}</label>
+                        <div class="col-sm-4">
+                            <select class="custom-select" id="input-days-to-start" name="dst-start">
+                                {% for day in days %}
+                                <option value="{{ loop.index }}">{{ loop.index }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="input-days-to-end" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal stop on day'] }}</label>
+                        <div class="col-sm-4">
+                            <select class="custom-select" id="input-days-to-end" name="dst-end">
+                                {% for day in days %}
+                                <option value="{{ loop.index }}">{{ loop.index }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <small class="col-12 text-muted">{{ string_table['Meals cycle days modal tip'] }}</small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ string_table['Meals cycle days modal close'] }}</button>
+                    <button type="submit" class="btn btn-primary">{{ string_table['Meals cycle days modal go'] }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="meals-app">
     <div class="row my-3">
         <div class="col">
             <h1 class="display-4">{{ trip['name'] }}</h1>
@@ -168,7 +241,7 @@
                         <i class="fas fa-calendar-day"></i> {{ trip['from_date'].strftime('%d/%m') }} - {{ trip['till_date'].strftime('%d/%m') }}
                     </p>
                     <p class="card-text">
-                        <i class="fas fa-walking"></i> {{ string_table['Meals card participants'] }}: {{ trip['attendees'] }} 
+                        <i class="fas fa-walking"></i> {{ string_table['Meals card participants'] }}: {{ trip['attendees'] }}
                     </p>
                     {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
                     <a class="btn btn-primary w-100 my-1" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">
@@ -197,6 +270,36 @@
         </div>
 
         <div class="col">
+            <div class="card shadow mb-3">
+                <h5 class="card-header">
+                    {{ string_table['Meals tools header'] }}
+                    <a class="btn btn-sm btn-secondary float-right ml-1" href="{{ url_for('trips.download', trip_id=trip['id']) }}">
+                        <i class="fas fa-table"></i>
+                    </a>
+                    <button class="btn btn-sm btn-secondary float-right mx-1"
+                            type="button" data-toggle="modal"
+                            data-target="#cycle-days-modal">
+                        <i class="fas fa-spinner"></i>
+                    </button>
+                </h5>
+                <div class="card-body">
+                    <p class="card-text">
+                        <i class="fas fa-cookie-bite"></i> {{ string_table['Meals stats average cals title'] }}:
+                        {% raw %}
+                            {{ averageCals }}
+                        {% endraw %}
+                        {{ string_table['Meals day calories title'] }}
+                    </p>
+                    <p class="card-text">
+                        <i class="fas fa-cubes"></i> {{ string_table['Meals stats average mass title'] }}:
+                        {% raw %}
+                            {{ averageMass }}
+                        {% endraw %}
+                        {{ string_table['Meals grams unit'] }}
+                    </p>
+                </div>
+            </div>
+
             {% import 'meals/meals_day.html' as meals_day %}
             {% for day in days %}
             {{ meals_day.day(day_info=day, string_table=string_table) }}
@@ -209,7 +312,7 @@
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
 <script>
-    vm = new Vue({
+    addProdApp = new Vue({
         el: '#add-product-modal',
         data: {
             currentProductId: 0,
@@ -250,19 +353,19 @@
                     },
                     success: function (msg) {
                         if (msg.result == false) {
-                            vm.units = []
+                            addProdApp.units = []
                             return;
                         }
 
-                        vm.units = []
+                        addProdApp.units = []
                         for (unit of msg.units) {
                             var name = unit === 0 ? '{{ string_table["Meals grams unit"] }}' : '{{ string_table["Meals pcs unit"] }}'
-                            vm.units.push({
+                            addProdApp.units.push({
                                 name: name,
                                 value: unit
                             })
                         }
-                        vm.unit = 0;
+                        addProdApp.unit = 0;
                     }
                 })
             },
@@ -294,18 +397,19 @@
                     },
                     success: function (msg) {
                         if (msg['result'] != true) {
-                            vm.errorMessage = '{{ string_table["Meals unable to add meal error"] }}';
+                            addProdApp.errorMessage = '{{ string_table["Meals unable to add meal error"] }}';
                         }
                         else {
                             reloadDay(day);
-                            vm.currentProductId = 0;
-                            vm.currentProductName = '';
-                            vm.mass = '';
-                            vm.units = [];
-                            vm.unit = undefined;
-                            vm.errorMessage = '';
+                            addProdApp.currentProductId = 0;
+                            addProdApp.currentProductName = '';
+                            addProdApp.mass = '';
+                            addProdApp.units = [];
+                            addProdApp.unit = undefined;
+                            addProdApp.errorMessage = '';
+                            mealsApp.updateAverages();
                         }
-                        vm.spinnerVisible = false;
+                        addProdApp.spinnerVisible = false;
                     }
                 })
             },
@@ -318,8 +422,35 @@
         }
     })
 
+    var mealsApp = new Vue({
+        el: '#meals-app',
+        data: {
+            averageCals: 0,
+            averageMass: 0,
+            averagesSpinnerVisible: false
+        },
+        methods: {
+            updateAverages: function() {
+                mealsApp.averagesSpinnerVisible = true;
+
+                $.ajax({
+                    type: "GET",
+                    url: "{{ url_for('api.meals.meals_averages') }}",
+                    data: {
+                        'trip_id': "{{ trip['id'] }}"
+                    },
+                    success: function(msg) {
+                        mealsApp.averageCals = msg['cals']
+                        mealsApp.averageMass = msg['mass']
+                    }
+                })
+            }
+        }
+    })
+
     $(document).ready(function () {
         updateList('');
+        mealsApp.updateAverages();
     });
 
     $(document).on('show.bs.modal', '#add-product-modal', function (event) {
@@ -330,12 +461,12 @@
         modal.find("#found-products").data("day", day);
         modal.find("#found-products").data("mealtype", mealType);
 
-        vm.currentProductId = 0;
-        vm.currentProductName = '';
-        vm.mass = '';
-        vm.units = []
-        vm.unit = undefined;
-        vm.errorMessageVisible = false;
+        addProdApp.currentProductId = 0;
+        addProdApp.currentProductName = '';
+        addProdApp.mass = '';
+        addProdApp.units = []
+        addProdApp.unit = undefined;
+        addProdApp.errorMessageVisible = false;
 
         setTimeout(() => {
             document.getElementById('search-product-input').focus();
@@ -360,6 +491,7 @@
                 }
                 else {
                     reloadDay(dayNumber);
+                    mealsApp.updateAverages();
                 }
             },
             error: function() {
@@ -407,9 +539,9 @@
                     if (msg.result !== true)
                         return;
 
-                    vm.products = []
+                    addProdApp.products = []
                     for (product of msg.products) {
-                        vm.products.push({
+                        addProdApp.products.push({
                             id: product['id'],
                             name: product['name']
                         })
@@ -422,6 +554,16 @@
                 }
             })
         }, 500)
+    }
+
+    function hideDay(cardId) {
+        let hideClass = 'd-none';
+        let body = document.querySelector('#' + cardId + ' div.card-body');
+        if (body.classList.contains(hideClass)) {
+            body.classList.remove(hideClass)
+        } else {
+            body.classList.add(hideClass);
+        }
     }
 </script>
 

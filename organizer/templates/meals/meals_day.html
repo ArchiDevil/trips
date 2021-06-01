@@ -61,7 +61,7 @@
 
 {% macro day(day_info, string_table) %}
 <div class="card shadow mb-3" id="day{{day_info['number']}}">
-    <h5 class="card-header text-white bg-success">
+    <h5 class="card-header text-white bg-success clickable-header user-select-none" onclick="hideDay('day{{day_info['number']}}')">
         {{ string_table['Meals day number prefix'] }} {{ day_info['number'] }} - {{ day_info['date'] }}
     </h5>
     <div class="card-body">

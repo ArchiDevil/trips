@@ -1,3 +1,8 @@
+import datetime
+
+from organizer.schema import TripAccess, VkUser
+from organizer.db import get_session
+from flask.app import Flask
 from organizer.strings import STRING_TABLE
 
 def test_users_rejects_not_logged_in(client):
@@ -181,6 +186,39 @@ def test_users_remove_returns_404_on_wrong_user(admin_logged_client):
 def test_users_remove_cannot_remove_current_user(admin_logged_client):
     response = admin_logged_client.get('/users/remove/1')
     assert response.status_code == 403  # forbidden to remove current user
+
+
+def test_users_remove_trip_access(admin_logged_client, app: Flask):
+    with app.app_context():
+        with get_session() as session:
+            session.add(TripAccess(user_id=2, trip_id=1))
+            session.commit()
+
+    response = admin_logged_client.get('/users/remove/2')
+    assert response.status_code == 302
+    assert '/users/' in response.location
+
+    with app.app_context():
+        with get_session() as session:
+            assert not session.query(TripAccess).filter(TripAccess.user_id == 2).first()
+
+
+def test_users_remove_vk_user(admin_logged_client, app: Flask):
+    with app.app_context():
+        with get_session() as session:
+            session.add(VkUser(id=12,
+                               user_id=2,
+                               user_token="12345",
+                               token_exp_time=datetime.datetime.utcnow()))
+            session.commit()
+
+    response = admin_logged_client.get('/users/remove/2')
+    assert response.status_code == 302
+    assert '/users/' in response.location
+
+    with app.app_context():
+        with get_session() as session:
+            assert not session.query(VkUser).filter(VkUser.user_id == 2).first()
 
 
 def test_users_edit_rejects_not_logged_in(client):

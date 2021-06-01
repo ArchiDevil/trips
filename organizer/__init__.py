@@ -18,7 +18,7 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     if 'DATABASE_URL' in os.environ:  # pragma: no cover
         db_url = os.environ['DATABASE_URL']  # pragma: no cover
-    else: 
+    else:
         db_url = 'sqlite:///' + os.path.join(app.instance_path, 'flaskr.sqlite')
 
     secret_key = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ else 'dev'
@@ -36,7 +36,10 @@ def create_app(test_config=None):
         PERMANENT_SESSION_LIFETIME=session_lifetime,
         SERVER_NAME=server_name,
         VK_CLIENT_ID=vk_client_id,
-        VK_APP_SECRET=vk_app_secret
+        VK_APP_SECRET=vk_app_secret,
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
     )
 
     if test_config is None:

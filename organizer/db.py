@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from typing import ContextManager, Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -14,7 +15,7 @@ from organizer.fake_data import init_fake_data_internal
 
 
 @contextmanager
-def get_session():
+def get_session() -> Generator[scoped_session, None, None]:
     # this is the first request to the DB
     if 'engine' not in g:
         init_connection()

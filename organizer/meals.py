@@ -1,96 +1,16 @@
-import datetime
 import functools
 import hashlib
-from typing import List
+from collections import defaultdict
 
-from flask import Blueprint, render_template, get_template_attribute, abort, g
+from flask import Blueprint, render_template, get_template_attribute, abort, g, url_for, redirect, request
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
 from organizer.schema import Trip, MealRecord, Product, AccessGroup, User
 from organizer.strings import STRING_TABLE
+from organizer.meals_utils import calculate_total_days_info, format_date, calculate_day_info
 
 bp = Blueprint('meals', __name__, url_prefix='/meals')
-
-
-def format_date(first_day, current_day_number):
-    return (first_day + datetime.timedelta(days=current_day_number - 1)).strftime('%d/%m')
-
-
-def calculate_day_info(day_number: int,
-                       date: str,
-                       meals_info: List[dict]):
-    day = {
-        'number': day_number,
-        'date': '',
-        'breakfast': [],
-        'breakfast_total': {'mass': 0},
-        'lunch': [],
-        'lunch_total': {'mass': 0},
-        'dinner': [],
-        'dinner_total': {'mass': 0},
-        'snacks': [],
-        'snacks_total': {'mass': 0},
-        'total_total': {'mass': 0}
-    }
-
-    meals_map = {
-        0: 'breakfast',
-        1: 'lunch',
-        2: 'dinner',
-        3: 'snacks'
-    }
-
-    for record in meals_info:
-        meal_number = record.meal_number
-        day[meals_map[meal_number]].append({
-            'id': record.id,
-            'name': record.name,
-            'mass': record.mass,
-            'proteins': record.proteins * record.mass / 100.0,
-            'fats': record.fats * record.mass / 100.0,
-            'carbs': record.carbs * record.mass / 100.0,
-            'cals': record.calories * record.mass / 100.0
-        })
-
-    # calculating totals for each day
-    for field in ('mass', 'proteins', 'fats', 'carbs', 'cals'):
-        day['breakfast_total'][field] = sum([e[field] for e in day['breakfast']])
-        day['lunch_total'][field] = sum([e[field] for e in day['lunch']])
-        day['dinner_total'][field] = sum([e[field] for e in day['dinner']])
-        day['snacks_total'][field] = sum([e[field] for e in day['snacks']])
-
-        day['total_total'][field] = sum([day['breakfast_total'][field],
-                                         day['lunch_total'][field],
-                                         day['dinner_total'][field],
-                                         day['snacks_total'][field]])
-
-    day['date'] = date
-    return day
-
-
-def calculate_total_days_info(first_date, last_date, meals_info):
-    days_amount = (last_date - first_date).days + 1
-    days = [{
-            'number': x,
-            'date': '',
-            'breakfast': [],
-            'breakfast_total': {'mass': 0},
-            'lunch': [],
-            'lunch_total': {'mass': 0},
-            'dinner': [],
-            'dinner_total': {'mass': 0},
-            'snacks': [],
-            'snacks_total': {'mass': 0},
-            'total_total': {'mass': 0}
-        } for x in range(1, days_amount + 1)]
-
-    for i, _ in enumerate(days):
-        date = format_date(first_date, i + 1)
-        day_meals = [x for x in meals_info if x.day_number == i + 1]
-        days[i] = calculate_day_info(i + 1, date, day_meals)
-
-    return days
 
 
 @bp.route('/<int:trip_id>')
@@ -132,7 +52,8 @@ def days_view(trip_id):
     last_date = trip_info.till_date
     days = calculate_total_days_info(first_date, last_date, meals_info)
 
-    return render_template('meals/meals.html', trip=trip, days=days)
+    return render_template('meals/meals.html',
+                           trip=trip, days=days)
 
 
 @bp.route('/<int:trip_id>/day_table/<int:day_number>')
@@ -162,3 +83,56 @@ def day_tables(trip_id, day_number):
     day = calculate_day_info(day_number, date, meals_info)
     day_macro = get_template_attribute('meals/meals_day.html', 'day')
     return day_macro(day, string_table=STRING_TABLE)
+
+
+@bp.route('cycle_days/<int:trip_id>', methods=['POST'])
+@login_required_group(AccessGroup.TripManager)
+def cycle_days(trip_id):
+    if not 'src-start' in request.form or not 'src-end' in request.form:
+        abort(400)
+
+    if not 'dst-start' in request.form or not 'dst-end' in request.form:
+        abort(400)
+
+    try:
+        src_start = int(request.form['src-start'])
+        src_end = int(request.form['src-end'])
+        dst_start = int(request.form['dst-start'])
+        dst_end = int(request.form['dst-end'])
+    except ValueError:
+        abort(403)
+
+    if src_start <= 0 or src_end <= 0 or dst_start <= 0 or dst_end <= 0:
+        abort(403)
+
+    if src_start > src_end or dst_start > dst_end:
+        abort(403)
+
+    days_count = src_end - src_start + 1
+
+    with get_session() as session:
+        meals_info = session.query(MealRecord).filter(Trip.id == trip_id,
+                                                      MealRecord.day_number >= src_start,
+                                                      MealRecord.day_number <= src_start + days_count).all()
+        meals_per_day = defaultdict(list)
+        for meal in meals_info:
+            meals_per_day[meal.day_number].append(meal)
+
+        trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
+        trip_duration = (trip_info.till_date - trip_info.from_date).days + 1
+
+        if src_end > trip_duration or dst_end > trip_duration:
+            abort(403)
+
+        for day_number in range(dst_start, dst_end + 1):
+            idx = ((day_number - 1) % days_count) + 1
+            for meal in meals_per_day[idx]:
+                new_record = MealRecord(trip_id=trip_id,
+                                        product_id=meal.product_id,
+                                        day_number=day_number,
+                                        meal_number=meal.meal_number,
+                                        mass=meal.mass)
+                session.add(new_record)
+        session.commit()
+
+    return redirect(url_for('meals.days_view', trip_id=trip_id))

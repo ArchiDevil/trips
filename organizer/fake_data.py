@@ -62,22 +62,36 @@ def init_fake_data_internal(session):
 
     session.commit()
 
-    for x in range(5):
-        session.add_all([
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=1, mass=60),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=2, mass=20),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=3, mass=30),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=4, mass=50),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=5, mass=50),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=6, mass=20),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=7, mass=15),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=8, mass=30),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=9, mass=30),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=10, mass=60),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=11, mass=30),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=12, mass=30),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=13, mass=30),
-            MealRecord(trip_id=1, day_number=x + 1, meal_number=3, product_id=14, mass=60)
-        ])
+    for x in range(4, -1, -1):
+        if x == 3:
+            continue
 
+        if x == 0:
+            session.add_all([
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=1, mass=60),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=2, mass=20),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=3, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=4, mass=50),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=5, mass=50),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=6, mass=20),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=7, mass=15),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=8, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=9, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=10, mass=60),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=11, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=12, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=13, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=3, product_id=14, mass=60)
+            ])
+        else:
+            session.add_all([
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=1, mass=60),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=0, product_id=4, mass=50),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=5, mass=50),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=8, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=1, product_id=9, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=10, mass=60),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=13, mass=30),
+                MealRecord(trip_id=1, day_number=x + 1, meal_number=3, product_id=14, mass=60)
+            ])
     session.commit()

@@ -315,3 +315,28 @@ def test_api_remove_returns_fail_on_incorrect_meal_id(org_logged_client):
     result = org_logged_client.delete('/api/v1/meals/remove',
                                       data={'meal_id': 'nan'})
     assert not result.json['result']
+
+
+def test_api_calculate_averages_reject_insufficient_privilegies(client):
+    result = client.get('/api/v1/meals/averages',
+                                    data={'trip_id': 1})
+    assert result.status_code == 403
+
+
+def test_api_requires_trip_id(user_logged_client):
+    result = user_logged_client.get('/api/v1/meals/averages')
+    assert result.status_code == 400
+
+
+def test_api_rejects_incorrect_trip_id(user_logged_client):
+    result = user_logged_client.get('/api/v1/meals/averages',
+                                    query_string={'trip_id': 127})
+    assert result.status_code == 404
+
+
+def test_api_calculates_averages(user_logged_client):
+    result = user_logged_client.get('/api/v1/meals/averages',
+                                    query_string={'trip_id': 1})
+    assert result.status_code == 200
+    assert result.json['mass']
+    assert result.json['cals']

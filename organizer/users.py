@@ -4,7 +4,7 @@ from sentry_sdk import capture_message
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import User, AccessGroup
+from organizer.schema import User, AccessGroup, VkUser, TripAccess
 from organizer.strings import STRING_TABLE
 
 bp = Blueprint('users', __name__, url_prefix='/users')
@@ -122,6 +122,8 @@ def delete(user_id):
         if not user:
             abort(404)
 
+        session.query(TripAccess).filter(TripAccess.user_id == user_id).delete()
+        session.query(VkUser).filter(VkUser.user_id == user_id).delete()
         session.query(User).filter(User.id == user_id).delete()
         session.commit()
         return redirect(url_for('users.index'))

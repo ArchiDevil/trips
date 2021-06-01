@@ -244,6 +244,8 @@ def test_trips_can_edit_trip(org_logged_client):
     assert (STRING_TABLE['Trips participants count title'] + ': 5').encode() not in response.data
 
 
+
+
 def test_trips_edit_rejects_wrong_name(org_logged_client):
     response = org_logged_client.post('/trips/edit/1',
                                       data={
@@ -314,6 +316,18 @@ def test_trips_edit_rejects_swapped_dates(org_logged_client):
     assert b'10/09' not in response.data
     assert b'08/09' not in response.data
     assert (STRING_TABLE['Trips participants count title'] + ': 5').encode() in response.data
+
+
+def test_trips_edit_shows_redirect_error(org_logged_client):
+    response = org_logged_client.post('/trips/edit/1',
+                                      data={
+                                          'name': 'Test trip',
+                                          'daterange': '08-09-2019 - 10-09-2019',
+                                          'group1': '3',
+                                          'group2': '6'
+                                      })
+    assert response.status_code == 200
+    assert b'No redirect field is provided' in response.data
 
 
 def test_trips_edit_rejects_empty_groups(org_logged_client):
@@ -422,6 +436,15 @@ def test_trips_forget_returns_404_for_non_existing_trip(user_logged_client):
     assert response.status_code == 404
 
 
+def test_trips_can_share(org_logged_client):
+    response = org_logged_client.get('/')
+    assert b'Admin trip' not in response.data
+
+    org_logged_client.get('/meals/3')
+    response = org_logged_client.get('/')
+    assert b'Admin trip' in response.data
+
+
 def test_trips_forget_forgets_trip(user_logged_client):
     user_logged_client.get('/meals/1')
     response = user_logged_client.get('/trips/forget/1')
@@ -430,3 +453,59 @@ def test_trips_forget_forgets_trip(user_logged_client):
 
     response = user_logged_client.get('/')
     assert b'Taganay' not in response.data
+
+
+def test_trips_download_rejects_not_logged_in(client):
+    response = client.get('/trips/download/1')
+    assert response.status_code == 302
+    assert 'auth/login' in response.location
+
+
+def test_trips_download_returns_csv(user_logged_client):
+    response = user_logged_client.get('/trips/download/1')
+    assert response.status_code == 200
+    assert response.data
+
+    data: str = response.data.decode(encoding='utf-8')
+    lines = data.splitlines()
+    assert lines
+    assert len(lines) == 39
+    assert lines[0] == ','.join([
+        STRING_TABLE['CSV name'],
+        STRING_TABLE['CSV day'],
+        STRING_TABLE['CSV meal'],
+        STRING_TABLE['CSV mass'],
+        STRING_TABLE['CSV cals']
+    ])
+    assert ','.join([
+        'Multigrain cereal', '3', STRING_TABLE['Meals breakfast title'], '60', '362.0'
+    ]) in lines
+
+
+def test_trips_download_returns_empty_csv(admin_logged_client):
+    response = admin_logged_client.get('/trips/download/3')
+    assert response.status_code == 200
+    assert response.data
+
+    data: str = response.data.decode(encoding='utf-8')
+    lines = data.splitlines()
+    assert lines
+    assert len(lines) == 1
+    assert lines[0] == ','.join([
+        STRING_TABLE['CSV name'],
+        STRING_TABLE['CSV day'],
+        STRING_TABLE['CSV meal'],
+        STRING_TABLE['CSV mass'],
+        STRING_TABLE['CSV cals']
+    ])
+
+
+def test_trips_download_returns_404_for_non_existing_trip(user_logged_client):
+    response = user_logged_client.get('/trips/download/42')
+    assert response.status_code == 404
+
+
+def test_trips_forgetting_of_unknown_does_nothing(user_logged_client):
+    response = user_logged_client.get('/trips/forget/3')
+    assert response.status_code == 302
+    assert response.location.endswith('/')

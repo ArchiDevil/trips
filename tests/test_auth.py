@@ -1,4 +1,8 @@
+from flask import Flask
+
 from organizer.strings import STRING_TABLE
+from organizer.db import get_session
+from organizer.schema import User
 
 def test_auth_can_see_login_page(client):
     response = client.get('/auth/login')
@@ -19,6 +23,44 @@ def test_auth_can_log_in_as_user(client):
 
     assert response.status_code == 302
     assert '/trip/edit/1' in response.location
+
+
+def test_auth_updates_last_login(client, app: Flask):
+    with app.app_context():
+        with get_session() as session:
+            user = session.query(User).filter(User.login == "Administrator").first()
+            first_date = user.last_logged_in
+
+    client.post('/auth/login',
+                data={
+                    'login': 'Administrator',
+                    'password': 'qwerty',
+                    'redirect': '/trip/edit/1'
+                })
+
+    with app.app_context():
+        with get_session() as session:
+            user = session.query(User).filter(User.login == "Administrator").first()
+            second_date = user.last_logged_in
+
+    assert first_date != second_date
+
+
+def test_auth_any_access_updates_last_login(org_logged_client, app: Flask):
+    with app.app_context():
+        with get_session() as session:
+            user = session.query(User).filter(User.login == "Organizer").first()
+            first_date = user.last_logged_in
+
+    response = org_logged_client.get('/meals/1')
+    assert response.status_code == 200
+
+    with app.app_context():
+        with get_session() as session:
+            user = session.query(User).filter(User.login == "Organizer").first()
+            second_date = user.last_logged_in
+
+    assert first_date != second_date
 
 
 def test_auth_can_log_in_as_user_with_remember(client):

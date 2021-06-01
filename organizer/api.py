@@ -1,20 +1,34 @@
 import datetime
+import functools
 from enum import Enum
+from typing import List, Dict, Tuple, Any
 
 from flask import Blueprint, request, g, abort
 
 from organizer.db import get_session
 from organizer.schema import Product, Trip, MealRecord, AccessGroup
+from organizer.meals_utils import calculate_total_days_info
 
 products_bp = Blueprint('api.products', __name__, url_prefix='/api/v1/products')
 meals_bp = Blueprint('api.meals', __name__, url_prefix='/api/v1/meals')
 
 
-@products_bp.route('/search', methods=['GET'])
-def products_search():
-    if 'user' not in g or g.user is None:
-        abort(403)
+def api_login_required_group(group=None):
+    def api_login_required_grouped(view):
+        @functools.wraps(view)
+        def api_wrapped_view_grouped(**kwargs):
+            if 'user' not in g or g.user is None:
+                abort(403)
+            if group and g.user.access_group.value < group.value:
+                abort(403)
+            return view(**kwargs)
+        return api_wrapped_view_grouped
+    return api_login_required_grouped
 
+
+@products_bp.route('/search', methods=['GET'])
+@api_login_required_group()
+def products_search():
     # TODO: check the provided name
     search_request = request.args['name']
     search_request = "%{}%".format(search_request)
@@ -41,10 +55,8 @@ class Units(Enum):
 
 
 @products_bp.route('/units', methods=['GET'])
+@api_login_required_group()
 def product_units():
-    if 'user' not in g or g.user is None:
-        abort(403)
-
     product_id = request.args['id']
 
     with get_session() as session:
@@ -66,12 +78,8 @@ def product_units():
 
 
 @meals_bp.route('/add', methods=['POST'])
+@api_login_required_group(AccessGroup.TripManager)
 def meals_add():
-    if 'user' not in g or g.user is None:
-        abort(403)
-    if g.user.access_group.value < AccessGroup.TripManager.value:
-        abort(403)
-
     trip_id = request.form['trip_id']
     meal_name = request.form['meal_name']
     day_number = request.form['day_number']
@@ -128,7 +136,7 @@ def meals_add():
             mass = grams * mass
 
         meal_number = meals_map[meal_name]
-        
+
         existing_record: MealRecord = session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
                                                                        MealRecord.product_id == found_product.id,
                                                                        MealRecord.day_number == day_number,
@@ -152,12 +160,8 @@ def meals_add():
 
 
 @meals_bp.route('/remove', methods=['DELETE'])
+@api_login_required_group(AccessGroup.TripManager)
 def meals_remove():
-    if 'user' not in g or g.user is None:
-        abort(403)
-    if g.user.access_group.value < AccessGroup.TripManager.value:
-        abort(403)
-
     meal_id = request.form['meal_id']
 
     try:
@@ -181,3 +185,49 @@ def meals_remove():
         })
         session.commit()
         return {'result': True}
+
+
+def calculate_averages(days: List[Dict[str, Any]]) -> Tuple[int, int]:
+    full_mass = 0
+    full_cals = 0
+    for day in days:
+        full_mass += day['total_total']['mass']
+        full_cals += day['total_total']['cals']
+
+    return full_mass // len(days), full_cals // len(days)
+
+
+@meals_bp.route('/averages', methods=['GET'])
+@api_login_required_group()
+def meals_averages():
+    if not 'trip_id' in request.args:
+        abort(400)
+
+    trip_id = request.args['trip_id']
+
+    with get_session() as session:
+        trip_info: Trip = session.query(Trip).filter(Trip.id == trip_id).first()
+        if not trip_info:
+            abort(404)
+
+        meals_info = session.query(MealRecord.id,
+                                   MealRecord.trip_id,
+                                   MealRecord.day_number,
+                                   MealRecord.meal_number,
+                                   MealRecord.mass,
+                                   Product.name,
+                                   Product.calories,
+                                   Product.proteins,
+                                   Product.fats,
+                                   Product.carbs).join(Product).filter(MealRecord.trip_id == trip_id).all()
+        trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
+
+    first_date = trip_info.from_date
+    last_date = trip_info.till_date
+    days = calculate_total_days_info(first_date, last_date, meals_info)
+    mass, cals = calculate_averages(days)
+
+    return {
+        'mass': mass,
+        'cals': cals
+    }
