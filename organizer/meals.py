@@ -118,15 +118,15 @@ def cycle_days(trip_id):
     if dst_end > src_start and dst_end < src_end:
         abort(400)
 
-    days_count = src_end - src_start + 1
+    src_days_count = src_end - src_start + 1
 
     with get_session() as session:
         meals_info = session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
                                                       MealRecord.day_number >= src_start,
-                                                      MealRecord.day_number <= src_start + days_count).all()
+                                                      MealRecord.day_number <= src_start + src_days_count).order_by(MealRecord.day_number).all()
         meals_per_day = defaultdict(list)
         for meal in meals_info:
-            meals_per_day[meal.day_number].append(meal)
+            meals_per_day[meal.day_number - src_start].append(meal)
 
         trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
         trip_duration = (trip_info.till_date - trip_info.from_date).days + 1
@@ -135,7 +135,7 @@ def cycle_days(trip_id):
             abort(403)
 
         for day_number in range(dst_start, dst_end + 1):
-            idx = ((day_number - 1) % days_count) + 1
+            idx = (day_number - dst_start) % src_days_count
             for meal in meals_per_day[idx]:
                 new_record = MealRecord(trip_id=trip_id,
                                         product_id=meal.product_id,
