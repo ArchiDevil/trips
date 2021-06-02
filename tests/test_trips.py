@@ -466,7 +466,12 @@ def test_trips_download_returns_csv(user_logged_client):
     assert response.status_code == 200
     assert response.data
 
-    data: str = response.data.decode(encoding='utf-8')
+    # BOM
+    assert response.data[0] == 0xEF
+    assert response.data[1] == 0xBB
+    assert response.data[2] == 0xBF
+
+    data: str = response.data[3:].decode(encoding='utf-8')
     lines = data.splitlines()
     assert lines
     assert len(lines) == 39
@@ -487,7 +492,8 @@ def test_trips_download_returns_empty_csv(admin_logged_client):
     assert response.status_code == 200
     assert response.data
 
-    data: str = response.data.decode(encoding='utf-8')
+    # skip BOM
+    data: str = response.data[3:].decode(encoding='utf-8')
     lines = data.splitlines()
     assert lines
     assert len(lines) == 1
