@@ -3,6 +3,7 @@ import hashlib
 from collections import defaultdict
 
 from flask import Blueprint, render_template, get_template_attribute, abort, g, url_for, redirect, request
+from sqlalchemy.sql.expression import select
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
@@ -121,6 +122,12 @@ def cycle_days(trip_id):
     src_days_count = src_end - src_start + 1
 
     with get_session() as session:
+        if 'overwrite' in request.form:
+            session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
+                                             MealRecord.day_number >= dst_start,
+                                             MealRecord.day_number <= dst_end).delete()
+            session.commit()
+
         meals_info = session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
                                                       MealRecord.day_number >= src_start,
                                                       MealRecord.day_number <= src_start + src_days_count).order_by(MealRecord.day_number).all()

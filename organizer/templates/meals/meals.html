@@ -141,10 +141,7 @@
                     <p>{{ string_table['Meals cycle days modal description'] }}</p>
 
                     <div class="form-group row">
-                        <label class="col-sm-6 col-form-label"><strong>{{ string_table['Meals cycle days modal from title']}}</strong></label>
-                    </div>
-
-                    <div class="form-group row">
+                        <p class="col-sm-12 col-form-label"><strong>{{ string_table['Meals cycle days modal from title']}}</strong></p>
                         <label for="src-days-from" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy from day']}}</label>
                         <div class="col-sm-4">
                             <select class="custom-select" id="src-days-from" name="src-start" v-model="srcStart">
@@ -164,10 +161,7 @@
                     </div>
 
                     <div class="form-group row">
-                        <label class="col-sm-6 col-form-label"><strong>{{ string_table['Meals cycle days modal to title']}}</strong></label>
-                    </div>
-
-                    <div class="form-group row">
+                        <p class="col-sm-12 col-form-label"><strong>{{ string_table['Meals cycle days modal to title']}}</strong></p>
                         <label for="dst-days-from" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal paste from day'] }}</label>
                         <div class="col-sm-4">
                             <select class="custom-select" id="dst-days-from" name="dst-start"  v-model="dstStart">
@@ -188,6 +182,16 @@
 
                     <div class="form-group row">
                         <small class="col-12 text-muted">{{ string_table['Meals cycle days modal tip'] }}</small>
+                    </div>
+
+                    <div class="form-group row mt-4">
+                        <div class="form-check custom-control custom-checkbox">
+                            <div class="form-check pl-3">
+                                <input type="checkbox" class="custom-control-input" id="rewrite-data" name="overwrite">
+                                <label class="custom-control-label" for="rewrite-data">{{ string_table['Meals cycle days overwrite'] }}</label>
+                            </div>
+                        </div>
+                        <small class="col-12 text-muted">{{ string_table['Meals cycle days overwrite tip'] }}</small>
                     </div>
 
                     <div class="form-group row" v-if="errorMessageVisible">
@@ -277,14 +281,16 @@
             <div class="card shadow mb-3">
                 <h5 class="card-header">
                     {{ string_table['Meals tools header'] }}
-                    <a class="btn btn-sm btn-secondary float-right ml-1" href="{{ url_for('trips.download', trip_id=trip['id']) }}">
+                    <a class="btn btn-sm btn-light float-right ml-1" href="{{ url_for('trips.download', trip_id=trip['id']) }}">
                         <i class="fas fa-table"></i>
                     </a>
-                    <button class="btn btn-sm btn-secondary float-right mx-1"
+                    {% if g.user.access_group.value != 0 %}
+                    <button class="btn btn-sm btn-light float-right mx-1"
                             type="button" data-toggle="modal"
                             data-target="#cycle-days-modal">
                         <i class="fas fa-spinner"></i>
                     </button>
+                    {% endif %}
                 </h5>
                 <div class="card-body">
                     <p class="card-text">
@@ -588,6 +594,39 @@
         } else {
             body.classList.add(hideClass);
         }
+
+        compressClass = 'fa-compress-alt';
+        expandClass = 'fa-expand-alt';
+        let icon = document.querySelector('#' + cardId + ' button.float-left i.fas');
+        if (icon.classList.contains(compressClass)) {
+            icon.classList.remove(compressClass);
+            icon.classList.add(expandClass);
+        } else {
+            icon.classList.remove(expandClass);
+            icon.classList.add(compressClass);
+        }
+    }
+
+    function removeDay(dayNumber) {
+        $.ajax({
+            type: "DELETE",
+            url: "{{ url_for('api.meals.meals_clear') }}",
+            data: {
+                'trip_id': {{ trip['id'] }},
+                'day_number': dayNumber
+            },
+            success: function(msg) {
+                if (msg.result !== true)
+                    return;
+
+                reloadDay(dayNumber);
+            },
+            error: function() {
+                $("#fatal-error-modal").modal({
+                    backdrop: 'static'
+                });
+            }
+        })
     }
 </script>
 

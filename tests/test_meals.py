@@ -122,6 +122,51 @@ def test_meals_cycle_cycles(org_logged_client, app: Flask):
             assert len(records) == base_size * 4 # all 4 left days are filled
 
 
+def test_meals_cycle_cycles_with_overwrite(org_logged_client, app: Flask):
+    with app.app_context():
+        with get_session() as session:
+            session.query(MealRecord).filter(MealRecord.day_number != 1).delete()
+            session.commit()
+
+    response = org_logged_client.post('/meals/cycle_days/1',
+                                      data={
+                                          'src-start': '1',
+                                          'src-end': '1',
+                                          'dst-start': '2',
+                                          'dst-end': '2'
+                                      })
+    assert response.status_code == 302
+
+    with app.app_context():
+        with get_session() as session:
+            # remove breakfast completely
+            session.query(MealRecord).filter(MealRecord.day_number == 1,
+                                             MealRecord.meal_number == 0).delete()
+            session.commit()
+
+            # we have something on breakfast on day 2
+            records = session.query(MealRecord).filter(MealRecord.day_number == 2,
+                                                       MealRecord.meal_number == 0).all()
+            assert records
+
+    response = org_logged_client.post('/meals/cycle_days/1',
+                                      data={
+                                          'src-start': '1',
+                                          'src-end': '1',
+                                          'dst-start': '2',
+                                          'dst-end': '2',
+                                          'overwrite': '1'
+                                      })
+    assert response.status_code == 302
+
+    with app.app_context():
+        with get_session() as session:
+            # no more data on breakfast on day 2
+            records = session.query(MealRecord).filter(MealRecord.day_number == 2,
+                                                       MealRecord.meal_number == 0).all()
+            assert not records
+
+
 def test_meals_cycle_rejects_not_logged_in(user_logged_client):
     response = user_logged_client.post('/meals/cycle_days/1',
                                        data={

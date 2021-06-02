@@ -6,12 +6,6 @@
     display: block;
 }
 
-.clickable-header:hover {
-    background-color: var(--teal) !important;
-    cursor: pointer;
-    transition: background-color .15s ease-in-out;
-}
-
 @media print {
     body {
         line-height: 1.0;

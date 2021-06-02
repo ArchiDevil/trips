@@ -162,17 +162,18 @@ def meals_add():
 @meals_bp.route('/remove', methods=['DELETE'])
 @api_login_required_group(AccessGroup.TripManager)
 def meals_remove():
+    if not 'meal_id' in request.form:
+        abort(400)
+
     meal_id = request.form['meal_id']
 
     try:
         meal_id = int(meal_id)
-        assert meal_id > 0
-    except (ValueError, AssertionError):
-        return {'result': False}
+    except ValueError:
+        abort(400)
 
     with get_session() as session:
-        meal_info = session.query(MealRecord.trip_id).filter(
-            MealRecord.id == meal_id).first()
+        meal_info = session.query(MealRecord.trip_id).filter(MealRecord.id == meal_id).first()
         if not meal_info:
             return {'result': False}
 
@@ -231,3 +232,31 @@ def meals_averages():
         'mass': mass,
         'cals': cals
     }
+
+
+@meals_bp.route('/clear', methods=['DELETE'])
+@api_login_required_group(AccessGroup.TripManager)
+def meals_clear():
+    if not 'trip_id' in request.form or not 'day_number' in request.form:
+        abort(400)
+
+    trip_id = request.form['trip_id']
+    day_number = request.form['day_number']
+
+    try:
+        trip_id = int(trip_id)
+        day_number = int(day_number)
+    except ValueError:
+        abort(400)
+
+    with get_session() as session:
+        session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
+                                         MealRecord.day_number == day_number).delete()
+
+        # update the last time trip was touched
+        session.query(Trip).filter(Trip.id == trip_id).update({
+            'last_update': datetime.datetime.utcnow()
+        })
+        session.commit()
+
+    return {'result': True}
