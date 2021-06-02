@@ -133,6 +133,35 @@ def test_meals_cycle_rejects_not_logged_in(user_logged_client):
     assert response.status_code == 403
 
 
+def test_meals_cycle_rejects_overlapping_ranges(org_logged_client):
+    response = org_logged_client.post('/meals/cycle_days/1',
+                                      data={
+                                          'src-start': '1',
+                                          'src-end': '3',
+                                          'dst-start': '2',
+                                          'dst-end': '5'
+                                      })
+    assert response.status_code == 400
+
+    response = org_logged_client.post('/meals/cycle_days/1',
+                                      data={
+                                          'src-start': '3',
+                                          'src-end': '5',
+                                          'dst-start': '2',
+                                          'dst-end': '4'
+                                      })
+    assert response.status_code == 400
+
+    response = org_logged_client.post('/meals/cycle_days/1',
+                                      data={
+                                          'src-start': '2',
+                                          'src-end': '4',
+                                          'dst-start': '2',
+                                          'dst-end': '4'
+                                      })
+    assert response.status_code == 400
+
+
 def test_meals_cycle_rejects_incorrect_days(org_logged_client):
     response = org_logged_client.post('/meals/cycle_days/1', data={})
     assert response.status_code == 400
@@ -150,8 +179,8 @@ def test_meals_cycle_rejects_incorrect_days(org_logged_client):
                                       data={
                                           'src-start': '1',
                                           'src-end': '25',
-                                          'dst-start': '2',
-                                          'dst-end': '10'
+                                          'dst-start': '26',
+                                          'dst-end': '30'
                                       })
     assert response.status_code == 403
 

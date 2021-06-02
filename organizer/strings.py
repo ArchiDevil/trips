@@ -273,6 +273,7 @@ STRING_TABLE = {
     'Meals cycle days modal paste from day': 'С',
     'Meals cycle days modal stop on day': 'По',
     'Meals cycle days modal tip': 'Например, вы выбрали копирование дней 3–5 на дни 8–13. В таком случае, дни будут скопированы следующим образом: в дне 8 окажется содержимое дня 3, в 9 — 4, в 10 — 5, в 11 — 3, в 12 — 4, в 13 — 5.',
+    'Meals cycle days modal overlapping ranges': 'Исходный и целевой отрезки пересекаются. Убедитесь, что исходный отрезок не накладывается на целевой.',
 
     'Monday dp': 'Пн',
     'Tuesday dp': 'Вт',

@@ -108,6 +108,16 @@ def cycle_days(trip_id):
     if src_start > src_end or dst_start > dst_end:
         abort(403)
 
+    # ranges are touching each other
+    if src_start == dst_start or src_start == dst_end or src_end == dst_start or src_end == dst_end:
+        abort(400)
+
+    if dst_start > src_start and dst_start < src_end:
+        abort(400)
+
+    if dst_end > src_start and dst_end < src_end:
+        abort(400)
+
     days_count = src_end - src_start + 1
 
     with get_session() as session:

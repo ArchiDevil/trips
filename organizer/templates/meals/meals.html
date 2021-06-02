@@ -145,17 +145,17 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="input-days-from" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy from day']}}</label>
+                        <label for="src-days-from" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy from day']}}</label>
                         <div class="col-sm-4">
-                            <select class="custom-select" id="input-days-from" name="src-start">
+                            <select class="custom-select" id="src-days-from" name="src-start" v-model="srcStart">
                                 {% for day in days %}
                                 <option value="{{ loop.index }}">{{ loop.index }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <label for="input-days" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy to day'] }}</label>
+                        <label for="src-days-to" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy to day'] }}</label>
                         <div class="col-sm-4">
-                            <select class="custom-select" id="input-days" name="src-end">
+                            <select class="custom-select" id="src-days-to" name="src-end" v-model="srcEnd">
                                 {% for day in days %}
                                 <option value="{{ loop.index }}">{{ loop.index }}</option>
                                 {% endfor %}
@@ -168,17 +168,17 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="input-days-to-start" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal paste from day'] }}</label>
+                        <label for="dst-days-from" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal paste from day'] }}</label>
                         <div class="col-sm-4">
-                            <select class="custom-select" id="input-days-to-start" name="dst-start">
+                            <select class="custom-select" id="dst-days-from" name="dst-start"  v-model="dstStart">
                                 {% for day in days %}
                                 <option value="{{ loop.index }}">{{ loop.index }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <label for="input-days-to-end" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal stop on day'] }}</label>
+                        <label for="dst-days-to" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal stop on day'] }}</label>
                         <div class="col-sm-4">
-                            <select class="custom-select" id="input-days-to-end" name="dst-end">
+                            <select class="custom-select" id="dst-days-to" name="dst-end"  v-model="dstEnd">
                                 {% for day in days %}
                                 <option value="{{ loop.index }}">{{ loop.index }}</option>
                                 {% endfor %}
@@ -189,11 +189,15 @@
                     <div class="form-group row">
                         <small class="col-12 text-muted">{{ string_table['Meals cycle days modal tip'] }}</small>
                     </div>
+
+                    <div class="form-group row" v-if="errorMessageVisible">
+                        <small class="col-12 text-danger">{{ string_table['Meals cycle days modal overlapping ranges'] }}</small>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ string_table['Meals cycle days modal close'] }}</button>
-                    <button type="submit" class="btn btn-primary">{{ string_table['Meals cycle days modal go'] }}</button>
+                    <button type="submit" class="btn btn-primary" v-bind:disabled="errorMessageVisible">{{ string_table['Meals cycle days modal go'] }}</button>
                 </div>
             </form>
         </div>
@@ -427,7 +431,7 @@
         data: {
             averageCals: 0,
             averageMass: 0,
-            averagesSpinnerVisible: false
+            averagesSpinnerVisible: false,
         },
         methods: {
             updateAverages: function() {
@@ -444,6 +448,26 @@
                         mealsApp.averageMass = msg['mass']
                     }
                 })
+            }
+        },
+    })
+
+    var cycleDaysApp = new Vue({
+        el: '#cycle-days-modal',
+        data: {
+            srcStart: 1,
+            srcEnd: 1,
+            dstStart: {% if days | count > 1 %}2{% else %} 1 {% endif %},
+            dstEnd: {{ days | count }},
+        },
+        computed: {
+            errorMessageVisible: function () {
+                return parseInt(this.srcStart) == parseInt(this.dstStart)
+                || parseInt(this.srcStart) == parseInt(this.dstEnd)
+                || parseInt(this.srcEnd) == parseInt(this.dstStart)
+                || parseInt(this.srcEnd) == parseInt(this.dstEnd)
+                || (parseInt(this.dstStart) > parseInt(this.srcStart) && parseInt(this.dstStart) < parseInt(this.srcEnd))
+                || (parseInt(this.dstEnd) > parseInt(this.srcStart) && parseInt(this.dstEnd) < parseInt(this.srcEnd))
             }
         }
     })
