@@ -121,7 +121,7 @@ def cycle_days(trip_id):
     days_count = src_end - src_start + 1
 
     with get_session() as session:
-        meals_info = session.query(MealRecord).filter(Trip.id == trip_id,
+        meals_info = session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
                                                       MealRecord.day_number >= src_start,
                                                       MealRecord.day_number <= src_start + days_count).all()
         meals_per_day = defaultdict(list)

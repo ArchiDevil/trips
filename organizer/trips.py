@@ -234,6 +234,7 @@ def send_csv_file(rows: List[List[Any]]):
 
     file_to_send = io.BytesIO()
     data = file.read()
+    file_to_send.write(bytes([0xEF, 0xBB, 0xBF])) # write BOM for Excel
     file_to_send.write(data.encode(encoding='utf-8'))
     file_to_send.seek(0, 0)
 
