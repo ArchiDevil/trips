@@ -9,8 +9,8 @@ from organizer.db import get_session
 from organizer.schema import Product, Trip, MealRecord, AccessGroup
 from organizer.meals_utils import calculate_total_days_info
 
-products_bp = Blueprint('api.products', __name__, url_prefix='/api/v1/products')
-meals_bp = Blueprint('api.meals', __name__, url_prefix='/api/v1/meals')
+products_bp = Blueprint('api_products', __name__, url_prefix='/api/v1/products')
+meals_bp = Blueprint('api_meals', __name__, url_prefix='/api/v1/meals')
 
 
 def api_login_required_group(group=None):
@@ -50,8 +50,8 @@ def products_search():
 
 
 class Units(Enum):
-    Grams = 0
-    Pieces = 1
+    GRAMMS = 0
+    PIECES = 1
 
 
 @products_bp.route('/units', methods=['GET'])
@@ -67,9 +67,9 @@ def product_units():
             return {'result': False}
 
         # TODO: put these units in some table
-        units = [Units.Grams.value]
+        units = [Units.GRAMMS.value]
         if product.grams is not None:
-            units.append(Units.Pieces.value)
+            units.append(Units.PIECES.value)
 
         return {
             'result': True,
@@ -130,9 +130,9 @@ def meals_add():
         grams = found_product.grams
 
         if grams is None:
-            if unit != Units.Grams.value:
+            if unit != Units.GRAMMS.value:
                 return {'result': False}
-        elif unit == Units.Pieces.value:
+        elif unit == Units.PIECES.value:
             mass = grams * mass
 
         meal_number = meals_map[meal_name]

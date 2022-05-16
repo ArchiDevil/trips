@@ -319,7 +319,7 @@
 </div>
 
 <!-- production version, optimized for size and speed -->
-<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 
 <script>
     addProdApp = new Vue({
@@ -357,7 +357,7 @@
                 document.getElementById('mass-input').select();
                 $.ajax({
                     type: "GET",
-                    url: "{{ url_for('api.products.product_units') }}",
+                    url: "{{ url_for('api_products.product_units') }}",
                     data: {
                         'id': this.currentProductId
                     },
@@ -396,7 +396,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "{{ url_for('api.meals.meals_add') }}",
+                    url: "{{ url_for('api_meals.meals_add') }}",
                     data: {
                         'trip_id': "{{ trip['id'] }}",
                         'meal_name': mealName,
@@ -445,7 +445,7 @@
 
                 $.ajax({
                     type: "GET",
-                    url: "{{ url_for('api.meals.meals_averages') }}",
+                    url: "{{ url_for('api_meals.meals_averages') }}",
                     data: {
                         'trip_id': "{{ trip['id'] }}"
                     },
@@ -508,7 +508,7 @@
     })
 
     function removeProduct(dayNumber, mealId) {
-        var url = "{{ url_for('api.meals.meals_remove') }}";
+        var url = "{{ url_for('api_meals.meals_remove') }}";
         $.ajax({
             type: "DELETE",
             url: url,
@@ -558,7 +558,7 @@
         lastRequestHandle = setTimeout(function () {
             $.ajax({
                 type: "GET",
-                url: "{{ url_for('api.products.products_search') }}",
+                url: "{{ url_for('api_products.products_search') }}",
                 data: {
                     'name': value,
                     'count': '10'
@@ -610,7 +610,7 @@
     function removeDay(dayNumber) {
         $.ajax({
             type: "DELETE",
-            url: "{{ url_for('api.meals.meals_clear') }}",
+            url: "{{ url_for('api_meals.meals_clear') }}",
             data: {
                 'trip_id': {{ trip['id'] }},
                 'day_number': dayNumber

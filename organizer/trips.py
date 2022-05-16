@@ -239,7 +239,7 @@ def send_csv_file(rows: List[List[Any]]):
     file_to_send.seek(0, 0)
 
     return send_file(file_to_send, mimetype='text/plain',
-                     as_attachment=True, attachment_filename='data.csv')
+                     as_attachment=True, download_name='data.csv')
 
 
 @bp.route('/trips/download/<int:trip_id>', methods=['GET'])

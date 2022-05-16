@@ -12,7 +12,7 @@ def test_api_rejects_adding_without_logged_in(client):
                              'meal_name': 0,
                              'day_number': 1,
                              'mass': 10,
-                             'unit': Units.Grams.value,
+                             'unit': Units.GRAMMS.value,
                              'product_id': 1
                          })
     assert result.status_code == 403
@@ -25,7 +25,7 @@ def test_api_rejects_adding_insufficient_privilegies(user_logged_client):
                                          'meal_name': 0,
                                          'day_number': 1,
                                          'mass': 10,
-                                         'unit': Units.Grams.value,
+                                         'unit': Units.GRAMMS.value,
                                          'product_id': 1
                                      })
     assert result.status_code == 403
@@ -54,7 +54,7 @@ def test_api_add_uses_correct_method(org_logged_client):
                                         'meal_name': 0,
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert result.status_code == 200
@@ -76,7 +76,7 @@ def test_api_add_adds_a_product_successfully(org_logged_client, app: Flask):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 987,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 5
                                     })
 
@@ -112,7 +112,7 @@ def test_api_add_merges_existing_product(org_logged_client, app: Flask):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 442,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert result.json['result']
@@ -135,7 +135,7 @@ def test_api_add_adds_a_product_with_pcs(org_logged_client, app: Flask):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 5,
-                                        'unit': Units.Pieces.value,
+                                        'unit': Units.PIECES.value,
                                         'product_id': 9
                                     })
     assert result.json['result']
@@ -155,7 +155,7 @@ def test_api_add_adds_a_product_with_pcs(org_logged_client, app: Flask):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 9
                                     })
     assert result.json['result']
@@ -177,7 +177,7 @@ def test_api_add_returns_fail_on_incorrect_trip_id(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -188,7 +188,7 @@ def test_api_add_returns_fail_on_incorrect_trip_id(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -201,7 +201,7 @@ def test_api_add_returns_fail_on_incorrect_meal_name(org_logged_client):
                                         'meal_name': 256,
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -212,7 +212,7 @@ def test_api_add_returns_fail_on_incorrect_meal_name(org_logged_client):
                                         'meal_name': 'nan',
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -225,7 +225,7 @@ def test_api_add_returns_fail_on_incorrect_day_number(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 287,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -236,7 +236,7 @@ def test_api_add_returns_fail_on_incorrect_day_number(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 'nan',
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -249,7 +249,7 @@ def test_api_add_returns_fail_on_incorrect_mass(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': -250,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -260,7 +260,7 @@ def test_api_add_returns_fail_on_incorrect_mass(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 'nan',
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -295,7 +295,7 @@ def test_api_add_returns_fail_on_incorrect_unit(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Pieces.value,
+                                        'unit': Units.PIECES.value,
                                         'product_id': 1
                                     })
     assert not result.json['result']
@@ -308,7 +308,7 @@ def test_api_add_returns_fail_on_incorrect_product_id(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 487
                                     })
     assert not result.json['result']
@@ -319,7 +319,7 @@ def test_api_add_returns_fail_on_incorrect_product_id(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 'numbers'
                                     })
     assert not result.json['result']
@@ -332,7 +332,7 @@ def test_api_add_returns_fail_on_archived_product_id(org_logged_client):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 10,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 15
                                     })
     assert not result.json['result']
@@ -350,7 +350,7 @@ def test_api_add_updates_trip(org_logged_client, app: Flask):
                                         'meal_name': 'breakfast',
                                         'day_number': 1,
                                         'mass': 987,
-                                        'unit': Units.Grams.value,
+                                        'unit': Units.GRAMMS.value,
                                         'product_id': 5
                                     })
 

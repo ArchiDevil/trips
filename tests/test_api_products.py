@@ -82,14 +82,14 @@ def test_api_units_return_units(user_logged_client):
     result = user_logged_client.get('/api/v1/products/units',
                                     query_string={'id': 2})
     assert result.json['result']
-    assert result.json['units'] == [Units.Grams.value]
+    assert result.json['units'] == [Units.GRAMMS.value]
 
 
 def test_api_units_return_multi_units(user_logged_client):
     result = user_logged_client.get('/api/v1/products/units',
                                     query_string={'id': 9})
     assert result.json['result']
-    assert result.json['units'] == [Units.Grams.value, Units.Pieces.value]
+    assert result.json['units'] == [Units.GRAMMS.value, Units.PIECES.value]
 
 
 def test_api_units_return_nothing_on_archived(user_logged_client):
