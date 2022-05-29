@@ -10,7 +10,7 @@ from organizer.schema import Trip, Product, MealRecord, AccessGroup, Group
 bp = Blueprint('reports', __name__, url_prefix='/reports')
 
 
-@bp.route('/shopping/<int:trip_id>')
+@bp.get('/shopping/<int:trip_id>')
 @login_required_group(AccessGroup.Guest)
 def shopping(trip_id):
     with get_session() as session:
@@ -46,14 +46,14 @@ def shopping(trip_id):
     return render_template('reports/shopping.html', trip=trip, products=products)
 
 
-@bp.route('/packing/<int:trip_id>')
+@bp.get('/packing/<int:trip_id>')
 @login_required_group(AccessGroup.Guest)
 def packing(trip_id):
     # four is a default value that is suitable for the most cases
     return redirect(url_for('reports.packing_ext', trip_id=trip_id, columns_count=4))
 
 
-@bp.route('/packing/<int:trip_id>/<int:columns_count>')
+@bp.get('/packing/<int:trip_id>/<int:columns_count>')
 @login_required_group(AccessGroup.Guest)
 def packing_ext(trip_id, columns_count):
     if columns_count > 6 or columns_count < 1:

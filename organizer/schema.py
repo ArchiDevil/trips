@@ -8,6 +8,10 @@ from sqlalchemy.orm import relationship
 
 BASE = declarative_base()
 
+class Units(PyEnum):
+    GRAMMS = 0
+    PIECES = 1
+
 
 class AccessGroup(PyEnum):
     Guest = 0

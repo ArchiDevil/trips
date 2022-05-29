@@ -7,13 +7,13 @@ from organizer.schema import AccessGroup
 bp = Blueprint('developer', __name__, url_prefix='/developer')
 
 
-@bp.route('/console')
+@bp.get('/console')
 @login_required_group(AccessGroup.Administrator)
 def console():
     return render_template('admin/console.html')
 
 
-@bp.route('/console/execute_sql', methods=['POST'])
+@bp.post('/console/execute_sql')
 @login_required_group(AccessGroup.Administrator)
 def execute_sql():
     sql_code = request.form['code']

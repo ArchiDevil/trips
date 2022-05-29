@@ -88,7 +88,7 @@ def create_admin_command(login, password):
     """Create a new administrator with the provided login and password"""
     init_connection()
     create_admin(login, password)
-    click.echo('Successfully created admin "{}"'.format(login))
+    click.echo(f'Successfully created admin "{login}"')
 
 
 def init_app(app):

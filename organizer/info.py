@@ -6,7 +6,7 @@ from organizer.schema import AccessGroup
 bp = Blueprint('info', __name__)
 
 
-@bp.route('/info/')
+@bp.get('/info/')
 @login_required_group(AccessGroup.Guest)
 def index():
     return render_template('info.html')

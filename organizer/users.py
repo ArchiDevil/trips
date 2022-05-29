@@ -10,7 +10,7 @@ from organizer.strings import STRING_TABLE
 bp = Blueprint('users', __name__, url_prefix='/users')
 
 
-@bp.route('/')
+@bp.get('/')
 @login_required_group(AccessGroup.Administrator)
 def index():
     with get_session() as session:
@@ -110,7 +110,7 @@ def edit(user_id):
     return render_template(edit_page, groups=groups, form_caption=form_caption, user=user, submit_text=submit_text)
 
 
-@bp.route('/remove/<int:user_id>')
+@bp.get('/remove/<int:user_id>')
 @login_required_group(AccessGroup.Administrator)
 def delete(user_id):
     with get_session() as session:

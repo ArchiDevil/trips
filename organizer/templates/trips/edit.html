@@ -38,7 +38,8 @@
                 "firstDay": 1
             }
         }, function (start, end, label) {
-            vm.tripDates = start.format(this.locale.format) + this.locale.separator + end.format(this.locale.format)
+            const dates = start.format(this.locale.format) + this.locale.separator + end.format(this.locale.format)
+            mountedApp.setTripDates(dates)
         });
     });
 
@@ -169,9 +170,10 @@
     {% endif %}
 </div>
 
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <!-- production version, optimized for size and speed -->
-<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/vue@3"></script>
 <script type="application/javascript" src="{{ url_for('static', filename='js/trip_edit.js') }}"></script>
 
 {% endblock %}

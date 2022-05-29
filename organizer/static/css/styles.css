@@ -15,3 +15,11 @@
 @page {
     size: auto
 }
+
+[v-cloak] {
+    display: none;
+}
+
+.fade-out {
+    filter: grayscale(80%);
+}

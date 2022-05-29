@@ -1,7 +1,7 @@
 import datetime
 import os
 
-from flask import Flask, current_app, render_template
+from flask import Flask, redirect, render_template, url_for
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -20,6 +20,9 @@ def create_app(test_config=None):
         db_url = os.environ['DATABASE_URL']  # pragma: no cover
     else:
         db_url = 'sqlite:///' + os.path.join(app.instance_path, 'flaskr.sqlite')
+
+    if db_url.startswith('postgres://'): # for Heroku deployment
+        db_url = db_url.replace('postgres://', 'postgresql://', 1)
 
     secret_key = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ else 'dev'
     session_lifetime = datetime.timedelta(days=14)
@@ -55,6 +58,10 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    @app.get('/')
+    def index():
+        return redirect(url_for('trips.index'))
+
     from . import db
     db.init_app(app)
 
@@ -63,7 +70,6 @@ def create_app(test_config=None):
 
     from . import trips
     app.register_blueprint(trips.bp)
-    app.add_url_rule('/', endpoint='index')
 
     from . import meals
     app.register_blueprint(meals.bp)
@@ -72,8 +78,7 @@ def create_app(test_config=None):
     app.register_blueprint(products.bp)
 
     from . import api
-    app.register_blueprint(api.products_bp)
-    app.register_blueprint(api.meals_bp)
+    app.register_blueprint(api.BP)
 
     from . import reports
     app.register_blueprint(reports.bp)

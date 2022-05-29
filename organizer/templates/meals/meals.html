@@ -1,10 +1,30 @@
 {% extends 'base.html' %} {% block content %}
 
+<script>
+    const globals = {
+        urls: {
+            userInfo: '{{ url_for("api.auth.user") }}',
+            tripInfo: '{{ url_for("api.trips.get_info", trip_id=trip["id"]) }}',
+            productUnits: '{{ url_for("api.products.product_units", _external=True) }}',
+            addMeal: '{{ url_for("api.meals.meals_add") }}',
+            removeMeal: '{{ url_for("api.meals.meals_remove") }}',
+            clearMeals: '{{ url_for("api.meals.meals_clear") }}',
+            productsSearch: '{{ url_for("api.products.search", _external=True) }}',
+            mealsInfo: '{{ url_for("api.meals.get_meals", trip_id=trip["id"]) }}',
+            cycleDays: '{{ url_for("meals.cycle_days", trip_id=trip["id"]) }}'
+        },
+        trip: {
+            id : "{{ trip['id'] }}"
+        }
+    }
+</script>
+
+{% raw %}
 <div class="modal fade" id="add-product-modal" tabindex="-1" role="dialog" aria-labelledby="add-product-modal-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="add-product-modal-label">{{ string_table['Meals add modal title'] }}</h5>
+                <h5 class="modal-title" id="add-product-modal-label">{{ $t('meals.addModal.title') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -13,36 +33,34 @@
                 <form id="add-meal-form" name="meal" novalidate>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label">
-                            {{ string_table['Meals add modal product title'] }}
+                            {{ $t('meals.addModal.productTitle') }}
                         </label>
                         <div class="input-group col-sm-10">
                             <input type="text" class="form-control col-7 col-md-8" v-model="currentProductName" disabled>
                             <div class="input-group-append col-5 col-md-4 px-0">
-                                <button tabindex="7" class="btn btn-outline-secondary w-100 text-truncate" type="button" v-on:click="clearProduct()">
-                                    {{ string_table['Meals add modal clear product button'] }}
+                                <button tabindex="7" class="btn btn-outline-secondary w-100 text-truncate" type="button" @click="clearProduct()">
+                                    {{ $t('meals.addModal.clearProductButton') }}
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label for="mass-input" class="col-sm-2 col-form-label">
-                            {{ string_table['Meals add modal mass title'] }}
+                            {{ $t('meals.addModal.massTitle') }}
                         </label>
                         <div class="input-group col-sm-10">
                             <input tabindex="2" class="form-control col-7 col-md-8" id="mass-input" name="mass"
-                                   placeholder="{{ string_table['Meals add modal mass placeholder'] }}"
+                                   :placeholder="$t('meals.addModal.massPlaceholder')"
                                    v-model="mass"
                                    autocomplete="off"
-                                   v-bind:class="{ 'is-valid': validation.mass, 'is-invalid': !validation.mass }"
+                                   :class="{ 'is-valid': validation.mass, 'is-invalid': !validation.mass }"
                                    @keyup="addMealKey"/>
                             <select tabindex="3" class="custom-select input-group-append col-5 col-md-4 rounded-right"
                                     v-model="unit">
-                                {% raw %}
                                     <option v-for="unit in units" v-bind:value="unit.value">{{unit.name}}</option>
-                                {% endraw %}
                             </select>
                             <div class="invalid-feedback">
-                                {{ string_table['Meals add modal invalid mass error'] }}
+                                {{ $t('meals.addModal.invalidMassError') }}
                             </div>
                         </div>
                         <div class="input-group">
@@ -57,28 +75,24 @@
                            type="text"
                            id="search-product-input"
                            class="form-control"
-                           placeholder="{{ string_table['Meals add modal search placeholder'] }}"
-                           v-on:input="searchProducts">
+                           :placeholder="$t('meals.addModal.searchPlaceholder')"
+                           @input="searchProducts">
                 </div>
                 <table class="table table-sm table-hover">
                     <thead>
                         <tr>
-                            <th style="width: 8%">{{ string_table['Meals add modal id title'] }}</th>
-                            <th>{{ string_table['Meals add modal name title'] }}</th>
+                            <th style="width: 8%">{{ $t('meals.addModal.idTitle') }}</th>
+                            <th>{{ $t('meals.addModal.nameTitle') }}</th>
                         </tr>
                     </thead>
                     <tbody id="found-products">
-                        <tr v-for="product in products" v-on:click="setProduct(product.id, product.name)">
+                        <tr v-for="product in products" @click="setProduct(product.id, product.name)">
                             <th scope="row">
-                                {% raw %}
-                                    {{ product.id }}
-                                {% endraw %}
+                                {{ product.id }}
                             </th>
                             <td>
-                                <a tabindex="-1" v-on:click="setProduct(product.id, product.name)" href="javascript:void(0);">
-                                    {% raw %}
-                                        {{ product.name }}
-                                    {% endraw %}
+                                <a tabindex="-1" @click="setProduct(product.id, product.name)" href="javascript:void(0);">
+                                    {{ product.name }}
                                 </a>
                             </td>
                         </tr>
@@ -87,17 +101,15 @@
             </div>
             <div class="modal-footer">
                 <span id="error-message" class="align-middle text-danger mx-3" v-if="errorMessageVisible">
-                    {% raw %}
-                        {{ errorMessage }}
-                    {% endraw %}
+                    {{ errorMessage }}
                 </span>
                 <button tabindex="5" type="button" class="btn btn-secondary col-3" data-dismiss="modal">
-                    {{ string_table['Meals add modal close button'] }}
+                    {{ $t('meals.addModal.closeButton') }}
                 </button>
                 <button tabindex="4" id="add-product-button" type="button" class="btn btn-primary col-3"
                         v-bind:disabled="submitDisabled" @click="addMeal">
                     <span class="spinner-border spinner-border-sm" v-if="spinnerVisible" role="status"></span>
-                    {{ string_table['Meals add modal add button'] }}
+                    {{ $t('meals.addModal.addButton') }}
                 </button>
             </div>
         </div>
@@ -109,18 +121,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="fatal-error-modal-label">
-                    {{ string_table['Meals error modal title'] }}
+                    {{ $t('meals.errorModal.title') }}
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                {{ string_table['Meals error modal text'] }}
+                {{ $t('meals.errorModal.text') }}
             </div>
             <div class="modal-footer">
-                <button id="reload-page-button" type="button" class="btn btn-primary">
-                    {{ string_table['Meals error modal reload button'] }}
+                <button id="reload-page-button" type="button" class="btn btn-primary" @click="window.location.reload(true)">
+                    {{ $t('meals.errorModal.reloadButton') }}
                 </button>
             </div>
         </div>
@@ -130,504 +142,660 @@
 <div class="modal fade" id="cycle-days-modal" tabindex="-1" role="dialog" aria-labelledby="cycle-days-modal-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url_for('meals.cycle_days', trip_id=trip['id']) }}">
+            <form method="POST" :action="cycleDaysLink">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="cycle-days-modal-label">{{ string_table['Meals tools cycle days'] }}</h5>
+                    <h5 class="modal-title" id="cycle-days-modal-label">{{ $t('meals.cycleDaysModal.title') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>{{ string_table['Meals cycle days modal description'] }}</p>
+                    <p>{{ $t('meals.cycleDaysModal.description') }}</p>
 
                     <div class="form-group row">
-                        <p class="col-sm-12 col-form-label"><strong>{{ string_table['Meals cycle days modal from title']}}</strong></p>
-                        <label for="src-days-from" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy from day']}}</label>
+                        <p class="col-sm-12 col-form-label"><strong>{{ $t('meals.cycleDaysModal.fromTitle') }}</strong></p>
+                        <label for="src-days-from" class="col-sm-2 col-form-label">{{ $t('meals.cycleDaysModal.copyFromDay') }}</label>
                         <div class="col-sm-4">
                             <select class="custom-select" id="src-days-from" name="src-start" v-model="srcStart">
-                                {% for day in days %}
-                                <option value="{{ loop.index }}">{{ loop.index }}</option>
-                                {% endfor %}
+                                <option v-for="day in days" :value="day">{{ day }}</option>
                             </select>
                         </div>
-                        <label for="src-days-to" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal copy to day'] }}</label>
+                        <label for="src-days-to" class="col-sm-2 col-form-label">{{ $t('meals.cycleDaysModal.copyToDay') }}</label>
                         <div class="col-sm-4">
                             <select class="custom-select" id="src-days-to" name="src-end" v-model="srcEnd">
-                                {% for day in days %}
-                                <option value="{{ loop.index }}">{{ loop.index }}</option>
-                                {% endfor %}
+                                <option v-for="day in days" :value="day">{{ day }}</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <p class="col-sm-12 col-form-label"><strong>{{ string_table['Meals cycle days modal to title']}}</strong></p>
-                        <label for="dst-days-from" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal paste from day'] }}</label>
+                        <p class="col-sm-12 col-form-label"><strong>{{ $t('meals.cycleDaysModal.toTitle') }}</strong></p>
+                        <label for="dst-days-from" class="col-sm-2 col-form-label">{{ $t('meals.cycleDaysModal.pasteFromDay') }}</label>
                         <div class="col-sm-4">
                             <select class="custom-select" id="dst-days-from" name="dst-start"  v-model="dstStart">
-                                {% for day in days %}
-                                <option value="{{ loop.index }}">{{ loop.index }}</option>
-                                {% endfor %}
+                                <option v-for="day in days" :value="day">{{ day }}</option>
                             </select>
                         </div>
-                        <label for="dst-days-to" class="col-sm-2 col-form-label">{{ string_table['Meals cycle days modal stop on day'] }}</label>
+                        <label for="dst-days-to" class="col-sm-2 col-form-label">{{ $t('meals.cycleDaysModal.pasteToDay') }}</label>
                         <div class="col-sm-4">
                             <select class="custom-select" id="dst-days-to" name="dst-end"  v-model="dstEnd">
-                                {% for day in days %}
-                                <option value="{{ loop.index }}">{{ loop.index }}</option>
-                                {% endfor %}
+                                <option v-for="day in days" :value="day">{{ day }}</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <small class="col-12 text-muted">{{ string_table['Meals cycle days modal tip'] }}</small>
+                        <small class="col-12 text-muted">{{ $t('meals.cycleDaysModal.tip') }}</small>
                     </div>
 
                     <div class="form-group row mt-4">
                         <div class="form-check custom-control custom-checkbox">
                             <div class="form-check pl-3">
                                 <input type="checkbox" class="custom-control-input" id="rewrite-data" name="overwrite">
-                                <label class="custom-control-label" for="rewrite-data">{{ string_table['Meals cycle days overwrite'] }}</label>
+                                <label class="custom-control-label" for="rewrite-data">{{ $t('meals.cycleDaysModal.overwrite') }}</label>
                             </div>
                         </div>
-                        <small class="col-12 text-muted">{{ string_table['Meals cycle days overwrite tip'] }}</small>
+                        <small class="col-12 text-muted">{{ $t('meals.cycleDaysModal.overwriteTip') }}</small>
                     </div>
 
                     <div class="form-group row" v-if="errorMessageVisible">
-                        <small class="col-12 text-danger">{{ string_table['Meals cycle days modal overlapping ranges'] }}</small>
+                        <small class="col-12 text-danger">{{ $t('meals.cycleDaysModal.overlappingRanges') }}</small>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ string_table['Meals cycle days modal close'] }}</button>
-                    <button type="submit" class="btn btn-primary" v-bind:disabled="errorMessageVisible">{{ string_table['Meals cycle days modal go'] }}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ $t('meals.cycleDaysModal.closeButton') }}</button>
+                    <button type="submit" class="btn btn-primary" v-bind:disabled="errorMessageVisible">{{ $t('meals.cycleDaysModal.goButton') }}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="container" id="meals-app">
+<div class="container" id="meals-app" v-cloak>
     <div class="row my-3">
         <div class="col">
-            <h1 class="display-4">{{ trip['name'] }}</h1>
+            <span class="display-4" v-if="!tripLoading">{{ tripInfo.trip.name }}</span>
+            <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-else></span>
         </div>
-
-        <div class="col-auto d-flex flex-row-reverse align-items-end">
-            {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-            <a class="btn btn-primary mb-3 d-block d-lg-none"
-                href="{{ url_for('trips.edit', trip_id=trip['id']) }}">
-                <i class="fas fa-pen"></i>
-            </a>
-            {% endif %}
+        <div class="col-auto d-flex flex-row-reverse align-items-end" v-if="editor">
+            <a class="btn btn-primary d-block d-lg-none" v-if="!userLoading"
+            :href="tripInfo.edit_link">
+            <i class="fas fa-pen"></i>
+        </a>
+        <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-else></span>
         </div>
     </div>
 
-    <div class="row my-lg-0 my-3">
+    <div class="row my-lg-0 my-3" v-if="!tripLoading">
         <div class="col">
-            <a class="btn btn-secondary w-100 d-block d-lg-none" href="{{ url_for('reports.shopping', trip_id=trip['id']) }}">
-                {{ string_table['Meals card shopping report button'] }}
+            <a class="btn btn-secondary w-100 d-block d-lg-none" :href="tripInfo.shopping_link">
+                {{ $t('meals.card.shoppingButton') }}
             </a>
         </div>
         <div class="col">
-            <a class="btn btn-secondary w-100 d-block d-lg-none" href="{{ url_for('reports.packing', trip_id=trip['id']) }}">
-                {{ string_table['Meals card packing report button'] }}
+            <a class="btn btn-secondary w-100 d-block d-lg-none" :href="tripInfo.packing_link">
+                {{ $t('meals.card.packingButton') }}
             </a>
         </div>
     </div>
+    <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-else></span>
 
-    <div class="row my-3">
+    <div class="row my-3" v-cloak>
         <div class="col-auto d-none d-lg-block">
-            <div class="card shadow" style="width: 18rem;">
-                <img src="{{ url_for('static', filename='img/trips/{}.png'.format(trip['magic'])) }}" class="card-img-top" alt="">
-                <h5 class="card-header">
-                    {{ string_table['Meals card header'] }}
-                </h5>
-                <div class="card-body">
-                    <p class="card-text">
-                        <i class="fas fa-calendar-day"></i> {{ trip['from_date'].strftime('%d/%m') }} - {{ trip['till_date'].strftime('%d/%m') }}
-                    </p>
-                    <p class="card-text">
-                        <i class="fas fa-walking"></i> {{ string_table['Meals card participants'] }}: {{ trip['attendees'] }}
-                    </p>
-                    {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-                    <a class="btn btn-primary w-100 my-1" href="{{ url_for('trips.edit', trip_id=trip['id']) }}">
-                        <i class="fas fa-pen"></i> {{ string_table['Meals card edit button'] }}
-                    </a>
-                    {% endif %}
-                    <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.shopping', trip_id=trip['id']) }}">
-                        <i class="fas fa-shopping-cart"></i> {{ string_table['Meals card shopping report button'] }}
-                    </a>
-                    <a class="btn btn-secondary w-100 my-1" href="{{ url_for('reports.packing', trip_id=trip['id']) }}">
-                        <i class="fas fa-hiking"></i> {{ string_table['Meals card packing report button'] }}
-                    </a>
-                </div>
-            </div>
+            <trip-handling-card v-if="!tripLoading && !userLoading" :from-date="fromDate" :till-date="tillDate"
+                                :editor="editor" :cover-src="tripInfo.cover_src" :attendees="tripInfo.attendees"
+                                :shopping-link="tripInfo.shopping_link" :packing-link="tripInfo.packing_link"
+                                :edit-link="tripInfo.edit_link"></trip-handling-card>
+            <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-else></span>
 
-            <div class="sticky-top py-3 px-4" style="width: 18rem;">
+            <div class="sticky-top py-3 px-4" style="width: 18rem;" v-if="!mealsLoading">
                 <div class="w-100 d-flex flex-wrap">
-                    {% for day in days %}
-                    <a class="btn btn-outline-secondary m-1" style="width: 45%;" href="#day{{day['number']}}">
+                    <a class="btn btn-outline-secondary m-1" style="width: 45%;" v-for="day in days" :href="'#day' + day.number">
                         <i class="fas fa-angle-double-right"></i>
-                        {{ string_table['Meals day number prefix'] }} {{day['number']}}
+                        {{ $t('meals.day.numberPrefix') }} {{ day.number }}
                     </a>
-                    {% endfor %}
                 </div>
             </div>
+            <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-else></span>
         </div>
 
-        <div class="col">
-            <div class="card shadow mb-3">
+        <div class="col" v-if="!mealsLoading">
+            <div class="card shadow mb-3" v-if="!tripLoading">
                 <h5 class="card-header">
-                    {{ string_table['Meals tools header'] }}
-                    <a class="btn btn-sm btn-light float-right ml-1" href="{{ url_for('trips.download', trip_id=trip['id']) }}">
+                    {{ $t('meals.tools.header') }}
+                    <a class="btn btn-sm btn-light float-right ml-1" :href="tripInfo.download_link">
                         <i class="fas fa-table"></i>
                     </a>
-                    {% if g.user.access_group.value != 0 %}
                     <button class="btn btn-sm btn-light float-right mx-1"
                             type="button" data-toggle="modal"
-                            data-target="#cycle-days-modal">
+                            data-target="#cycle-days-modal"
+                            v-if="editor">
                         <i class="fas fa-spinner"></i>
                     </button>
-                    {% endif %}
                 </h5>
                 <div class="card-body">
                     <p class="card-text">
-                        <i class="fas fa-cookie-bite"></i> {{ string_table['Meals stats average cals title'] }}:
-                        {% raw %}
+                        <i class="fas fa-cookie-bite"></i> {{ $t('meals.tools.averageCals') }}:
                             {{ averageCals }}
-                        {% endraw %}
-                        {{ string_table['Meals day calories title'] }}
+                            {{ $t('meals.day.caloriesTitle') }}
                     </p>
                     <p class="card-text">
-                        <i class="fas fa-cubes"></i> {{ string_table['Meals stats average mass title'] }}:
-                        {% raw %}
-                            {{ averageMass }}
-                        {% endraw %}
-                        {{ string_table['Meals grams unit'] }}
+                        <i class="fas fa-cubes"></i> {{ $t('meals.tools.averageMass') }}:
+                        {{ averageMass }}
+                        {{ $t('meals.units.grams') }}
                     </p>
                 </div>
             </div>
+            <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-else></span>
 
-            {% import 'meals/meals_day.html' as meals_day %}
-            {% for day in days %}
-            {{ meals_day.day(day_info=day, string_table=string_table) }}
-            {% endfor %}
+            <day v-for="day in days" :day="day" :editor="editor" @reload="reload(day)"></day>
         </div>
+        <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-else></span>
     </div>
 </div>
 
 <!-- production version, optimized for size and speed -->
-<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/vue@3"></script>
+<script src="https://unpkg.com/vue-i18n@9"></script>
 
-<script>
-    addProdApp = new Vue({
-        el: '#add-product-modal',
-        data: {
-            currentProductId: 0,
-            currentProductName: '',
-            mass: '',
-            unit: undefined,
-            products: [],
-            units: [],
-            spinnerVisible: false,
-            errorMessage: ''
+<script type="module">
+{% endraw %}
+    import Day from '{{ url_for("static", filename="js/components/Day.js") }}'
+    import TripHandlingCard from '{{ url_for("static", filename="js/components/TripHandlingCard.js") }}'
+{% raw %}
+
+    const messages = {
+        ru: {
+            meals: {
+                card: {
+                    header: 'Информация о походе',
+                    participants: 'Участников',
+                    editButton: 'Редактировать',
+                    shoppingButton: 'Список покупок',
+                    packingButton: 'Отчет для фасовки'
+                },
+                tools: {
+                    header: 'Статистика и инструменты',
+                    averageCals: 'Средняя калорийность (в день)',
+                    averageMass: 'Средняя масса (в день)',
+                },
+                cycleDaysModal: {
+                    title: 'Скопировать дни',
+                    description: 'Если вы наполнили несколько дней похода, то вы можете циклично скопировать их во все остальные. Выберите сколько дней скопировать, в какие дни их поместить и нажмите "Скопировать".',
+                    closeButton: 'Закрыть',
+                    goButton: 'Скопировать',
+                    fromTitle: 'Копировать дни:',
+                    toTitle: 'Вставить дни:',
+                    copyFromDay: 'С',
+                    copyToDay: 'По',
+                    pasteFromDay: 'С',
+                    pasteToDay: 'По',
+                    tip: 'Например, вы выбрали копирование дней 3–5 на дни 8–13. В таком случае, дни будут скопированы следующим образом: в дне 8 окажется содержимое дня 3, в 9 — 4, в 10 — 5, в 11 — 3, в 12 — 4, в 13 — 5.',
+                    overlappingRanges: 'Исходные и целевые дни пересекаются. Убедитесь, что вы не копируете дни в самих себя.',
+                    overwrite: 'Перезаписать содержимое целевых дней',
+                    overwriteTip: 'Если выберете эту опцию, то все данные в целевых днях будут удалены, а вместо них записаны скопированные. Эта операция необратима.',
+                },
+                day: {
+                    caloriesTitle: 'Ккал',
+                    numberPrefix: 'День',
+                    nameTitle: 'Название',
+                    massTitle: 'Масса',
+                    proteinsTitle: 'Б',
+                    fatsTitle: 'Ж',
+                    carbsTitle: 'У',
+                    caloriesTitle: 'Ккал',
+                    breakfastTitle: 'Завтрак',
+                    lunchTitle: 'Обед',
+                    dinnerTitle: 'Ужин',
+                    snacksTitle: 'Перекусы',
+                    resultsTitle: 'Сумма за день',
+                    tableDeleteRecord: 'Удалить',
+                    tableTotalRecord: 'Итого',
+                    numberPrefix: 'День',
+                    clearDayButton: 'Очистить',
+                },
+                units: {
+                    grams: 'г',
+                    pcs: 'шт'
+                },
+                errors: {
+                    unableToAddMeal: 'Невозможно добавить продукт'
+                },
+                addModal: {
+                    title: 'Добавить продукт',
+                    idTitle: '#',
+                    nameTitle: 'Название',
+                    massTitle: 'Масса',
+                    productTitle: 'Продукт',
+                    searchPlaceholder: 'Искать продукт',
+                    massPlaceholder: 'Введите массу',
+                    closeButton: 'Закрыть',
+                    addButton: 'Добавить',
+                    clearProductButton: 'Очистить',
+                    invalidMassError: 'Введите положительное число'
+                },
+                errorModal: {
+                    title: 'Ошибка соединения',
+                    text: 'Произошла ошибка соединения с сервером. Попробуйте перезагрузить страницу.',
+                    reloadButton: 'Перезагрузить'
+                }
+            }
+        },
+        en: {
+            meals: {
+                card: {
+                    header: 'Trip information',
+                    participants: 'Participants',
+                    editButton: 'Edit',
+                    shoppingButton: 'Shopping list',
+                    packingButton: 'Packing list'
+                },
+                tools: {
+                    header: 'Statistics and tools',
+                    averageCals: 'Average calories (per day)',
+                    averageMass: 'Average mass (per day)',
+                },
+                cycleDaysModal: {
+                    title: 'Copy days',
+                    description: 'If you filled some days in a trip you can copy them onto other days to avoid filling the same data manually. Choose how many days you want to copy, what days are destinations, and press "Copy" button.',
+                    closeButton: 'Close',
+                    goButton: 'Copy',
+                    fromTitle: 'Copy days:',
+                    toTitle: 'Paste days:',
+                    copyFromDay: 'From',
+                    copyToDay: 'To',
+                    pasteFromDay: 'From',
+                    pasteToDay: 'To',
+                    tip: 'For example you have selected copying days 3–5 into days 8–13. In this case day 8 will be filled with day 3 data, day 9 with day 4 and etc.',
+                    overlappingRanges: 'Source and target days are overlapping. Make sure you are not copying days into themselves.',
+                    overwrite: 'Overwrite target days',
+                    overwriteTip: 'If you choose the option all the data in target days will be removed and replaced. This operation could not be revert back.',
+                },
+                day: {
+                    caloriesTitle: 'Kcal',
+                    numberPrefix: 'Day',
+                    nameTitle: 'Name',
+                    massTitle: 'Mass',
+                    proteinsTitle: 'P',
+                    fatsTitle: 'F',
+                    carbsTitle: 'C',
+                    caloriesTitle: 'Kcal',
+                    breakfastTitle: 'Breakfast',
+                    lunchTitle: 'Lunch',
+                    dinnerTitle: 'Dinner',
+                    snacksTitle: 'Snacks',
+                    resultsTitle: 'Day total',
+                    tableDeleteRecord: 'Remove',
+                    tableTotalRecord: 'Total',
+                    numberPrefix: 'Day',
+                    clearDayButton: 'Clear',
+                },
+                units: {
+                    grams: 'g',
+                    pcs: 'pcs'
+                },
+                errors: {
+                    unableToAddMeal: 'Unable to add a product'
+                },
+                addModal: {
+                    title: 'Add product',
+                    idTitle: '#',
+                    nameTitle: 'Name',
+                    massTitle: 'Mass',
+                    productTitle: 'Product',
+                    searchPlaceholder: 'Search for a product',
+                    massPlaceholder: 'Enter mass',
+                    closeButton: 'Close',
+                    addButton: 'Add',
+                    clearProductButton: 'Clear',
+                    invalidMassError: 'Enter a positive number'
+                },
+                errorModal: {
+                    title: 'Connection error',
+                    text: 'Something gone wrong. Try to reload a page.',
+                    reloadButton: 'Reload'
+                }
+            }
+        }
+    }
+
+    const i18n = VueI18n.createI18n({
+        locale: 'ru',
+        fallbackLocale: 'en',
+        messages,
+    })
+
+    const { createApp } = Vue
+
+    let addProdApp = createApp({
+        data() {
+            return {
+                currentProductId: 0,
+                currentProductName: '',
+                mass: '',
+                unit: undefined,
+                products: [],
+                units: [],
+                spinnerVisible: false,
+                errorMessage: '',
+                lastRequestHandle: undefined,
+                day: 0,
+                mealName: ''
+            }
         },
         computed: {
-            validation: function() {
+            validation: function () {
                 return {
                     mass: +this.mass > 0
                 }
             },
-            errorMessageVisible: function() {
+            errorMessageVisible: function () {
                 return this.errorMessage.length > 0
             },
-            submitDisabled: function() {
+            submitDisabled: function () {
                 return this.currentProductId === 0 ||
-                       this.validation.mass === false ||
-                       this.units.length === 0 ||
-                       this.spinnerVisible === true
+                    this.validation.mass === false ||
+                    this.units.length === 0 ||
+                    this.spinnerVisible === true
             }
         },
         methods: {
-            setProduct: function(productId, productName) {
+            setProduct: function (productId, productName) {
                 this.currentProductId = productId;
                 this.currentProductName = productName;
                 document.getElementById('mass-input').select();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ url_for('api_products.product_units') }}",
-                    data: {
-                        'id': this.currentProductId
-                    },
-                    success: function (msg) {
-                        if (msg.result == false) {
-                            addProdApp.units = []
-                            return;
-                        }
+                let url = new URL(globals.urls.productUnits);
+                url.searchParams.set('id', this.currentProductId);
 
-                        addProdApp.units = []
-                        for (unit of msg.units) {
-                            var name = unit === 0 ? '{{ string_table["Meals grams unit"] }}' : '{{ string_table["Meals pcs unit"] }}'
-                            addProdApp.units.push({
+                let localApp = this
+                fetch(url)
+                    .then(response => response.json())
+                    .then(msg => {
+                        localApp.units = []
+                        if (msg.result === false)
+                            return;
+
+                        for (let unit of msg.units) {
+                            let name = unit === 0 ? localApp.$t('meals.units.grams') : localApp.$t('meals.units.pcs')
+                            localApp.units.push({
                                 name: name,
                                 value: unit
                             })
                         }
-                        addProdApp.unit = 0;
-                    }
+                        localApp.unit = 0;
+                    })
+                    .catch(error => {
+                        $("#fatal-error-modal").modal({
+                            backdrop: 'static'
+                    });
                 })
             },
-            clearProduct: function() {
+            clearProduct: function () {
                 this.currentProductId = 0;
                 this.currentProductName = '';
             },
-            searchProducts: function(event) {
-                updateList($(event.target).val());
+            searchProducts: function (event) {
+                this.updateList($(event.target).val());
             },
-            addMeal: function(event) {
-                var day = $("#found-products").data("day");
-                var mealName = $("#found-products").data("mealtype");
+            addMeal: function (event) {
                 if (this.validation.mass === false)
                     return;
 
                 this.spinnerVisible = true;
 
-                $.ajax({
-                    type: "POST",
-                    url: "{{ url_for('api_meals.meals_add') }}",
-                    data: {
-                        'trip_id': "{{ trip['id'] }}",
-                        'meal_name': mealName,
-                        'day_number': day,
-                        'product_id': this.currentProductId,
-                        'mass': this.mass,
-                        'unit': this.unit
-                    },
-                    success: function (msg) {
-                        if (msg['result'] != true) {
-                            addProdApp.errorMessage = '{{ string_table["Meals unable to add meal error"] }}';
-                        }
-                        else {
-                            reloadDay(day);
-                            addProdApp.currentProductId = 0;
-                            addProdApp.currentProductName = '';
-                            addProdApp.mass = '';
-                            addProdApp.units = [];
-                            addProdApp.unit = undefined;
-                            addProdApp.errorMessage = '';
-                            mealsApp.updateAverages();
-                        }
-                        addProdApp.spinnerVisible = false;
+                let url = globals.urls.addMeal
+                let body = JSON.stringify({
+                    'trip_id': globals.trip.id,
+                    'meal_name': this.mealName,
+                    'day_number': this.day.number,
+                    'product_id': this.currentProductId,
+                    'mass': this.mass,
+                    'unit': this.unit
+                })
+
+                let localApp = this
+                fetch(url, {
+                    method: "POST",
+                    body: body,
+                    headers: {
+                        "Content-Type": "application/json"
                     }
+                })
+                .then(response => response.json())
+                .then(msg => {
+                    if (msg.result != true) {
+                        localApp.errorMessage = localApp.$t('meals.errors.unableToAddMeal')
+                    } else {
+                        mountedMealsApp.reload(localApp.day);
+                        localApp.currentProductId = 0;
+                        localApp.currentProductName = '';
+                        localApp.mass = '';
+                        localApp.units = [];
+                        localApp.unit = undefined;
+                        localApp.errorMessage = '';
+                    }
+                    localApp.spinnerVisible = false;
+                })
+                .catch(error => {
+                    $("#fatal-error-modal").modal({
+                        backdrop: 'static'
+                    });
                 })
             },
-            addMealKey: function(event) {
+            addMealKey: function (event) {
                 if (event.key !== "Enter")
                     return;
+
                 this.addMeal(event);
                 event.preventDefault();
+            },
+            updateList: function(value) {
+                if(this.lastRequestHandle) {
+                    clearTimeout(this.lastRequestHandle);
+                }
+
+                var instance = this
+                this.lastRequestHandle = setTimeout(async () => {
+                    let url = new URL(globals.urls.productsSearch)
+                    url.searchParams.set('search', value)
+                    try {
+                        const res = await fetch(url)
+                        let response = await res.json()
+                        instance.lastRequestHandle = undefined;
+                        instance.products = []
+                        for (let product of response.products) {
+                            instance.products.push({
+                                id: product['id'],
+                                name: product['name']
+                            })
+                        }
+                    } catch (error) {
+                        $("#fatal-error-modal").modal({
+                            backdrop: 'static'
+                        });
+                    }
+                }, 500)
             }
+        },
+        mounted() {
+            this.updateList('')
         }
     })
+    addProdApp.use(i18n)
+    let mountedAddProdApp = addProdApp.mount('#add-product-modal')
 
-    var mealsApp = new Vue({
-        el: '#meals-app',
-        data: {
-            averageCals: 0,
-            averageMass: 0,
-            averagesSpinnerVisible: false,
-        },
-        methods: {
-            updateAverages: function() {
-                mealsApp.averagesSpinnerVisible = true;
+    let fatalErrorApp = createApp({})
+    fatalErrorApp.use(i18n)
+    fatalErrorApp.mount('#fatal-error-modal')
 
-                $.ajax({
-                    type: "GET",
-                    url: "{{ url_for('api_meals.meals_averages') }}",
-                    data: {
-                        'trip_id': "{{ trip['id'] }}"
-                    },
-                    success: function(msg) {
-                        mealsApp.averageCals = msg['cals']
-                        mealsApp.averageMass = msg['mass']
-                    }
-                })
+    let cycleDaysApp = createApp({
+        data() {
+            return {
+                daysCount: 0,
+                srcStart: 1,
+                srcEnd: 1,
+                dstStart: 0,
+                dstEnd: 0,
             }
-        },
-    })
-
-    var cycleDaysApp = new Vue({
-        el: '#cycle-days-modal',
-        data: {
-            srcStart: 1,
-            srcEnd: 1,
-            dstStart: {% if days | count > 1 %}2{% else %} 1 {% endif %},
-            dstEnd: {{ days | count }},
         },
         computed: {
             errorMessageVisible: function () {
                 return parseInt(this.srcStart) == parseInt(this.dstStart)
-                || parseInt(this.srcStart) == parseInt(this.dstEnd)
-                || parseInt(this.srcEnd) == parseInt(this.dstStart)
-                || parseInt(this.srcEnd) == parseInt(this.dstEnd)
-                || (parseInt(this.dstStart) > parseInt(this.srcStart) && parseInt(this.dstStart) < parseInt(this.srcEnd))
-                || (parseInt(this.dstEnd) > parseInt(this.srcStart) && parseInt(this.dstEnd) < parseInt(this.srcEnd))
+                    || parseInt(this.srcStart) == parseInt(this.dstEnd)
+                    || parseInt(this.srcEnd) == parseInt(this.dstStart)
+                    || parseInt(this.srcEnd) == parseInt(this.dstEnd)
+                    || (parseInt(this.dstStart) > parseInt(this.srcStart) && parseInt(this.dstStart) < parseInt(this.srcEnd))
+                    || (parseInt(this.dstEnd) > parseInt(this.srcStart) && parseInt(this.dstEnd) < parseInt(this.srcEnd))
+            },
+            cycleDaysLink() {
+                return globals.urls.cycleDays
+            },
+            days() {
+                return Array.from(Array(this.daysCount).keys()).map(i => i + 1)
+            }
+        },
+        mounted () {
+            let appInstance = this
+            fetch(globals.urls.tripInfo)
+                .then(response => response.json())
+                .then(msg => {
+                    appInstance.daysCount = msg.trip.days_count
+                    appInstance.dstStart = appInstance.daysCount > 1 ? 2 : 1
+                    appInstance.dstEnd = appInstance.daysCount
+                })
+        }
+    })
+    cycleDaysApp.use(i18n)
+    cycleDaysApp.mount('#cycle-days-modal')
+
+    let mealsApp = createApp({
+        components: {
+            TripHandlingCard,
+            Day
+        },
+        data() {
+            return {
+                days: [],
+                group: '',
+                tripInfo: {},
+                tripLoading: true,
+                userLoading: true,
+                mealsLoading: true
+            }
+        },
+        computed: {
+            editor() {
+                return this.group === 'TripManager' || this.group === 'Administrator'
+            },
+            averageCals() {
+                let sum = 0.0
+                for (let day of this.days) {
+                    for (let key of Object.keys(day.meals)) {
+                        for (let record of day.meals[key]) {
+                            sum += record.calories
+                        }
+                    }
+                }
+                return (sum / this.days.length).toFixed(1)
+            },
+            averageMass() {
+                let sum = 0.0
+                for (let day of this.days) {
+                    for (let key of Object.keys(day.meals)) {
+                        for (let record of day.meals[key]) {
+                            sum += record.mass
+                        }
+                    }
+                }
+                return (sum / this.days.length).toFixed(1)
+            },
+            fromDate() {
+                const date = new Date(this.tripInfo.trip.from_date)
+                return date.toLocaleDateString()
+            },
+            tillDate() {
+                const date = new Date(this.tripInfo.trip.till_date)
+                return date.toLocaleDateString()
+            }
+        },
+        mounted() {
+            var instance = this
+            fetch(globals.urls.userInfo)
+                .then(response => response.json())
+                .then(data => {
+                    instance.group = data.access_group
+                    instance.userLoading = false
+                })
+                .catch(error => {
+                    $("#fatal-error-modal").modal({
+                        backdrop: 'static'
+                    });
+                })
+
+            fetch(globals.urls.mealsInfo)
+                .then(response => response.json())
+                .then(data => {
+                    instance.days = data.days
+                    instance.mealsLoading = false
+                })
+                .catch(error => {
+                    $("#fatal-error-modal").modal({
+                        backdrop: 'static'
+                    });
+                })
+
+            fetch(globals.urls.tripInfo)
+                .then(response => response.json())
+                .then(msg => {
+                    instance.tripInfo = msg
+                    instance.tripLoading = false
+                })
+                .catch(error => {
+                    $("#fatal-error-modal").modal({
+                        backdrop: 'static'
+                    });
+                })
+        },
+        methods: {
+            reload(day) {
+                let localApp = this
+                fetch(day.reload_link)
+                    .then(response => response.json())
+                    .then(data => {
+                        localApp.days[data.day.number - 1] = data.day
+                    })
+                    .catch(error => {
+                        $("#fatal-error-modal").modal({
+                            backdrop: 'static'
+                        });
+                    })
             }
         }
     })
-
-    $(document).ready(function () {
-        updateList('');
-        mealsApp.updateAverages();
-    });
+    mealsApp.use(i18n)
+    let mountedMealsApp = mealsApp.mount('#meals-app')
 
     $(document).on('show.bs.modal', '#add-product-modal', function (event) {
-        var button = $(event.relatedTarget);
-        var day = button.data('day');
-        var mealType = button.data('mealtype');
-        var modal = $(this);
-        modal.find("#found-products").data("day", day);
-        modal.find("#found-products").data("mealtype", mealType);
+        let button = $(event.relatedTarget);
+        let day = button.data('day');
+        let mealType = button.data('mealtype');
+        let reloadLink = button.data('reloadlink')
 
-        addProdApp.currentProductId = 0;
-        addProdApp.currentProductName = '';
-        addProdApp.mass = '';
-        addProdApp.units = []
-        addProdApp.unit = undefined;
-        addProdApp.errorMessageVisible = false;
+        mountedAddProdApp.day = {number: day, reload_link: reloadLink};
+        mountedAddProdApp.mealName = mealType;
+        mountedAddProdApp.currentProductId = 0;
+        mountedAddProdApp.currentProductName = '';
+        mountedAddProdApp.mass = '';
+        mountedAddProdApp.units = []
+        mountedAddProdApp.unit = undefined;
 
         setTimeout(() => {
             document.getElementById('search-product-input').focus();
         }, 500);
     })
-
-    $(document).on('click', '#reload-page-button', function (event) {
-        window.location.reload(true);
-    })
-
-    function removeProduct(dayNumber, mealId) {
-        var url = "{{ url_for('api_meals.meals_remove') }}";
-        $.ajax({
-            type: "DELETE",
-            url: url,
-            data: "meal_id=" + mealId.toString(),
-            success: function (msg) {
-                if (msg['result'] != true) {
-                    $("#fatal-error-modal").modal({
-                        backdrop: 'static'
-                    });
-                }
-                else {
-                    reloadDay(dayNumber);
-                    mealsApp.updateAverages();
-                }
-            },
-            error: function() {
-                $("#fatal-error-modal").modal({
-                    backdrop: 'static'
-                });
-            }
-        });
-    }
-
-    function reloadDay(dayNumber) {
-        var url = "{{ url_for('meals.days_view', trip_id=trip['id']) }}/day_table/" + dayNumber.toString();
-        var dayElement = $("#day" + dayNumber.toString());
-        $.ajax({
-            type: "GET",
-            url: url,
-            success: function (msg) {
-                dayElement.replaceWith(msg);
-            },
-            error: function() {
-                $("#fatal-error-modal").modal({
-                    backdrop: 'static'
-                });
-            }
-        });
-    }
-
-    var lastRequestHandle = undefined;
-    function updateList(value) {
-        if (lastRequestHandle) {
-            clearTimeout(lastRequestHandle);
-        }
-
-        lastRequestHandle = setTimeout(function () {
-            $.ajax({
-                type: "GET",
-                url: "{{ url_for('api_products.products_search') }}",
-                data: {
-                    'name': value,
-                    'count': '10'
-                },
-                success: function (msg) {
-                    lastRequestHandle = undefined;
-
-                    if (msg.result !== true)
-                        return;
-
-                    addProdApp.products = []
-                    for (product of msg.products) {
-                        addProdApp.products.push({
-                            id: product['id'],
-                            name: product['name']
-                        })
-                    }
-                },
-                error: function () {
-                    $("#fatal-error-modal").modal({
-                        backdrop: 'static'
-                    });
-                }
-            })
-        }, 500)
-    }
-
-    function hideDay(cardId) {
-        let hideClass = 'd-none';
-        let body = document.querySelector('#' + cardId + ' div.card-body');
-        if (body.classList.contains(hideClass)) {
-            body.classList.remove(hideClass)
-        } else {
-            body.classList.add(hideClass);
-        }
-
-        compressClass = 'fa-compress-alt';
-        expandClass = 'fa-expand-alt';
-        let icon = document.querySelector('#' + cardId + ' button.float-left i.fas');
-        if (icon.classList.contains(compressClass)) {
-            icon.classList.remove(compressClass);
-            icon.classList.add(expandClass);
-        } else {
-            icon.classList.remove(expandClass);
-            icon.classList.add(compressClass);
-        }
-    }
-
-    function removeDay(dayNumber) {
-        $.ajax({
-            type: "DELETE",
-            url: "{{ url_for('api_meals.meals_clear') }}",
-            data: {
-                'trip_id': {{ trip['id'] }},
-                'day_number': dayNumber
-            },
-            success: function(msg) {
-                if (msg.result !== true)
-                    return;
-
-                reloadDay(dayNumber);
-            },
-            error: function() {
-                $("#fatal-error-modal").modal({
-                    backdrop: 'static'
-                });
-            }
-        })
-    }
 </script>
+
+{% endraw %}
 
 {% endblock %}

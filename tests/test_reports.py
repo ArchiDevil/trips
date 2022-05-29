@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 # TODO: no tests check correctness of the data
 from organizer.strings import STRING_TABLE
 
+
 def test_shopping_rejects_not_logged_in(client):
     response = client.get('/reports/shopping/1')
     assert response.status_code == 302

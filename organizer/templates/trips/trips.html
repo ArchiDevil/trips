@@ -2,116 +2,209 @@
 {% block content %}
 
 <script>
-    $("#trips-link").addClass("active");
+    setActive("trips-link")
 </script>
 
-<div class="container">
+<script>
+    const globals = {
+        urls: {
+            userInfo: '{{ url_for("api.auth.user") }}',
+            tripsInfo: '{{ url_for("api.trips.get_trip_ids") }}',
+            tripsAdd: '{{ url_for("trips.add") }}',
+            cardImgSrc: '{{ url_for("static", filename="img/sketches/1.png") }}',
+        }
+    }
+</script>
+
+{% raw %}
+<div id="app" class="container" v-cloak>
     <div class="row my-3">
-        <div class="col-4">
-            <h1 class="display-4">{{ string_table['Trips title'] }}</h1>
+        <div class="col-6">
+            <span class="display-4">{{ $t('trips.title') }}</span>
+            <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-if="contentLoading"></span>
         </div>
 
-        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-        <div class="col d-flex flex-row-reverse align-items-end">
-            <a class="btn btn-primary mb-3 d-block d-lg-none" type="button" href="{{ url_for('trips.add') }}">
-                {{ string_table['Trips create new short button'] }}
+        <div class="col-6 d-flex flex-row-reverse align-items-end" v-if="!contentLoading && editor">
+            <a class="btn btn-primary d-block d-lg-none" type="button" :href="addTripLink">
+                {{ $t('trips.createShortButton') }}
             </a>
         </div>
-        {% endif %}
     </div>
 
-    {% if not trips %}
+    <div class="row my-3" v-if="!tripIds.length && !contentLoading">
+        <div class="col">
+            <div class="jumbotron shadow">
+                <h1 class="display-4">{{ $t('trips.jumbotronTitle') }}</h1>
 
-    <div class="row my-3">
-        <div class="jumbotron shadow">
-            <h1 class="display-4">{{ string_table['Trips jumbotron title'] }}</h1>
-    {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-            <p class="lead">{{ string_table['Trips jumbotron text tripmanager'] }}</p>
-            <hr class="my-4">
-            <p>{{ string_table['Trips jumbotron text2'] }}</p>
-            <a class="btn btn-primary btn-lg" href="{{ url_for('trips.add') }}" role="button">{{ string_table['Trips jumbotron create button'] }}</a>
-    {% else %}
-            <p class="lead">{{ string_table['Trips jumbotron text guest'] }}</p>
-    {% endif %}
+                <p class="lead" v-if="editor">{{ $t(trips.jumbotronText) }}</p>
+                <p class="lead" v-else>{{ $t('trips.jumbotronTextGuest') }}</p>
+
+                <hr class="my-4" v-if="editor">
+                <p v-if="editor">{{ $t('trips.jumbotronText2') }}</p>
+                <a class="btn btn-primary btn-lg" :href="addTripLink" role="button" v-if="editor">
+                    {{ $t('trips.jumbotronCreateButton') }}
+                </a>
+            </div>
         </div>
     </div>
-
-    {% else %}
-
-    <div class="row my-3">
-        {% if g.user.access_group.value >= AccessGroup.TripManager.value %}
-        <div class="col-auto d-none d-lg-block">
+    <div class="row my-3" v-else-if="tripIds.length && !contentLoading">
+        <div class="col-auto d-none d-lg-block" v-if="editor">
             <div class="card shadow" style="width: 18rem;">
-                <img src="{{ url_for('static', filename='img/sketches/1.png') }}" class="card-img-top bg-light" alt="">
-                <h5 class="card-header">{{ string_table['Trips card title'] }}</h5>
+                <img :src="cardImgSrc" class="card-img-top bg-light" alt="">
+                <h5 class="card-header">{{ $t('trips.cardTitle') }}</h5>
                 <div class="card-body">
-                    <p class="card-text">{{ string_table['Trips card text'] }}</p>
-                    <a href="{{ url_for('trips.add') }}" class="btn btn-primary w-100" role="button">
-                        <i class="fas fa-plus"></i> {{ string_table['Trips card create button'] }}
+                    <p class="card-text">{{ $t('trips.cardText') }}</p>
+                    <a :href="addTripLink" class="btn btn-primary w-100" role="button">
+                        <i class="fas fa-plus"></i> {{ $t('trips.createButton') }}
                     </a>
                 </div>
             </div>
         </div>
-        {% endif %}
 
         <div class="col">
-            {% if trips %}
-            {% for trip in trips %}
-            {% if not trip['trip_record'].archived %}
-            <div class="card shadow mb-3">
-                <div class="row no-gutters">
-                    <div class="d-none d-md-block col-md-4 col-xl-3">
-                        <img src="{{ url_for('static', filename='img/trips/{}.png'.format(trip['magic'])) }}" class="w-100 rounded-left" alt="">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h4 class="card-title">
-                                {% if trip['type'] == 'shared' %}
-                                <i class="fas fa-share-alt" title="{{ string_table['Trips shared info title'] }}"></i>
-                                {% endif %}
-                                {{ trip['trip_record'].name }}
-                            </h4>
-                            <p class="card-text mb-2">
-                                <i class="fas fa-calendar-day"></i> {{ trip['trip_record'].from_date.strftime('%d/%m') }} -
-                                {{ trip['trip_record'].till_date.strftime('%d/%m') }}
-                            </p>
-                            <p class="card-text">
-                                <i class="fas fa-walking"></i> {{ string_table['Trips participants count title'] }}: {{ trip['attendees'] }}
-                            </p>
-                            <!-- <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
-                            <div class="row">
-                                <div class="col">
-                                    <a href="{{ url_for('meals.days_view', trip_id=trip['trip_record'].id) }}"
-                                        class="btn btn-primary w-100">
-                                        {{ string_table['Trips open button'] }}
-                                    </a>
-                                </div>
-                                {% if trip['type'] == 'user' %}
-                                <div class="col">
-                                    <a href="{{ url_for('trips.edit', trip_id=trip['trip_record'].id) }}"
-                                       class="btn btn-secondary w-100">
-                                        {{ string_table['Trips edit button'] }}
-                                    </a>
-                                </div>
-                                {% else %}
-                                <div class="col">
-                                    <a href="{{ url_for('trips.forget', trip_id=trip['trip_record'].id) }}"
-                                       class="btn btn-outline-secondary w-100">
-                                        {{ string_table['Trips hide button'] }}
-                                    </a>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-            {% endfor %}
-            {% endif %}
+            <trips-list :trips="sortedTrips"></trips-list>
+            <div class="spinner-border" role="status" v-if="tripsLoading"></div>
         </div>
     </div>
-    {% endif %}
 </div>
+
+<script src="https://unpkg.com/vue@3"></script>
+<script src="https://unpkg.com/vue-i18n@9"></script>
+
+<script type="module">
+{% endraw %}
+    import TripsList from '{{ url_for("static", filename="js/components/TripsList.js") }}'
+{% raw %}
+
+    const messages = {
+        ru: {
+            trips: {
+                sharedInfoTitle: 'С вами поделились этим походом',
+                participantsCountTitle: 'Участников',
+                openButton: 'Открыть',
+                editButton: 'Редактировать',
+                hideButton: 'Скрыть',
+                title: 'Походы',
+                createShortButton: 'Создать',
+                createButton: 'Создать поход',
+                cardTitle: 'Новое приключение',
+                cardText: 'Откройте еще одну страницу в вашей книге историй, нажав кнопку ниже. Это просто.',
+                jumbotronTitle: 'Добро пожаловать!',
+                jumbotronText: 'Мы обнаружили, что у вас нет ни одного запланированного похода. Весь земной шар ждет вас, и готов к исследованию. Давайте исследовать мир вместе!',
+                jumbotronText2: 'Начнем исследовать с нажатия вот этой кнопки. Нам нужно будет совсем немного информации. Это не займет много времени',
+                jumbotronTextGuest: 'Похоже, что никто не поделился с вами своими походами. Попросите руководителя, или кого-нибудь из вашей группы предоставить вам ссылку на поход и он появится здесь.',
+                jumbotronCreateButton: 'Создать поход',
+                lastUpdatePrefix: 'Последнее обновление',
+            }
+        },
+        en: {
+            trips: {
+                sharedInfoTitle: 'Someone shared this trip with you',
+                participantsCountTitle: 'Participants',
+                openButton: 'Open',
+                editButton: 'Edit',
+                hideButton: 'Hide',
+                title: 'Trips',
+                createShortButton: 'Add',
+                createButton: 'Create a trip',
+                cardTitle: 'A new adventure',
+                cardText: 'Open a new page in your story by clicking a button below. This is easy.',
+                jumbotronTitle: 'Welcome!',
+                jumbotronText: 'We have found out that you do not have any planned trips. The whole world is waiting, let\'s start exploring it together!',
+                jumbotronText2: 'Let\'s start from the button. We will ask for a little portion if information, it does not take long',
+                jumbotronTextGuest: 'It seems like no one shared a trip with you :( Ask your trip manager or anyone from your group for a link and the trip will appear here.',
+                jumbotronCreateButton: 'Create a trip',
+                lastUpdatePrefix: 'Last updated',
+            }
+        }
+    }
+
+    const i18n = VueI18n.createI18n({
+        locale: 'ru',
+        fallbackLocale: 'en',
+        messages,
+    })
+
+    const { createApp } = Vue
+
+    const app = createApp({
+        components: {
+            TripsList
+        },
+        data() {
+            return {
+                contentLoading: true,
+                tripsLoading: true,
+                tripIds: [],
+                trips: [],
+                userInfo: null,
+                sortingFunc: (a, b) => {
+                    return new Date(a.trip.till_date) - new Date(b.trip.till_date)
+                },
+                reverseSortingFunc: (a, b) => {
+                    return new Date(b.trip.till_date) - new Date(a.trip.till_date)
+                },
+            }
+        },
+        computed: {
+            sortedTrips() {
+                let upcomingTrips = this.trips.filter(trip => {
+                    let today = Date.now()
+                    let distance = new Date(trip.trip.till_date) - today
+                    return distance >= 0
+                })
+                let pastTrips = this.trips.filter(trip => {
+                    let today = Date.now()
+                    let distance = new Date(trip.trip.till_date) - today
+                    return distance < 0
+                })
+                return [...upcomingTrips.sort(this.sortingFunc), ...pastTrips.sort(this.reverseSortingFunc)]
+            },
+            group() {
+                if (this.userInfo) {
+                    return this.userInfo.access_group
+                } else {
+                    return ''
+                }
+            },
+            addTripLink() {
+                return globals.urls.tripsAdd
+            },
+            editor() {
+                return this.group === 'TripManager' || this.group === 'Administrator'
+            },
+            cardImgSrc() {
+                return globals.urls.cardImgSrc
+            }
+        },
+        mounted() {
+            var instance = this
+            fetch(globals.urls.userInfo)
+                .then(response => response.json())
+                .then(userInfo => {
+                    instance.userInfo = userInfo
+                })
+                .then(() => {
+                    fetch(globals.urls.tripsInfo)
+                        .then(response => response.json())
+                        .then(async response => {
+                            instance.tripIds = response.trips
+                            instance.contentLoading = false
+                            await Promise.all(response.trips.map((e, idx, arr) => {
+                                return fetch('/api/trips/get/' + e)
+                                    .then(response => response.json())
+                                    .then(response => {
+                                        instance.trips.push(response)
+                                    })
+                            }))
+                            instance.tripsLoading = false
+                        })
+                })
+        }
+    })
+    app.use(i18n)
+    app.mount('#app')
+</script>
+{% endraw %}
 
 {% endblock %}

@@ -1,7 +1,5 @@
 import csv
 import datetime
-import functools
-import hashlib
 import io
 from typing import Any, List
 
@@ -10,49 +8,15 @@ from sentry_sdk import capture_exception
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, AccessGroup, User, TripAccess, Group, Product, MealRecord
+from organizer.schema import Trip, AccessGroup, TripAccess, Group, Product, MealRecord
 from organizer.strings import STRING_TABLE
 
-bp = Blueprint('trips', __name__)
+bp = Blueprint('trips', __name__, url_prefix='/trips')
 
-
-@bp.route('/')
+@bp.get('/')
 @login_required_group(AccessGroup.Guest)
 def index():
-    with get_session() as session:
-        user_trips = None
-        shared_trips = None
-
-        if g.user.access_group == AccessGroup.Administrator:
-            user_trips: List[Trip] = session.query(Trip).all()
-        else:
-            user = session.query(User).filter(User.id == g.user.id).one()
-            user_trips: List[Trip] = user.trips
-            shared_trips: List[Trip] = user.shared_trips
-
-        trips = []
-        if user_trips:
-            for trip in user_trips:
-                groups: List[Group] = trip.groups
-                trips.append({
-                    'trip_record': trip,
-                    'type': 'user',
-                    'attendees': functools.reduce(lambda x, y: x+y, [group.persons for group in groups]),
-                    'magic': int(hashlib.sha1(trip.name.encode()).hexdigest(), 16) % 8 + 1
-                })
-
-        if shared_trips:
-            for trip in shared_trips:
-                groups: List[Group] = trip.groups
-                trips.append({
-                    'trip_record': trip,
-                    'type': 'shared',
-                    'attendees': functools.reduce(lambda x, y: x+y, [group.persons for group in groups]),
-                    'magic': int(hashlib.sha1(trip.name.encode()).hexdigest(), 16) % 8 + 1
-                })
-
-        return render_template('trips/trips.html',
-                               trips=trips)
+    return render_template('trips/trips.html')
 
 
 def validate_input_data():
@@ -64,7 +28,7 @@ def validate_input_data():
     try:
         i = 1
         while True:
-            group_name = 'group{}'.format(i)
+            group_name = f'group{i}'
             if group_name in request.form:
                 value = int(request.form[group_name])
                 if value < 1:
@@ -90,7 +54,7 @@ def validate_input_data():
     return name, groups, from_date, till_date
 
 
-@bp.route('/trips/add', methods=['GET', 'POST'])
+@bp.route('/add', methods=['GET', 'POST'])
 @login_required_group(AccessGroup.TripManager)
 def add():
     template_file = 'trips/edit.html'
@@ -120,16 +84,18 @@ def add():
                 new_trip.groups.append(Group(group_number=i, persons=persons))
             session.add(new_trip)
             session.commit()
+
+            end_url = url_for('meals.days_view', trip_id=new_trip.id)
         return redirect(end_url)
 
     return render_template(template_file,
                            caption=caption,
                            submit_caption=submit_caption,
-                           close_url=end_url,
+                           close_url=url_for('.index'),
                            submit_url=add_url)
 
 
-@bp.route('/trips/edit/<int:trip_id>', methods=['GET', 'POST'])
+@bp.route('/edit/<int:trip_id>', methods=['GET', 'POST'])
 @login_required_group(AccessGroup.TripManager)
 def edit(trip_id: int):
     template_file = 'trips/edit.html'
@@ -138,7 +104,7 @@ def edit(trip_id: int):
     edit_url = url_for('trips.edit', trip_id=trip_id)
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
     if not redirect_location:
-        redirect_location = url_for('.index')
+        redirect_location = url_for('trips.index')
 
     with get_session() as session:
         trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
@@ -193,7 +159,7 @@ def edit(trip_id: int):
                            redirect=redirect_location)
 
 
-@bp.route('/trips/archive/<int:trip_id>')
+@bp.get('/archive/<int:trip_id>')
 @login_required_group(AccessGroup.TripManager)
 def archive(trip_id: int):
     with get_session() as session:
@@ -208,7 +174,7 @@ def archive(trip_id: int):
     return redirect(url_for('.index'))
 
 
-@bp.route('/trips/forget/<int:trip_id>')
+@bp.get('/forget/<int:trip_id>')
 @login_required_group(AccessGroup.Guest)
 def forget(trip_id: int):
     with get_session() as session:
@@ -242,7 +208,7 @@ def send_csv_file(rows: List[List[Any]]):
                      as_attachment=True, download_name='data.csv')
 
 
-@bp.route('/trips/download/<int:trip_id>', methods=['GET'])
+@bp.get('/download/<int:trip_id>')
 @login_required_group(AccessGroup.Guest)
 def download(trip_id: int):
     csv_content = [[

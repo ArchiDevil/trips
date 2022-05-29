@@ -40,6 +40,19 @@ def login_required_group(group):
     return login_required_grouped
 
 
+def api_login_required_group(group=None):
+    def api_login_required_grouped(view):
+        @functools.wraps(view)
+        def api_wrapped_view_grouped(**kwargs):
+            if 'user' not in g or g.user is None:
+                abort(403)
+            if group and g.user.access_group.value < group.value:
+                abort(403)
+            return view(**kwargs)
+        return api_wrapped_view_grouped
+    return api_login_required_grouped
+
+
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
@@ -93,7 +106,7 @@ def login():
     return render_template('auth/login.html', redirect=redirect_location)
 
 
-@bp.route('/logout')
+@bp.get('/logout')
 @login_required_group(AccessGroup.Guest)
 def logout():
     with configure_scope() as scope:
@@ -102,7 +115,7 @@ def logout():
     return redirect(url_for('trips.index'))
 
 
-@bp.route('/vk_login')
+@bp.get('/vk_login')
 def vk_login():
     url = 'https://oauth.vk.com/authorize?'
     query = urlencode({
@@ -188,7 +201,7 @@ def request_vk_user_name_and_photo(access_token):
     return '{} {}'.format(response_user['first_name'], response_user['last_name']), response_user['photo_50']
 
 
-@bp.route('/vk_redirect')
+@bp.get('/vk_redirect')
 def vk_redirect():
     code = request.args['code']
     redirect_location = request.args['state']

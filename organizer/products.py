@@ -1,4 +1,5 @@
 import math
+from typing import Final
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
 from sentry_sdk import capture_exception
@@ -54,35 +55,13 @@ def check_input_data():
             raise RuntimeError(STRING_TABLE['Products error incorrect grams'])
 
 
-@bp.route('/')
+@bp.get('/')
 @login_required_group(AccessGroup.Guest)
 def index():
-    with get_session() as session:
-        page = 0
-        products_per_page = 10
-        if 'page' in request.args:
-            page = int(request.args['page'])
-
-        search = None
-        if 'search' in request.args:
-            search = request.args['search']
-
-        if search:
-            search_pattern = "%{}%".format(search)
-            products_count = session.query(Product.id).filter(Product.name.ilike(search_pattern),
-                                                              Product.archived == False).count()
-            products = session.query(Product).filter(Product.name.ilike(search_pattern), Product.archived == False).order_by(
-                Product.id).offset(page * products_per_page).limit(products_per_page).all()
-        else:
-            products_count = session.query(Product.id).filter(Product.archived == False).count()
-            products = session.query(Product).filter(Product.archived == False).order_by(
-                Product.id).offset(page * products_per_page).limit(products_per_page).all()
-        return render_template('products/products.html', products=products,
-                               search=search, page=page,
-                               last_page=math.ceil(products_count / products_per_page) - 1)
+    return render_template('products/products.html')
 
 
-@bp.route('/add', methods=['POST'])
+@bp.post('/add')
 @login_required_group(AccessGroup.TripManager)
 def add():
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
@@ -115,7 +94,7 @@ def add():
     return redirect(redirect_location)
 
 
-@bp.route('/archive/<int:product_id>')
+@bp.get('/archive/<int:product_id>')
 @login_required_group(AccessGroup.TripManager)
 def archive(product_id):
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
@@ -130,7 +109,7 @@ def archive(product_id):
         return redirect(redirect_location)
 
 
-@bp.route('/edit/<int:product_id>', methods=['POST'])
+@bp.post('/edit/<int:product_id>')
 @login_required_group(AccessGroup.TripManager)
 def edit(product_id):
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')

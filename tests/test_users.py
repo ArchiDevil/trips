@@ -1,8 +1,9 @@
 import datetime
 
+from flask.app import Flask
+
 from organizer.schema import TripAccess, VkUser
 from organizer.db import get_session
-from flask.app import Flask
 from organizer.strings import STRING_TABLE
 
 def test_users_rejects_not_logged_in(client):
