@@ -1,8 +1,10 @@
-include organizer/schema.sql
 graft organizer/static
 graft organizer/templates
 include Procfile
 include runtime.txt
 include requirements.txt
+include alembic.ini
+include alembic/*
+include alembic/versions/*
 global-exclude *.pyc
 prune tests
