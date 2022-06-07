@@ -87,7 +87,7 @@ def test_auth_reports_login_error(client):
                                'redirect': '/trip/edit/1'
                            })
     assert response.status_code == 200
-    assert b'No such user'
+    assert STRING_TABLE['Login errors no user'].encode('utf-8') in response.data
 
 
 def test_auth_reports_password_error(client):
@@ -98,17 +98,17 @@ def test_auth_reports_password_error(client):
                                'redirect': '/trip/edit/1'
                            })
     assert response.status_code == 200
-    assert b'Incorrect password'
+    assert STRING_TABLE['Login errors incorrect password'].encode('utf-8') in response.data
 
 
-def test_auth_reports_incorrect_redirect(client):
+def test_auth_redirects_without_field(client):
     response = client.post('/auth/login',
                            data={
                                'login': 'Administrator',
-                               'password': 'invalid pass'
+                               'password': 'qwerty'
                            })
-    assert response.status_code == 200
-    assert b'No redirect address provided'
+    assert response.status_code == 302
+    assert '/trips/' in response.location
 
 
 def test_auth_logout_requires_login(client):
@@ -117,8 +117,8 @@ def test_auth_logout_requires_login(client):
     assert '/auth/login' in response.location
 
 
-def test_auth_can_logout(user_logged_client):
-    response = user_logged_client.get('/auth/logout')
-    assert not user_logged_client.cookie_jar
+def test_auth_can_logout(org_logged_client):
+    response = org_logged_client.get('/auth/logout')
+    assert not org_logged_client.cookie_jar
     assert response.status_code == 302
     assert '/' in response.location

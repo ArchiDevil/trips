@@ -11,7 +11,7 @@ BP = Blueprint('products', __name__, url_prefix='/products')
 
 
 @BP.get('/search')
-@api_login_required_group(AccessGroup.Guest)
+@api_login_required_group(AccessGroup.User)
 def search():
     products_per_page: Final = 10
     page = int(request.args.get('page', 0))
@@ -49,7 +49,7 @@ def search():
 
 
 @BP.get('/units')
-@api_login_required_group()
+@api_login_required_group(AccessGroup.User)
 def product_units():
     product_id = request.args['id']
 

@@ -1,7 +1,8 @@
 import datetime
 from enum import Enum as PyEnum
 
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Boolean, Enum as AlchemyEnum, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Date, \
+                       DateTime, Boolean, Enum as AlchemyEnum, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -9,22 +10,31 @@ from sqlalchemy.orm import relationship
 BASE = declarative_base()
 
 class Units(PyEnum):
+    '''Units used for products weight'''
     GRAMMS = 0
     PIECES = 1
 
 
 class AccessGroup(PyEnum):
-    Guest = 0
-    TripManager = 1
-    Administrator = 2
+    '''Levels of privileges'''
+    User = 0
+    Administrator = 1
 
 
 class UserType(PyEnum):
+    '''Type of user'''
     Native = 0
     Vk = 1
 
 
+class TripAccessType(PyEnum):
+    '''Defines if user can or cannot write to trip'''
+    Read = 0
+    Write = 1
+
+
 class User(BASE):
+    '''Describes a native user'''
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
@@ -42,13 +52,15 @@ class User(BASE):
 
 
 class Trip(BASE):
+    '''Describes a trip'''
     __tablename__ = 'trips'
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     from_date = Column(Date, nullable=False)
     till_date = Column(Date, nullable=False)
-    created_by = Column(Integer, ForeignKey(User.__tablename__ + '.id'), nullable=False)
+    created_by = Column(Integer, ForeignKey(User.__tablename__ + '.id'),
+                        nullable=False)
     last_update = Column(DateTime, nullable=False,
                          default=datetime.datetime.utcnow)
     archived = Column(Boolean, default=False, nullable=False)
@@ -58,16 +70,19 @@ class Trip(BASE):
 
 
 class Group(BASE):
+    '''Describes a separate group in a trip'''
     __tablename__ = 'groups'
 
-    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'), primary_key=True)
+    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'),
+                     primary_key=True)
     group_number = Column(Integer, primary_key=True)
     persons = Column(Integer, nullable=False)
 
-    trip = relationship('Trip')
+    trip = relationship('Trip', back_populates='groups')
 
 
 class Product(BASE):
+    '''Describes a product'''
     __tablename__ = 'products'
 
     id = Column(Integer, primary_key=True)
@@ -81,31 +96,51 @@ class Product(BASE):
 
 
 class MealRecord(BASE):
+    '''Describes a meal record in a specific trip on a specific day'''
     __tablename__ = 'meal_records'
 
     id = Column(Integer, primary_key=True)
-    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'), nullable=False)
-    product_id = Column(Integer, ForeignKey(Product.__tablename__ + '.id'), nullable=False)
+    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'),
+                     nullable=False)
+    product_id = Column(Integer, ForeignKey(Product.__tablename__ + '.id'),
+                        nullable=False)
     day_number = Column(Integer, nullable=False)
     meal_number = Column(Integer, nullable=False)
     mass = Column(Integer, nullable=False)
 
 
 class VkUser(BASE):
+    '''Describes a Vk registered user'''
     __tablename__ = 'vkusers'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'), primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'),
+                     primary_key=True)
     user_token = Column(String, nullable=False)
     token_exp_time = Column(DateTime, nullable=False)
     photo_url = Column(String)
 
 
 class TripAccess(BASE):
+    '''Describes what users can access what trips'''
     __tablename__ = 'tripaccess'
 
-    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'), primary_key=True)
-    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'), primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'),
+                     primary_key=True)
+    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'),
+                     primary_key=True)
+    access_type = Column(AlchemyEnum(TripAccessType), nullable=False)
+
+
+class SharingLink(BASE):
+    '''Describes a link the user shared'''
+    __tablename__ = 'sharinglinks'
+
+    uuid = Column(String, nullable=False, primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'))
+    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'))
+    expiration_date = Column(DateTime, nullable=False)
+    access_type = Column(AlchemyEnum(TripAccessType), nullable=False)
 
 
 def init_schema(engine):

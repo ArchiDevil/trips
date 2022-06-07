@@ -7,6 +7,6 @@ bp = Blueprint('info', __name__)
 
 
 @bp.get('/info/')
-@login_required_group(AccessGroup.Guest)
+@login_required_group(AccessGroup.User)
 def index():
     return render_template('info.html')

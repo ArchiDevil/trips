@@ -3,7 +3,7 @@
 }
 
 .showhim:hover .showme {
-    display: block;
+    display: unset;
 }
 
 @media print {

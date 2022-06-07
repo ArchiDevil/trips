@@ -14,7 +14,7 @@ bp = Blueprint('products', __name__, url_prefix='/products')
 
 def check_input_data():
     name = str(request.form['name'])
-    if not name:
+    if not name or len(name) > 100:
         raise RuntimeError(STRING_TABLE['Products error incorrect name'])
 
     try:
@@ -56,13 +56,13 @@ def check_input_data():
 
 
 @bp.get('/')
-@login_required_group(AccessGroup.Guest)
+@login_required_group(AccessGroup.User)
 def index():
     return render_template('products/products.html')
 
 
 @bp.post('/add')
-@login_required_group(AccessGroup.TripManager)
+@login_required_group(AccessGroup.User)
 def add():
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
     if not redirect_location:
@@ -95,7 +95,7 @@ def add():
 
 
 @bp.get('/archive/<int:product_id>')
-@login_required_group(AccessGroup.TripManager)
+@login_required_group(AccessGroup.Administrator)
 def archive(product_id):
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
     if not redirect_location:
@@ -110,7 +110,7 @@ def archive(product_id):
 
 
 @bp.post('/edit/<int:product_id>')
-@login_required_group(AccessGroup.TripManager)
+@login_required_group(AccessGroup.Administrator)
 def edit(product_id):
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
     if not redirect_location:

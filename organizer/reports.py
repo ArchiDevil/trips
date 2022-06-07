@@ -1,22 +1,29 @@
 from collections import defaultdict
 
 from sqlalchemy.sql import func
-from flask import Blueprint, render_template, abort, redirect, url_for
+from flask import Blueprint, render_template, abort, redirect, url_for, g
 
-from organizer.auth import login_required_group
+from organizer.auth import login_required_group, user_has_trip_access
 from organizer.db import get_session
-from organizer.schema import Trip, Product, MealRecord, AccessGroup, Group
+from organizer.schema import Trip, Product, MealRecord, AccessGroup, Group, TripAccessType
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
 
 
 @bp.get('/shopping/<int:trip_id>')
-@login_required_group(AccessGroup.Guest)
-def shopping(trip_id):
+@login_required_group(AccessGroup.User)
+def shopping(trip_id: int):
     with get_session() as session:
         trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
+
+        if not user_has_trip_access(trip,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session,
+                                    TripAccessType.Read):
+            abort(403)
 
         persons_count = session.query(func.sum(Group.persons)).filter(Group.trip_id == trip_id).scalar()
         meals = session.query(MealRecord.mass,
@@ -47,15 +54,15 @@ def shopping(trip_id):
 
 
 @bp.get('/packing/<int:trip_id>')
-@login_required_group(AccessGroup.Guest)
-def packing(trip_id):
+@login_required_group(AccessGroup.User)
+def packing(trip_id: int):
     # four is a default value that is suitable for the most cases
     return redirect(url_for('reports.packing_ext', trip_id=trip_id, columns_count=4))
 
 
 @bp.get('/packing/<int:trip_id>/<int:columns_count>')
-@login_required_group(AccessGroup.Guest)
-def packing_ext(trip_id, columns_count):
+@login_required_group(AccessGroup.User)
+def packing_ext(trip_id: int, columns_count: int):
     if columns_count > 6 or columns_count < 1:
         abort(403)
 
@@ -63,6 +70,13 @@ def packing_ext(trip_id, columns_count):
         trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
+
+        if not user_has_trip_access(trip,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session,
+                                    TripAccessType.Read):
+            abort(403)
 
         meals = session.query(MealRecord.day_number,
                               MealRecord.meal_number,
@@ -75,7 +89,7 @@ def packing_ext(trip_id, columns_count):
 
     products = defaultdict(list)
     for meal in meals:
-        day = meal.day_number
+        day: int = meal.day_number
         products[day].append({
             'name': meal.name,
             'meal_number': meal.meal_number,

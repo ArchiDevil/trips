@@ -33,17 +33,6 @@ def client(app):
 
 
 @pytest.fixture
-def user_logged_client(client):
-    client.post('/auth/login',
-                data={
-                    'login': 'User',
-                    'password': 'user1',
-                    'redirect': '/'
-                })
-    return client
-
-
-@pytest.fixture
 def org_logged_client(client):
     client.post('/auth/login',
                 data={

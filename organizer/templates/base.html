@@ -44,7 +44,7 @@
                 <a id="products-link" class="nav-item nav-link" href="{{ url_for('products.index') }}"><i class="fas fa-pizza-slice"></i> {{ string_table['Navbar products link title'] }}</a>
                 {% if g.user.access_group == AccessGroup.Administrator %}
                 <a id="users-link" class="nav-item nav-link" href="{{ url_for('users.index') }}"><i class="fas fa-users"></i> {{ string_table['Navbar users link title'] }}</a>
-                <a id="developer-console-link" class="nav-item nav-link" href="{{ url_for('developer.console') }}"><i class="fas fa-terminal"></i> {{ string_table['Navbar console link title'] }}</a>
+                <a id="developer-console-link" class="nav-item nav-link" href="{{ url_for('developer.administration') }}"><i class="fas fa-terminal"></i> {{ string_table['Navbar developer link title'] }}</a>
                 {% endif %}
                 <a id="info-link" class="nav-item nav-link" href="{{ url_for('info.index') }}"><i class="fas fa-info"></i> {{ string_table['Navbar info link title'] }}</a>
             </div>

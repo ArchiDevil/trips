@@ -1,26 +1,28 @@
 from collections import defaultdict
+from typing import Optional
 
 from flask import Blueprint, render_template, abort, g, url_for, redirect, request
 
-from organizer.auth import login_required_group
+from organizer.auth import login_required_group, user_has_trip_access
 from organizer.db import get_session
-from organizer.schema import Trip, MealRecord, AccessGroup, User
+from organizer.schema import Trip, MealRecord, AccessGroup, TripAccessType
 
 bp = Blueprint('meals', __name__, url_prefix='/meals')
 
 @bp.get('/<int:trip_id>')
-@login_required_group(AccessGroup.Guest)
+@login_required_group(AccessGroup.User)
 def days_view(trip_id):
     with get_session() as session:
         trip_info: Trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip_info:
             abort(404)
 
-        if trip_info.created_by != g.user.id:
-            user = session.query(User).filter(User.id == g.user.id).one()
-            if not trip_info in user.shared_trips:
-                user.shared_trips.append(trip_info)
-                session.commit()
+        if not user_has_trip_access(trip_info,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session,
+                                    TripAccessType.Read):
+            abort(403)
 
         trip = {
             'id': trip_info.id
@@ -30,8 +32,20 @@ def days_view(trip_id):
 
 
 @bp.post('/cycle_days/<int:trip_id>')
-@login_required_group(AccessGroup.TripManager)
+@login_required_group(AccessGroup.User)
 def cycle_days(trip_id):
+    with get_session() as session:
+        trip_info: Optional[Trip] = session.query(Trip).filter(Trip.id == trip_id).first()
+        if not trip_info:
+            abort(404)
+
+        if not user_has_trip_access(trip_info,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session,
+                                    TripAccessType.Write):
+            abort(403)
+
     if not 'src-start' in request.form or not 'src-end' in request.form:
         abort(400)
 
@@ -44,13 +58,13 @@ def cycle_days(trip_id):
         dst_start = int(request.form['dst-start'])
         dst_end = int(request.form['dst-end'])
     except ValueError:
-        abort(403)
+        abort(400)
 
     if src_start <= 0 or src_end <= 0 or dst_start <= 0 or dst_end <= 0:
-        abort(403)
+        abort(400)
 
     if src_start > src_end or dst_start > dst_end:
-        abort(403)
+        abort(400)
 
     # ranges are touching each other
     if src_start == dst_start or src_start == dst_end or src_end == dst_start or src_end == dst_end:
@@ -78,11 +92,10 @@ def cycle_days(trip_id):
         for meal in meals_info:
             meals_per_day[meal.day_number - src_start].append(meal)
 
-        trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
         trip_duration = (trip_info.till_date - trip_info.from_date).days + 1
 
         if src_end > trip_duration or dst_end > trip_duration:
-            abort(403)
+            abort(400)
 
         for day_number in range(dst_start, dst_end + 1):
             idx = (day_number - dst_start) % src_days_count

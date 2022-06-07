@@ -1,27 +1,30 @@
 import csv
-import datetime
 import io
-from typing import Any, List
+from datetime import datetime
+from typing import Any, List, Optional
 
-from flask import Blueprint, render_template, request, url_for, redirect, abort, g, flash, send_file
+from flask import Blueprint, render_template, request, url_for, redirect, \
+                  abort, g, flash, send_file
 from sentry_sdk import capture_exception
 
-from organizer.auth import login_required_group
+from organizer.auth import login_required_group, user_has_trip_access
 from organizer.db import get_session
-from organizer.schema import Trip, AccessGroup, TripAccess, Group, Product, MealRecord
+from organizer.schema import SharingLink, Trip, AccessGroup, TripAccess, Group, \
+                             Product, MealRecord, TripAccessType
 from organizer.strings import STRING_TABLE
 
 bp = Blueprint('trips', __name__, url_prefix='/trips')
 
+
 @bp.get('/')
-@login_required_group(AccessGroup.Guest)
+@login_required_group(AccessGroup.User)
 def index():
     return render_template('trips/trips.html')
 
 
 def validate_input_data():
     name = request.form['name']
-    if not name:
+    if not name or len(name) > 50:
         raise RuntimeError(STRING_TABLE['Trips edit error incorrect name'])
 
     groups = []
@@ -45,8 +48,8 @@ def validate_input_data():
     daterange = request.form['daterange']
     try:
         from_date, till_date = daterange.split(' - ')
-        from_date = datetime.datetime.strptime(from_date, '%d-%m-%Y')
-        till_date = datetime.datetime.strptime(till_date, '%d-%m-%Y')
+        from_date = datetime.strptime(from_date, '%d-%m-%Y')
+        till_date = datetime.strptime(till_date, '%d-%m-%Y')
         if till_date < from_date:
             raise ValueError
     except ValueError:
@@ -55,7 +58,7 @@ def validate_input_data():
 
 
 @bp.route('/add', methods=['GET', 'POST'])
-@login_required_group(AccessGroup.TripManager)
+@login_required_group(AccessGroup.User)
 def add():
     template_file = 'trips/edit.html'
     caption = STRING_TABLE['Trips add title']
@@ -96,7 +99,7 @@ def add():
 
 
 @bp.route('/edit/<int:trip_id>', methods=['GET', 'POST'])
-@login_required_group(AccessGroup.TripManager)
+@login_required_group(AccessGroup.User)
 def edit(trip_id: int):
     template_file = 'trips/edit.html'
     caption = STRING_TABLE['Trips edit title']
@@ -110,6 +113,11 @@ def edit(trip_id: int):
         trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip_info:
             abort(404)
+
+        if not user_has_trip_access(trip_info, g.user.id,
+                               g.user.access_group == AccessGroup.Administrator,
+                               session, TripAccessType.Write):
+            abort(403)
 
         trip_groups = [group.persons for group in trip_info.groups]
 
@@ -144,7 +152,7 @@ def edit(trip_id: int):
             for i, group in enumerate(groups):
                 trip.groups.append(Group(trip_id=trip_id, group_number=i, persons=group))
 
-            trip.last_update = datetime.datetime.utcnow()
+            trip.last_update = datetime.utcnow()
             session.commit()
             return redirect(redirect_location)
 
@@ -160,22 +168,25 @@ def edit(trip_id: int):
 
 
 @bp.get('/archive/<int:trip_id>')
-@login_required_group(AccessGroup.TripManager)
+@login_required_group(AccessGroup.User)
 def archive(trip_id: int):
     with get_session() as session:
-        trip = session.query(Trip).filter(Trip.id == trip_id).first()
+        trip: Optional[Trip] = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
 
+        if trip.created_by != g.user.id:
+            abort(403)
+
         trip.archived = True
-        trip.last_update = datetime.datetime.utcnow()
+        trip.last_update = datetime.utcnow()
         session.commit()
 
     return redirect(url_for('.index'))
 
 
 @bp.get('/forget/<int:trip_id>')
-@login_required_group(AccessGroup.Guest)
+@login_required_group(AccessGroup.User)
 def forget(trip_id: int):
     with get_session() as session:
         trip = session.query(Trip).filter(Trip.id == trip_id).first()
@@ -184,12 +195,13 @@ def forget(trip_id: int):
 
         trip_access = session.query(TripAccess).filter(TripAccess.trip_id == trip_id,
                                                        TripAccess.user_id == g.user.id).first()
-        if trip_access:
-            session.query(TripAccess).filter(TripAccess.trip_id == trip_id,
-                                             TripAccess.user_id == g.user.id).delete()
-            session.commit()
+        if not trip_access:
+            abort(403)
 
-        return redirect(url_for('.index'))
+        session.delete(trip_access)
+        session.commit()
+
+    return redirect(url_for('.index'))
 
 
 def send_csv_file(rows: List[List[Any]]):
@@ -209,7 +221,7 @@ def send_csv_file(rows: List[List[Any]]):
 
 
 @bp.get('/download/<int:trip_id>')
-@login_required_group(AccessGroup.Guest)
+@login_required_group(AccessGroup.User)
 def download(trip_id: int):
     csv_content = [[
         STRING_TABLE['CSV name'],
@@ -231,6 +243,11 @@ def download(trip_id: int):
         if not trip:
             abort(404)
 
+        if not user_has_trip_access(trip, g.user.id,
+                               g.user.access_group == AccessGroup.Administrator,
+                               session, TripAccessType.Read):
+            abort(403)
+
         data = session.query(MealRecord.mass,
                              MealRecord.day_number,
                              MealRecord.meal_number,
@@ -245,3 +262,34 @@ def download(trip_id: int):
                                 record.calories])
 
     return send_csv_file(csv_content)
+
+
+@bp.get('/access/<uuid>')
+@login_required_group(AccessGroup.User)
+def access(uuid):
+    with get_session() as session:
+        current_time = datetime.utcnow()
+        # clean up dead links
+        session.query(SharingLink).filter(SharingLink.expiration_date < current_time).delete()
+        session.commit()
+
+        link: SharingLink = session.query(SharingLink).filter(SharingLink.uuid == uuid).first()
+        if not link:
+            return redirect(url_for('trips.incorrect'))
+
+        access = session.query(TripAccess).filter(TripAccess.trip_id == link.trip_id,
+                                                  TripAccess.user_id == g.user.id).first()
+        if not access:
+            session.add(TripAccess(trip_id=link.trip_id, user_id=g.user.id, access_type=link.access_type))
+            session.commit()
+        elif access.access_type == TripAccessType.Read and link.access_type == TripAccessType.Write:
+            access.access_type = link.access_type
+            session.commit()
+
+        return redirect(url_for('meals.days_view', trip_id=link.trip_id))
+
+
+@bp.get('/incorrect')
+@login_required_group(AccessGroup.User)
+def incorrect():
+    return render_template('trips/incorrect.html')

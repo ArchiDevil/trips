@@ -1,9 +1,11 @@
-from cmath import nan
 from datetime import date
+from typing import Dict
+from flask import Flask
 from flask.testing import FlaskClient
+import pytest
 
 from organizer.db import get_session
-from organizer.schema import Trip
+from organizer.schema import Trip, TripAccess, TripAccessType
 from organizer.strings import STRING_TABLE
 
 
@@ -13,9 +15,26 @@ def test_trips_edit_rejects_not_logged_in(client: FlaskClient):
     assert 'auth/login' in response.location
 
 
-def test_trips_edit_rejects_for_guest(user_logged_client: FlaskClient):
-    response = user_logged_client.get('/trips/edit/1')
+def test_trips_edit_rejects_insufficient_privileges(org_logged_client: FlaskClient):
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
+            session.commit()
+
+    response = org_logged_client.post('/trips/edit/3',
+                                      data={
+                                          'name': 'Test trip',
+                                          'daterange': '10-09-2019 - 12-09-2019',
+                                          'group1': '3',
+                                          'group2': '6',
+                                          'redirect': '/'
+                                      })
     assert response.status_code == 403
+
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').first()
+            assert not trip
 
 
 def test_trips_can_see_edit_trip_page(org_logged_client: FlaskClient):
@@ -30,7 +49,7 @@ def test_trips_edit_returns_404_for_non_existing_trip(org_logged_client: FlaskCl
     assert response.status_code == 404
 
 
-def test_trips_can_edit_trip(org_logged_client):
+def test_trips_can_edit_trip(org_logged_client: FlaskClient):
     response = org_logged_client.post('/trips/edit/1',
                                       data={
                                           'name': 'Test trip',
@@ -44,6 +63,52 @@ def test_trips_can_edit_trip(org_logged_client):
     with org_logged_client.application.app_context():
         with get_session() as session:
             trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').one()
+            assert trip.from_date == date(2019, 9, 10)
+            assert trip.till_date == date(2019, 9, 12)
+            assert trip.groups[0].persons == 3
+            assert trip.groups[1].persons == 6
+
+
+def test_trips_can_edit_shared_trip(org_logged_client: FlaskClient):
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Write))
+            session.commit()
+
+    response = org_logged_client.post('/trips/edit/1',
+                                      data={
+                                          'name': 'Test trip',
+                                          'daterange': '10-09-2019 - 12-09-2019',
+                                          'group1': '3',
+                                          'group2': '6',
+                                          'redirect': '/'
+                                      })
+    assert response.status_code == 302
+
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').one()
+            assert trip.from_date == date(2019, 9, 10)
+            assert trip.till_date == date(2019, 9, 12)
+            assert trip.groups[0].persons == 3
+            assert trip.groups[1].persons == 6
+
+
+def test_trips_admin_can_edit_any_trip(admin_logged_client: FlaskClient):
+    response = admin_logged_client.post('/trips/edit/1',
+                                        data={
+                                            'name': 'Test trip',
+                                            'daterange': '10-09-2019 - 12-09-2019',
+                                            'group1': '3',
+                                            'group2': '6',
+                                            'redirect': '/'
+                                        })
+    assert response.status_code == 302
+
+    with admin_logged_client.application.app_context():
+        with get_session() as session:
+            trip: Trip = session.query(Trip).filter(
+                Trip.name == 'Test trip').one()
             assert trip.from_date == date(2019, 9, 10)
             assert trip.till_date == date(2019, 9, 12)
             assert trip.groups[0].persons == 3
@@ -75,10 +140,11 @@ def test_trips_redirect_created_if_not_provided(org_logged_client: FlaskClient):
     assert 'name="redirect" value="/trips/"' in response.data.decode(encoding='utf-8')
 
 
-def test_trips_edit_rejects_wrong_name(org_logged_client: FlaskClient):
+@pytest.mark.parametrize('name', ['', 'a' * 51])
+def test_trips_edit_rejects_wrong_name(org_logged_client: FlaskClient, name: str):
     response = org_logged_client.post('/trips/edit/1',
                                       data={
-                                          'name': '',
+                                          'name': name,
                                           'daterange': '10-09-2019 - 12-09-2019',
                                           'group1': '3',
                                           'group2': '6',
@@ -89,37 +155,20 @@ def test_trips_edit_rejects_wrong_name(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 9, 10)
-            assert trip.till_date != date(2019, 9, 12)
+            assert trip.from_date == date(2019, 1, 1)
+            assert trip.till_date == date(2019, 1, 5)
             assert trip.groups[0].persons != 3
             assert trip.groups[1].persons != 6
 
 
-def test_trips_edit_rejects_wrong_dates_format(org_logged_client: FlaskClient):
+@pytest.mark.parametrize('dates', ['2019-09-10 ! 2019-09-12',
+                                   '42-09-2019 - 56-09-2019',
+                                   '10-09-2019 - 08-09-2019'])
+def test_trips_edit_rejects_incorrect_dates(org_logged_client: FlaskClient, dates: str):
     response = org_logged_client.post('/trips/edit/1',
                                       data={
                                           'name': 'Test trip',
-                                          'daterange': '2019-09-10 ! 2019-09-12',
-                                          'group1': '3',
-                                          'group2': '6',
-                                          'redirect': '/'
-                                      })
-    assert STRING_TABLE['Trips edit error incorrect dates'].encode() in response.data
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 9, 10)
-            assert trip.till_date != date(2019, 9, 12)
-            assert trip.groups[0].persons != 3
-            assert trip.groups[1].persons != 6
-
-
-def test_trips_edit_rejects_wrong_dates_values(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/trips/edit/1',
-                                      data={
-                                          'name': 'Test trip',
-                                          'daterange': '42-09-2019 - 56-09-2019',
+                                          'daterange': dates,
                                           'group1': '3',
                                           'group2': '6',
                                           'redirect': '/'
@@ -131,26 +180,6 @@ def test_trips_edit_rejects_wrong_dates_values(org_logged_client: FlaskClient):
             trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
             assert trip.from_date == date(2019, 1, 1)
             assert trip.till_date == date(2019, 1, 5)
-            assert trip.groups[0].persons != 3
-            assert trip.groups[1].persons != 6
-
-
-def test_trips_edit_rejects_swapped_dates(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/trips/edit/1',
-                                      data={
-                                          'name': 'Test trip',
-                                          'daterange': '10-09-2019 - 08-09-2019',
-                                          'group1': '3',
-                                          'group2': '6',
-                                          'redirect': '/'
-                                      })
-    assert STRING_TABLE['Trips edit error incorrect dates'].encode() in response.data
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 9, 10)
-            assert trip.till_date != date(2019, 9, 8)
             assert trip.groups[0].persons != 3
             assert trip.groups[1].persons != 6
 
@@ -167,79 +196,24 @@ def test_trips_edit_shows_redirect_error(org_logged_client: FlaskClient):
     assert b'No redirect field is provided' in response.data
 
 
-def test_trips_edit_rejects_empty_groups(org_logged_client: FlaskClient):
+@pytest.mark.parametrize('groups', [{},
+                                    {'group1': '3', 'group2': '0'},
+                                    {'group1': '3', 'group2': '-6'},
+                                    {'group1': 'nan', 'group2': '4'}])
+def test_trips_edit_rejects_empty_groups(org_logged_client: FlaskClient, groups: Dict[str, str]):
+    data = {'name': 'Test trip',
+            'daterange': '10-09-2019 - 12-09-2019',
+            'redirect': '/'}
+    data.update(groups)
+
     response = org_logged_client.post('/trips/edit/1',
-                                      data={
-                                          'name': 'Test trip',
-                                          'daterange': '10-09-2019 - 12-09-2019',
-                                          'redirect': '/'
-                                      })
+                                      data=data)
     assert STRING_TABLE['Trips edit error incorrect groups'].encode() in response.data
 
     with org_logged_client.application.app_context():
         with get_session() as session:
             trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 9, 10)
-            assert trip.till_date != date(2019, 9, 12)
-            assert trip.groups[0].persons != 0
-            assert trip.groups[1].persons != 0
-
-
-def test_trips_edit_rejects_zeroes_group_values(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/trips/edit/1',
-                                      data={
-                                          'name': 'Test trip',
-                                          'daterange': '10-09-2019 - 12-09-2019',
-                                          'group1': '3',
-                                          'group2': '0',
-                                          'redirect': '/'
-                                      })
-    assert STRING_TABLE['Trips edit error incorrect groups'].encode() in response.data
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 9, 10)
-            assert trip.till_date != date(2019, 9, 12)
-            assert trip.groups[0].persons != 3
-            assert trip.groups[1].persons != 0
-
-
-def test_trips_edit_rejects_negative_group_values(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/trips/edit/1',
-                                      data={
-                                          'name': 'Test trip',
-                                          'daterange': '10-09-2019 - 12-09-2019',
-                                          'group1': '3',
-                                          'group2': '-6',
-                                          'redirect': '/'
-                                      })
-    assert STRING_TABLE['Trips edit error incorrect groups'].encode() in response.data
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 9, 10)
-            assert trip.till_date != date(2019, 9, 12)
-            assert trip.groups[0].persons != 3
-            assert trip.groups[1].persons != -6
-
-
-def test_trips_edit_rejects_nan_group_values(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/trips/edit/1',
-                                      data={
-                                          'name': 'Test trip',
-                                          'daterange': '10-09-2019 - 12-09-2019',
-                                          'group1': 'nan',
-                                          'group2': '4',
-                                          'redirect': '/'
-                                      })
-    assert STRING_TABLE['Trips edit error incorrect groups'].encode() in response.data
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 9, 10)
-            assert trip.till_date != date(2019, 9, 12)
-            assert trip.groups[0].persons != nan
-            assert trip.groups[1].persons != 6
+            assert trip.from_date == date(2019, 1, 1)
+            assert trip.till_date == date(2019, 1, 5)
+            assert trip.groups[0].persons == 2
+            assert trip.groups[1].persons == 3

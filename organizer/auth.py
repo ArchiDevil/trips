@@ -7,9 +7,10 @@ from flask import Blueprint, render_template, request, g, redirect, url_for, ses
 from werkzeug.security import check_password_hash
 
 from sentry_sdk import configure_scope, capture_exception, capture_message
+from sqlalchemy import or_
 
 from organizer.db import get_session
-from organizer.schema import User, AccessGroup, VkUser, UserType
+from organizer.schema import User, AccessGroup, VkUser, UserType, Trip, TripAccess, TripAccessType
 from organizer.strings import STRING_TABLE
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -24,9 +25,10 @@ def login_required_group(group):
             if g.user.access_group.value < group.value:
                 abort(403)
             with configure_scope() as scope:
+                name: str = g.user.displayed_name if g.user.displayed_name else g.user.login
                 scope.user = {
                     'id': str(g.user.id),
-                    'username': '{}'.format(g.user.displayed_name if g.user.displayed_name else g.user.login)
+                    'username': f'{name}'
                 }
 
             # update last user login/access
@@ -107,7 +109,7 @@ def login():
 
 
 @bp.get('/logout')
-@login_required_group(AccessGroup.Guest)
+@login_required_group(AccessGroup.User)
 def logout():
     with configure_scope() as scope:
         scope.user = None
@@ -129,7 +131,7 @@ def vk_login():
 def create_vk_user(sql_session, login, user_id, displayed_name, access_token, expires_in, photo_url):
     new_user = User(login=login,
                     displayed_name=displayed_name,
-                    access_group=AccessGroup.Guest,
+                    access_group=AccessGroup.User,
                     user_type=UserType.Vk)
     sql_session.add(new_user)
     sql_session.commit()
@@ -219,3 +221,19 @@ def vk_redirect():
                      displayed_name, expires_in, photo_url)
 
     return redirect(redirect_location)
+
+
+def user_has_trip_access(trip: Trip, user_id: int, admin, session, access_type: TripAccessType):
+    if trip.created_by == user_id or admin:
+        return True
+
+    if access_type == TripAccessType.Read:
+        trip_access = session.query(TripAccess).filter(TripAccess.trip_id == trip.id,
+                                                       TripAccess.user_id == user_id,
+                                                       or_(TripAccess.access_type == TripAccessType.Read, TripAccess.access_type == TripAccessType.Write)).first()
+    elif access_type == TripAccessType.Write:
+        trip_access = session.query(TripAccess).filter(TripAccess.trip_id == trip.id,
+                                                       TripAccess.user_id == user_id,
+                                                       TripAccess.access_type == TripAccessType.Write).first()
+
+    return trip_access is not None

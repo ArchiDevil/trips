@@ -3,9 +3,10 @@ from typing import Optional, Dict, Any
 
 from flask import Blueprint, abort, request, url_for, g
 
-from organizer.auth import api_login_required_group
+from organizer.auth import api_login_required_group, user_has_trip_access
 from organizer.db import get_session
-from organizer.schema import AccessGroup, Trip, MealRecord, Product, Units, TripAccess
+from organizer.schema import AccessGroup, Trip, MealRecord, Product, \
+                             TripAccessType, Units
 
 BP = Blueprint('meals', __name__, url_prefix='/meals')
 
@@ -13,19 +14,8 @@ def format_date(first_day: datetime.date, current_day_number: int):
     return (first_day + datetime.timedelta(days=current_day_number - 1)).strftime('%d/%m')
 
 
-def has_trip_access(trip: Trip, user_id: int, session) -> bool:
-    access: Optional[TripAccess] = session.query(TripAccess).filter(TripAccess.trip_id == trip.id,
-                                                                    TripAccess.user_id == user_id).first()
-
-    shared = bool(access)
-    admin = g.user.access_group == AccessGroup.Administrator
-    creator = trip.created_by == user_id
-
-    return shared or admin or creator
-
-
 @BP.post('/add')
-@api_login_required_group(AccessGroup.TripManager)
+@api_login_required_group(AccessGroup.User)
 def meals_add():
     json: Dict[str, Any] = request.json
     trip_id = json['trip_id']
@@ -49,7 +39,11 @@ def meals_add():
             trip = session.query(Trip).filter(Trip.id == trip_id).first()
             assert trip
 
-            if not has_trip_access(trip, g.user.id, session):
+            if not user_has_trip_access(trip,
+                                        g.user.id,
+                                        g.user.access_group == AccessGroup.Administrator,
+                                        session,
+                                        TripAccessType.Write):
                 abort(403)
 
             diff = trip.till_date - trip.from_date
@@ -109,7 +103,7 @@ def meals_add():
 
 
 @BP.delete('/remove')
-@api_login_required_group(AccessGroup.TripManager)
+@api_login_required_group(AccessGroup.User)
 def meals_remove():
     if not 'meal_id' in request.json:
         abort(400)
@@ -128,7 +122,11 @@ def meals_remove():
         if not trip:
             abort(400)
 
-        if not has_trip_access(trip, g.user.id, session):
+        if not user_has_trip_access(trip,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session,
+                                    TripAccessType.Write):
             abort(403)
 
         session.query(MealRecord).filter(MealRecord.id == meal_id).delete()
@@ -142,7 +140,7 @@ def meals_remove():
 
 
 @BP.post('/clear')
-@api_login_required_group(AccessGroup.TripManager)
+@api_login_required_group(AccessGroup.User)
 def meals_clear():
     json: Any = request.json
     if not 'trip_id' in json or not 'day_number' in json:
@@ -159,7 +157,11 @@ def meals_clear():
         if not trip:
             abort(404)
 
-        if not has_trip_access(trip, g.user.id, session):
+        if not user_has_trip_access(trip,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session,
+                                    TripAccessType.Write):
             abort(403)
 
         session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
@@ -209,14 +211,18 @@ def extract_meals(trip_id: int, day_number: int):
 
 
 @BP.get('/<int:trip_id>')
-@api_login_required_group(AccessGroup.Guest)
+@api_login_required_group(AccessGroup.User)
 def get_meals(trip_id: int):
     with get_session() as session:
         trip: Optional[Trip] = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
 
-        if not has_trip_access(trip, g.user.id, session):
+        if not user_has_trip_access(trip,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session,
+                                    TripAccessType.Read):
             abort(403)
 
         days_count: int = (trip.till_date - trip.from_date).days + 1
@@ -233,7 +239,7 @@ def get_meals(trip_id: int):
 
 
 @BP.get('/<int:trip_id>/<int:day_number>')
-@api_login_required_group(AccessGroup.Guest)
+@api_login_required_group(AccessGroup.User)
 def get_day_meals(trip_id: int, day_number: int):
     with get_session() as session:
         trip: Optional[Trip] = session.query(Trip).filter(Trip.id == trip_id).first()
@@ -244,7 +250,11 @@ def get_day_meals(trip_id: int, day_number: int):
         if day_number > days_count or day_number < 1:
             abort(404)
 
-        if not has_trip_access(trip, g.user.id, session):
+        if not user_has_trip_access(trip,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session,
+                                    TripAccessType.Read):
             abort(403)
 
         return {'day': {

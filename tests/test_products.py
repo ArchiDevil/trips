@@ -1,3 +1,5 @@
+from flask.testing import FlaskClient
+
 import pytest
 from organizer.db import get_session
 from organizer.schema import Product
@@ -10,8 +12,8 @@ def test_index_page_rejects_not_logged_in(client):
     assert result.status_code == 302  # redirect to auth page
 
 
-def test_index_page_shows_products(user_logged_client):
-    result = user_logged_client.get('/products/')
+def test_index_page_shows_products(org_logged_client: FlaskClient):
+    result = org_logged_client.get('/products/')
     assert result.status_code == 200
 
 
@@ -19,11 +21,6 @@ def test_add_page_rejects_not_logged_in(client):
     result = client.post('/products/add')
     assert 'auth/login' in result.location
     assert result.status_code == 302  # redirect to auth page
-
-
-def test_add_page_rejects_insufficient_privileges(user_logged_client):
-    result = user_logged_client.post('/products/add')
-    assert result.status_code == 403
 
 
 def test_add_page_uses_correct_method(org_logged_client):
@@ -110,22 +107,22 @@ def test_add_page_redirects_after_adding(org_logged_client):
     assert '/chaoticgods' in result.location
 
 
-def test_add_page_reacts_to_incorrect_name(org_logged_client, app):
+@pytest.mark.parametrize('name', ['', 'a'*101])
+def test_add_page_rejects_incorrect_name(org_logged_client, app, name: str):
     result = org_logged_client.post('/products/add',
                                     data={
-                                        'name': '',
+                                        'name': name,
                                         'calories': '21.8',
                                         'proteins': '4.9',
                                         'fats': '5.6',
                                         'carbs': '19.9'
                                     })
     result = org_logged_client.get('/products/')
-    assert STRING_TABLE['Products error incorrect name'].encode(
-    ) in result.data
+    assert STRING_TABLE['Products error incorrect name'].encode() in result.data
 
     with app.app_context():
         with get_session() as session:
-            prod = session.query(Product).filter(Product.name == '').first()
+            prod = session.query(Product).filter(Product.name == name).first()
             assert not prod
 
 
@@ -242,24 +239,24 @@ def test_archive_page_rejects_not_logged_in(client):
     assert result.status_code == 302  # redirect to auth page
 
 
-def test_archive_page_rejects_insufficient_privileges(user_logged_client):
-    result = user_logged_client.get('/products/archive/1')
+def test_archive_page_rejects_users(org_logged_client):
+    result = org_logged_client.get('/products/archive/1')
     assert result.status_code == 403
 
 
-def test_archive_page_uses_correct_method(org_logged_client):
-    result = org_logged_client.get('/products/archive/1')
+def test_archive_page_uses_correct_method(admin_logged_client):
+    result = admin_logged_client.get('/products/archive/1')
     assert 'products' in result.location
     assert result.status_code == 302  # redirect to index
 
 
-def test_archive_page_returns_404_for_non_existing_product(org_logged_client):
-    result = org_logged_client.get('/products/archive/100500')
+def test_archive_page_returns_404_for_non_existing_product(admin_logged_client):
+    result = admin_logged_client.get('/products/archive/100500')
     assert result.status_code == 404
 
 
-def test_archive_page_archives_product(org_logged_client, app):
-    result = org_logged_client.get('/products/archive/2')
+def test_archive_page_archives_product(admin_logged_client, app):
+    result = admin_logged_client.get('/products/archive/2')
     assert result.status_code == 302
 
     with app.app_context():
@@ -268,9 +265,9 @@ def test_archive_page_archives_product(org_logged_client, app):
             assert prod.archived
 
 
-def test_archive_page_redirects_to_the_same_page(org_logged_client):
-    result = org_logged_client.get(
-        '/products/archive/2', headers=[('Referer', '/chaoticgods')])
+def test_archive_page_redirects_to_the_same_page(admin_logged_client):
+    result = admin_logged_client.get('/products/archive/2',
+                                     headers=[('Referer', '/chaoticgods')])
     assert result.status_code == 302
     assert '/chaoticgods' in result.location
 
@@ -288,15 +285,15 @@ def test_edit_rejects_not_logged_in(client):
     assert result.status_code == 302
 
 
-def test_edit_rejects_insufficient_privileges(user_logged_client):
-    result = user_logged_client.post('/products/edit/1',
-                                     data={
-                                         'name': 'Test product',
-                                         'calories': '249.6',
-                                         'proteins': '16.6',
-                                         'fats': '71.9',
-                                         'carbs': '41.9'
-                                     })
+def test_edit_page_rejects_users(org_logged_client):
+    result = org_logged_client.post('/products/edit/1',
+                                    data={
+                                        'name': 'Test product',
+                                        'calories': '249.6',
+                                        'proteins': '16.6',
+                                        'fats': '71.9',
+                                        'carbs': '41.9'
+                                    })
     assert result.status_code == 403
 
 
@@ -312,28 +309,28 @@ def test_edit_page_uses_correct_method(org_logged_client):
     assert result.status_code == 405
 
 
-def test_edit_page_redirects_after_edit(org_logged_client):
-    result = org_logged_client.post('/products/edit/1',
-                                    data={
-                                        'name': 'Test product',
-                                        'calories': '249.6',
-                                        'proteins': '16.6',
-                                        'fats': '71.9',
-                                        'carbs': '41.9'
-                                    })
+def test_edit_page_redirects_after_edit(admin_logged_client):
+    result = admin_logged_client.post('/products/edit/1',
+                                      data={
+                                          'name': 'Test product',
+                                          'calories': '249.6',
+                                          'proteins': '16.6',
+                                          'fats': '71.9',
+                                          'carbs': '41.9'
+                                      })
     assert result.status_code == 302
     assert 'products' in result.location
 
 
-def test_edit_page_edits(org_logged_client, app):
-    result = org_logged_client.post('/products/edit/1',
-                                    data={
-                                        'name': 'Test product',
-                                        'calories': '249.6',
-                                        'proteins': '16.6',
-                                        'fats': '71.9',
-                                        'carbs': '41.9'
-                                    })
+def test_edit_page_edits(admin_logged_client, app):
+    result = admin_logged_client.post('/products/edit/1',
+                                      data={
+                                          'name': 'Test product',
+                                          'calories': '249.6',
+                                          'proteins': '16.6',
+                                          'fats': '71.9',
+                                          'carbs': '41.9'
+                                      })
     assert result.status_code == 302
 
     with app.app_context():
@@ -346,16 +343,16 @@ def test_edit_page_edits(org_logged_client, app):
             assert prod.carbs == 41.9
 
 
-def test_edit_page_edits_with_grams(org_logged_client, app):
-    result = org_logged_client.post('/products/edit/1',
-                                    data={
-                                        'name': 'Test product',
-                                        'calories': '249.6',
-                                        'proteins': '16.6',
-                                        'fats': '71.9',
-                                        'carbs': '41.9',
-                                        'grams': '250.0'
-                                    })
+def test_edit_page_edits_with_grams(admin_logged_client, app):
+    result = admin_logged_client.post('/products/edit/1',
+                                      data={
+                                          'name': 'Test product',
+                                          'calories': '249.6',
+                                          'proteins': '16.6',
+                                          'fats': '71.9',
+                                          'carbs': '41.9',
+                                          'grams': '250.0'
+                                      })
     assert result.status_code == 302
 
     with app.app_context():
@@ -369,25 +366,26 @@ def test_edit_page_edits_with_grams(org_logged_client, app):
             assert prod.grams == 250.0
 
 
-def test_edit_page_redirects_after_editing(org_logged_client):
-    result = org_logged_client.post('/products/edit/1',
-                                    headers=[('Referer', '/chaoticgods')],
-                                    data={
-                                        'name': 'Test product',
-                                        'calories': '21.2',
-                                        'proteins': '4.0',
-                                        'fats': '5.1',
-                                        'carbs': '1.1',
-                                        'grams': '14.4'
-                                    })
+def test_edit_page_redirects_after_editing(admin_logged_client):
+    result = admin_logged_client.post('/products/edit/1',
+                                      headers=[('Referer', '/chaoticgods')],
+                                      data={
+                                          'name': 'Test product',
+                                          'calories': '21.2',
+                                          'proteins': '4.0',
+                                          'fats': '5.1',
+                                          'carbs': '1.1',
+                                          'grams': '14.4'
+                                      })
     assert result.status_code == 302
     assert '/chaoticgods' in result.location
 
 
-def test_edit_page_reacts_to_incorrect_name(org_logged_client, app):
+@pytest.mark.parametrize('name', ['', 'a'*101])
+def test_edit_page_rejects_incorrect_name(org_logged_client, app, name: str):
     org_logged_client.post('/products/edit/2',
                            data={
-                               'name': '',
+                               'name': name,
                                'calories': '249.6',
                                'proteins': '16.6',
                                'fats': '71.9',
@@ -520,15 +518,15 @@ def test_edit_page_rejects_incorrect_grams(org_logged_client, app, grams: str):
             assert not prod
 
 
-def test_edit_page_returns_404_for_non_existing_product(org_logged_client, app):
-    result = org_logged_client.post('/products/edit/200',
-                                    data={
-                                        'name': 'Test product',
-                                        'calories': '249.6',
-                                        'proteins': '16.6',
-                                        'fats': '71.9',
-                                        'carbs': '41.9'
-                                    })
+def test_edit_page_returns_404_for_non_existing_product(admin_logged_client, app):
+    result = admin_logged_client.post('/products/edit/200',
+                                      data={
+                                          'name': 'Test product',
+                                          'calories': '249.6',
+                                          'proteins': '16.6',
+                                          'fats': '71.9',
+                                          'carbs': '41.9'
+                                      })
     assert result.status_code == 404
     with app.app_context():
         with get_session() as session:

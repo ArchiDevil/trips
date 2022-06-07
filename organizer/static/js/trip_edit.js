@@ -14,7 +14,7 @@ const app = createApp({
     computed: {
         validation: function() {
             return {
-                name: this.tripName && this.tripName.length > 0,
+                name: this.tripName && this.tripName.length > 0 && this.tripName.length < 51,
                 dates: /\d{2}-\d{2}-\d{4}\s-\s\d{2}-\d{2}-\d{4}/.test(this.tripDates),
                 groupsSelector: true
             }

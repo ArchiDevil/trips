@@ -5,7 +5,7 @@ export default {
             <div class="d-none d-md-block col-md-4 col-xl-3">
                 <img :src="coverSrc" class="w-100 rounded-left" alt="" :class="{'fade-out': past}">
             </div>
-            <div class="col-md-8">
+            <div class="col-md-8 col-xl-9">
                 <div class="card-body">
                     <h4 class="card-title">
                         <i class="fas fa-share-alt" :title="$t('trips.sharedInfoTitle')" v-if="trip.type == 'shared'"></i>
@@ -24,15 +24,29 @@ export default {
                                 {{ $t('trips.openButton') }}
                             </a>
                         </div>
-                        <div class="col" v-if="trip.type == 'user'">
-                            <a :href="editLink" class="btn btn-secondary w-100">
-                                {{ $t('trips.editButton') }}
-                            </a>
-                        </div>
-                        <div class="col" v-else>
-                            <a :href="forgetLink" class="btn btn-outline-secondary w-100">
-                                {{ $t('trips.hideButton') }}
-                            </a>
+                        <div class="btn-group col">
+                            <button type="button"
+                                    class="btn btn-outline-secondary dropdown-toggle"
+                                    data-toggle="dropdown"
+                                    aria-expanded="false">
+                                {{ $t('trips.optionsButton') }}
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" type="button" :href="editLink" v-if="trip.type == 'user'">
+                                    <i class="fas fa-pen"></i> {{ $t('trips.editButton') }}
+                                </a>
+                                <a class="dropdown-item" type="button" :href="forgetLink" v-else>
+                                    <i class="fas fa-eye-slash"></i> {{ $t('trips.hideButton') }}
+                                </a>
+                                <a class="dropdown-item" type="button"
+                                   href="javascript:void(0)" data-toggle="modal"
+                                   data-target="#shareModal"
+                                   :data-read-link="shareLinks.read"
+                                   :data-write-link="shareLinks.write"
+                                   v-if="trip.type === 'user'">
+                                   <i class="fas fa-share-alt"></i> {{ $t('trips.shareButton') }}
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -53,6 +67,12 @@ export default {
         },
         forgetLink() {
             return this.trip.forget_link
+        },
+        shareLinks() {
+            return {
+                read: this.trip.trip.share_read_link,
+                write: this.trip.trip.share_write_link,
+            }
         },
         fromDate() {
             const date = new Date(this.trip.trip.from_date)

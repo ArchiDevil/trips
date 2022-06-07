@@ -13,13 +13,8 @@ def init_fake_data_internal(session):
     # password 'org'
     org = User(login="Organizer",
                password="pbkdf2:sha256:150000$3ngYsSXZ$4a693ab6cacc753ed1b18ce51757e6d9d85c25ed02c422ec66dae70b92ea11b2",
-               access_group=AccessGroup.TripManager)
+               access_group=AccessGroup.User)
     session.add(org)
-
-    # password 'user1'
-    session.add(User(login="User",
-                     password="pbkdf2:sha256:150000$LXwcrYlk$45da8f74b50caf71fa6933de95bff3d959618c8098b2f0d45967cba2623cede3",
-                     access_group=AccessGroup.Guest))
 
     trip1 = Trip(name="Taganay trip",
                  from_date=datetime.strptime("2019-01-01", "%Y-%m-%d"),
@@ -41,8 +36,6 @@ def init_fake_data_internal(session):
     org.trips.append(trip1)
     org.trips.append(trip2)
     admin.trips.append(trip3)
-
-    session.commit()
 
     session.add(Product(name="Multigrain cereal", calories=362, proteins=11, fats=2, carbs=75))
     session.add(Product(name="Mango", calories=64, proteins=1, fats=1, carbs=78))
@@ -94,4 +87,5 @@ def init_fake_data_internal(session):
                 MealRecord(trip_id=1, day_number=x + 1, meal_number=2, product_id=13, mass=30),
                 MealRecord(trip_id=1, day_number=x + 1, meal_number=3, product_id=14, mass=60)
             ])
+    session.add(MealRecord(trip_id=3, day_number=1, meal_number=0, product_id=1, mass=60))
     session.commit()

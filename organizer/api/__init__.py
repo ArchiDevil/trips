@@ -1,9 +1,9 @@
+from flask import Blueprint
+
 from .auth import BP as auth_bp
 from .meals import BP as meals_bp
 from .products import BP as products_bp
 from .trips import BP as trips_bp
-
-from flask import Blueprint
 
 BP = Blueprint('api', __name__, url_prefix='/api')
 

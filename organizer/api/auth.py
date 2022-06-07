@@ -7,7 +7,7 @@ BP = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 @BP.get('/user')
-@api_login_required_group(AccessGroup.Guest)
+@api_login_required_group(AccessGroup.User)
 def user():
     return {
         'id': g.user.id,

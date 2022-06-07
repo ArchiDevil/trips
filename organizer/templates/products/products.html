@@ -22,7 +22,7 @@
             <span class="display-4">{{ $t('products.title') }}</span>
             <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-if="contentLoading"></span>
         </div>
-        <div class="col d-flex flex-row-reverse align-items-end" v-if="editor">
+        <div class="col d-flex flex-row-reverse align-items-end" v-if="creator">
             <button class="btn btn-primary d-block d-lg-none"
                     type="button" data-toggle="modal" data-target="#edit-modal"
                     :data-link="addProductLink"
@@ -34,7 +34,7 @@
     </div>
 
     <div class="row my-3" v-if="!contentLoading">
-        <div class="col-auto d-none d-lg-block" v-if="editor">
+        <div class="col-auto d-none d-lg-block" v-if="creator">
             <div class="card shadow" style="width: 18rem;">
                 <img :src="cardImage" class="card-img-top bg-light" alt="">
                 <h5 class="card-header">{{ $t('products.cardHeader') }}</h5>
@@ -50,9 +50,9 @@
                 </div>
             </div>
         </div>
-{% endraw %}
 
         <div class="col">
+{% endraw %}
             {% with messages = get_flashed_messages() %}
             {% if messages %}
             {% for message in messages %}
@@ -62,7 +62,6 @@
             {% endfor %}
             {% endif %}
             {% endwith %}
-
 {% raw %}
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
@@ -78,44 +77,43 @@
                 <thead class="thead-light">
                     <tr>
                         <th class="text-right" scope="col" style="width: 8%">{{ $t('products.table.id') }}</th>
-                        <th scope="col" style="width: 54%">{{ $t('products.table.name') }}</th>
+                        <th scope="col" style="width: 52%">{{ $t('products.table.name') }}</th>
                         <th class="text-right" scope="col" style="width: 8%">{{ $t('products.table.calories') }}</th>
                         <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">{{ $t('products.table.proteins') }}</th>
                         <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">{{ $t('products.table.fats') }}</th>
                         <th class="text-right d-none d-sm-table-cell" scope="col" style="width: 8%">{{ $t('products.table.carbs') }}</th>
-                        <th class="text-right" scope="col" style="width: 6%" v-if="editor">{{ $t('products.table.archive') }}</th>
+                        <th class="text-right" scope="col" style="width: 8%" v-if="editor">{{ $t('products.table.archive') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="product in products" class="showhim">
                         <th class="text-right" scope="row">{{ product.id }}</th>
-                        <td>
-                            <span>{{ product.name }}</span>
-                            <span class="text-right float-right mx-1 showme" v-if="editor">
-                                <a
-                                data-toggle="modal"
-                                data-target="#edit-modal"
-                                :data-name="product.name"
-                                :data-calories="product.calories"
-                                :data-proteins="product.proteins"
-                                :data-fats="product.fats"
-                                :data-carbs="product.carbs"
-                                :data-grams="product.grams ? product.grams : ''"
-                                :data-link="product.edit_link"
-                                :data-mname="$t('products.editModal.editTitle')"
-                                :data-bname="$t('products.editModal.editButton')"
-                                href="javascript:void(0);">
-                                    <i class="fas fa-pen" :title="$t('products.editButtonTitle')"></i>
-                                </a>
-                            </span>
-                        </td>
+                        <td>{{ product.name }}</td>
                         <td class="text-right">{{ product.calories.toFixed(1) }}</td>
                         <td class="text-right d-none d-sm-table-cell">{{ product.proteins.toFixed(1) }}</td>
                         <td class="text-right d-none d-sm-table-cell">{{ product.fats.toFixed(1) }}</td>
                         <td class="text-right d-none d-sm-table-cell">{{ product.carbs.toFixed(1) }}</td>
                         <td v-if="editor">
                             <span class="text-right float-right mx-1 showme">
-                                <a :href="product.archive_link"><i class="text-danger fas fa-archive"></i></a>
+                                <a data-toggle="modal"
+                                   data-target="#edit-modal"
+                                   :data-name="product.name"
+                                   :data-calories="product.calories"
+                                   :data-proteins="product.proteins"
+                                   :data-fats="product.fats"
+                                   :data-carbs="product.carbs"
+                                   :data-grams="product.grams ? product.grams : ''"
+                                   :data-link="product.edit_link"
+                                   :data-mname="$t('products.editModal.editTitle')"
+                                   :data-bname="$t('products.editModal.editButton')"
+                                   href="javascript:void(0);">
+                                    <i class="fas fa-pen" :title="$t('products.editButtonTitle')"></i>
+                                </a>
+                            </span>
+                            <span class="text-right float-right mx-1 showme">
+                                <a :href="product.archive_link" :title="$t('products.archiveButtonTitle')">
+                                    <i class="text-danger fas fa-archive"></i>
+                                </a>
                             </span>
                         </td>
                     </tr>
@@ -277,311 +275,8 @@
     </div>
 </div>
 
-<!-- should be included before products.js -->
+{% endraw %}
 <script src="https://unpkg.com/vue@3"></script>
 <script src="https://unpkg.com/vue-i18n@9"></script>
-
-<script>
-    const messages = {
-        ru: {
-            products: {
-                editModal: {
-                    nameTitle: 'Название',
-                    namePlaceholder: 'Введите название',
-                    editTitle: 'Редактировать',
-                    editButton: 'Применить',
-                    closeButton: 'Закрыть',
-                    lockButton: 'Вычислять',
-                    caloriesTitle: 'Ккал',
-                    caloriesPlaceholder: 'Введите калорийность',
-                    mass: 'Масса',
-                    massDescription: 'Укажите, сколько весит одна штука продукта в граммах. Можно использовать дробные значения.',
-                    noteTitle: 'Важно',
-                    noteDescription: 'Сумма значений нутриентов не должна превышать 100 грамм',
-                    gramsCheckboxDescription: 'Использовать штуки',
-                    proteinsTitle: 'Белки',
-                    fatsTitle: 'Жиры',
-                    carbsTitle: 'Углеводы',
-                    wrongNutrient: 'Введите корректное значение',
-                    errorEmptyName: 'Поле не должно быть пустым',
-                    errorWrong: 'Введите положительное число больше 0.1',
-                    errorWrongCalories: 'Введите целое положительное число',
-                    addTitle: 'Добавить продукт',
-                    addButton: 'Добавить',
-                },
-                editButtonTitle: 'Редактировать',
-                title: 'Продукты',
-                table: {
-                    id: '#',
-                    name: 'Название',
-                    calories: 'Ккал',
-                    proteins: 'Б',
-                    fats: 'Ж',
-                    carbs: 'У',
-                    archive: 'А'
-                },
-                searchPlaceholder: 'Искать продукт',
-                addNew: 'Добавить продукт',
-                addNewShort: 'Добавить',
-                cardHeader: 'Чего-то не хватает?',
-                cardText: 'Если вы не можете найти что-то в базе данных, то всегда можно добавить свой продукт самостоятельно. Нужно будет только заполнить информацию о пищевой ценности.',
-            }
-        },
-        en: {
-            products: {
-                editModal: {
-                    nameTitle: 'Name',
-                    namePlaceholder: 'Enter name',
-                    editTitle: 'Edit',
-                    editButton: 'Apply',
-                    closeButton: 'Close',
-                    lockButton: 'Calculate',
-                    caloriesTitle: 'Kcal',
-                    caloriesPlaceholder: 'Enter calories',
-                    mass: 'Mass',
-                    massDescription: 'How much the piece weighs in grams. You can use fractional values.',
-                    noteTitle: 'Important',
-                    noteDescription: 'Sum of all nutrient masses must not exceed 100 grams',
-                    gramsCheckboxDescription: 'Use pieces',
-                    proteinsTitle: 'Proteins',
-                    fatsTitle: 'Fats',
-                    carbsTitle: 'Carbohydrates',
-                    wrongNutrient: 'Enter a correct value',
-                    errorEmptyName: 'Field must not be empty',
-                    errorWrong: 'Enter a positive number higher than 0.1',
-                    errorWrongCalories: 'Enter a positive number',
-                    addTitle: 'Add a product',
-                    addButton: 'Add',
-                },
-                editButtonTitle: 'Edit',
-                title: 'Products',
-                table: {
-                    id: '#',
-                    name: 'Name',
-                    calories: 'Kcal',
-                    proteins: 'P',
-                    fats: 'F',
-                    carbs: 'C',
-                    archive: 'A'
-                },
-                searchPlaceholder: 'Find a product',
-                addNew: 'Add a product',
-                addNewShort: 'Add',
-                cardHeader: 'Something is missing?',
-                cardText: 'If you cannot find something suitable in the database you can add your own product. Just fill the information about its nutrients.',
-            }
-        }
-    }
-
-    const i18n = VueI18n.createI18n({
-        locale: 'ru',
-        fallbackLocale: 'en',
-        messages,
-    })
-
-    const { createApp } = Vue
-
-    var productsApp = createApp({
-        data() {
-            return {
-                page: 0,
-                productsPerPage: 10,
-                totalCount: 0,
-                search: '',
-                products: [],
-                lastRequest: null,
-                group: '',
-                contentLoading: true,
-            }
-        },
-        computed: {
-            lastPage() {
-                return Math.floor(this.totalCount / this.productsPerPage)
-            },
-            editor() {
-                return this.group === 'TripManager' || this.group === 'Administrator'
-            },
-            addProductLink() {
-                return globals.urls.addProduct
-            },
-            cardImage() {
-                return globals.urls.cardImage
-            }
-        },
-        methods: {
-            requestProds() {
-                let instance = this
-                let url = new URL(globals.urls.searchProducts)
-                url.searchParams.append('search', instance.search)
-                url.searchParams.append('page', instance.page)
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        instance.productsPerPage = data.products_per_page
-                        instance.products = data.products
-                        instance.totalCount = data.total_count
-                    })
-            },
-            nextPage() {
-                this.page++
-                this.requestProds()
-            },
-            prevPage() {
-                this.page--
-                this.requestProds()
-            },
-        },
-        mounted() {
-            this.requestProds()
-            setTimeout(() => {
-                document.getElementById('input-search').focus();
-            }, 500);
-
-            var instance = this
-            fetch(globals.urls.user_info)
-                .then(response => response.json())
-                .then(data => {
-                    instance.group = data.access_group
-                    instance.contentLoading = false
-                })
-        },
-        watch: {
-            search(newSearch, oldSearch) {
-                if (this.lastRequest) {
-                    clearTimeout(this.lastRequest)
-                }
-
-                let instance = this
-                this.lastRequest = setTimeout(() => {
-                    instance.page = 0
-                    instance.requestProds()
-                }, 500)
-            }
-        }
-    })
-    productsApp.use(i18n)
-    productsApp.mount('#products-app')
-
-    function isNumber(value) {
-        return !isNaN(+value)
-    }
-
-    function notEmpty(value) {
-        return value.toString().length > 0
-    }
-
-    function min(value, min_val) {
-        return +value >= min_val
-    }
-
-    function max(value, max_val) {
-        return +value <= max_val
-    }
-
-    function between(value, min_val, max_val) {
-        return min(value, min_val) && max(value, max_val)
-    }
-
-    let addApp = createApp({
-        data() {
-            return {
-                modalTitle: '',
-                productName: '',
-                caloriesInternal: 0,
-                proteins: 0,
-                fats: 0,
-                carbs: 0,
-                grams: 1,
-                custom: false,
-                archiveLink: '',
-                submitLink: '',
-                buttonName: '',
-                caloriesLock: false
-            }
-        },
-        computed: {
-            validation: function () {
-                return {
-                    name: notEmpty(this.productName),
-                    cals: isNumber(this.calories) && notEmpty(this.calories) && min(this.calories, 0),
-                    proteins: isNumber(this.proteins) && notEmpty(this.proteins) && between(this.proteins, 0, 100),
-                    fats: isNumber(this.fats) && notEmpty(this.fats) && between(this.fats, 0, 100),
-                    carbs: isNumber(this.carbs) && notEmpty(this.carbs) && between(this.carbs, 0, 100),
-                    grams: isNumber(this.grams) && notEmpty(this.grams) && min(this.grams, 0.1),
-                    nutrition: +this.proteins + +this.fats + +this.carbs <= 100
-                }
-            },
-            formValid: function () {
-                return this.validation.name &&
-                    this.validation.cals &&
-                    this.validation.proteins &&
-                    this.validation.fats &&
-                    this.validation.carbs &&
-                    this.validation.nutrition &&
-                    (this.custom ? this.validation.grams : true);
-            },
-            calories: {
-                get: function () {
-                    if (this.caloriesLock === true) {
-                        let value = this.proteins * 4.0 + this.fats * 9.0 + this.carbs * 4.0
-                        return value.toFixed(1)
-                    } else {
-                        return this.caloriesInternal
-                    }
-                },
-                set: function (v) {
-                    this.caloriesInternal = v
-                }
-            }
-        },
-        methods: {
-            lockCalories: function () {
-                this.caloriesLock = !this.caloriesLock;
-            }
-        }
-    })
-    addApp.use(i18n)
-    let mountedAddApp = addApp.mount('#edit-modal')
-
-    $(document).on('show.bs.modal', '#edit-modal', function (event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
-        mountedAddApp.submitLink = button.data('link');
-        mountedAddApp.modalTitle = button.data('mname')
-        mountedAddApp.buttonName = button.data('bname');
-
-        let name = button.data('name');
-        let calories = button.data('calories');
-        let proteins = button.data('proteins');
-        let fats = button.data('fats');
-        let carbs = button.data('carbs');
-        let grams = button.data('grams');
-
-        let editingMode = name !== undefined;
-
-        if (editingMode) {
-            mountedAddApp.modalTitle += ' \'' + name + '\''
-            mountedAddApp.caloriesLock = false
-            let lockButton = document.getElementById('button-addon-lock')
-            lockButton.classList.remove('active')
-            lockButton.setAttribute('aria-pressed', 'false')
-        }
-
-        mountedAddApp.productName = name ? name : '';
-        mountedAddApp.calories = calories ? calories : 0;
-        mountedAddApp.proteins = proteins ? proteins : 0;
-        mountedAddApp.fats = fats ? fats : 0;
-        mountedAddApp.carbs = carbs ? carbs : 0;
-
-        let customMass = grams ? true : false;
-        mountedAddApp.custom = customMass;
-        mountedAddApp.grams = customMass ? grams : 1;
-
-        setTimeout(() => {
-            document.getElementById('add-name-input').select();
-        }, 500);
-    });
-
-</script>
-
-{% endraw %}
+<script src="{{ url_for('static', filename='js/products.js')}}" type="module"></script>
 {% endblock %}
