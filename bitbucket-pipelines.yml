@@ -18,7 +18,7 @@ pipelines:
           script:
             - pip install -r requirements.txt
             - python setup.py sdist
-            - pipe: atlassian/heroku-deploy:1.1.4
+            - pipe: atlassian/heroku-deploy:2.0.0
               variables:
                 HEROKU_API_KEY: $HEROKU_API_KEY
                 HEROKU_APP_NAME: $TEST_HEROKU_APP_NAME
