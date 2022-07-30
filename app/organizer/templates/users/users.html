@@ -1,0 +1,99 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container">
+    <div class="row my-3">
+        <div class="col">
+            <h1 class="display-4">{{ string_table['Users title'] }}</h1>
+        </div>
+    </div>
+
+    <div class="row my-3">
+        <div class="col">
+            <a class="btn btn-primary" href="{{ url_for('users.add') }}"><i class="fas fa-plus"></i> {{ string_table['Users add new button'] }}</a>
+        </div>
+    </div>
+
+    <div class="row my-3">
+        <div class="col">
+            <table class="table table-hover table-sm">
+                <thead>
+                    <th>{{ string_table['Users id title'] }}</th>
+                    <th>{{ string_table['Users login title'] }}</th>
+                    <th>{{ string_table['Users name title'] }}</th>
+                    <th>{{ string_table['Users password title'] }}</th>
+                    <th>{{ string_table['Users group title'] }}</th>
+                    <th>{{ string_table['Users type title'] }}</th>
+                    <th>{{ string_table['Users last login title'] }}</th>
+                    <th>{{ string_table['Users actions title'] }}</th>
+                </thead>
+
+                <tbody>
+                    {% for user in users %}
+                    <tr class="showhim">
+                        <th scope="row" style="width: 5%;">{{ user.id }}</th>
+                        <td style="width: 20%;">{{ user.login }}</td>
+                        <td style="width: 20%;">{{ user.displayed_name }}</td>
+                        <td style="width: 5%;">
+                            {% if user.password %}
+                            <i class="fas fa-check"></i>
+                            {% else %}
+                            <i class="fas fa-times"></i>
+                            {% endif %}
+                        </td>
+                        <td style="width: 10%;">{{ user.access_group.name }}</td>
+                        <td style="width: 10%;">{{ user.user_type.name }}</td>
+                        <td style="width: 15%;">{{ user.last_logged_in.strftime('%H:%M - %d-%m-%Y') }}</td>
+                        <td style="width: 3%;">
+                            <span class="text-right float-right mx-1 showme">
+                                <a class="showme text-danger" data-remove-link="{{ url_for('users.delete', user_id=user.id) }}"
+                                   data-toggle="modal" data-target="#delete-modal" href="javascript:void(0);">
+                                    <i class="fas fa-trash" title="{{ string_table['Users remove button title'] }}"></i>
+                                </a>
+                            </span>
+                            <span class="text-right float-right mx-1 showme">
+                                <a class="showme" href="{{ url_for('users.edit', user_id=user.id) }}">
+                                    <i class="fas fa-pen" title="{{ string_table['Users edit button title'] }}"></i>
+                                </a>
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete user confirmation modal -->
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="delete-modal-title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="delete-modal-title">{{ string_table['Users delete user modal title'] }}</h5>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger text-uppercase">{{ string_table['Users delete user modal text'] }}</p>
+                <p>{{ string_table['Users delete user modal text2'] }}</p>
+            </div>
+            <div class="modal-footer">
+                <a id="delete-button" class="btn btn-danger">{{ string_table['Users delete user modal delete'] }}</a>
+                <button class="btn btn-secondary" data-dismiss="modal">{{ string_table['Users delete user modal close'] }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/users.js') }}" type="module"></script>
+
+<script>
+    $(document).on('show.bs.modal', '#delete-modal', function (event) {
+        var button = $(event.relatedTarget);
+        var removeLink = button.data('remove-link');
+        var modal = $(this);
+        var deleteButton = modal.find("#delete-button");
+        deleteButton.attr('href', removeLink);
+    })
+</script>
+
+{% endblock %}

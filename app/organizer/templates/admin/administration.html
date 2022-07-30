@@ -1,0 +1,19 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container">
+    <div class="row my-3">
+        <div class="col">
+            <h1 class="display-4">{{ string_table['Developer section title'] }}</h1>
+        </div>
+    </div>
+
+    <div class="row my-3">
+        <div class="col">
+            <h2 class="display-5">{{ string_table['Developer section wip'] }}</h2>
+        </div>
+    </div>
+</div>
+
+<script src="{{url_for('static', filename='/js/admin.js')}}" type="module"></script>
+
+{% endblock %}

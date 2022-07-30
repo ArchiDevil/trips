@@ -1,0 +1,12 @@
+
+User-agent: Yandex
+User-agent: Googlebot
+Disallow: /trips
+Disallow: /meals
+Disallow: /products
+Disallow: /auth
+Disallow: /api
+Disallow: /reports
+Disallow: /developer
+
+Sitemap: https://hikehub.ru/sitemap.xml
