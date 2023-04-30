@@ -1,11 +1,10 @@
 from datetime import date
 from typing import Dict
-from flask import Flask
 from flask.testing import FlaskClient
 import pytest
 
 from organizer.db import get_session
-from organizer.schema import Trip, TripAccess, TripAccessType
+from organizer.schema import Trip, TripAccess
 from organizer.strings import STRING_TABLE
 
 
@@ -16,11 +15,6 @@ def test_trips_edit_rejects_not_logged_in(client: FlaskClient):
 
 
 def test_trips_edit_rejects_insufficient_privileges(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
-            session.commit()
-
     response = org_logged_client.post('/trips/edit/3',
                                       data={
                                           'name': 'Test trip',
@@ -72,7 +66,7 @@ def test_trips_can_edit_trip(org_logged_client: FlaskClient):
 def test_trips_can_edit_shared_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Write))
+            session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
     response = org_logged_client.post('/trips/edit/1',

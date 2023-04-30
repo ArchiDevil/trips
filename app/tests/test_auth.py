@@ -40,7 +40,7 @@ def test_auth_logout_requires_login(client: FlaskClient):
 
 def test_auth_can_logout(org_logged_client: FlaskClient):
     response = org_logged_client.get('/auth/logout')
-    assert not org_logged_client.cookie_jar
+    assert not org_logged_client.get_cookie('session')
     assert response.status_code == 302
     assert '/' in response.location
 

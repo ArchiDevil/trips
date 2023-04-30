@@ -3,7 +3,7 @@ from flask.testing import FlaskClient
 import pytest
 
 from organizer.db import get_session
-from organizer.schema import MealRecord, TripAccess, TripAccessType
+from organizer.schema import MealRecord, TripAccess
 
 
 def test_meals_rejects_not_logged_in(client: FlaskClient):
@@ -12,9 +12,9 @@ def test_meals_rejects_not_logged_in(client: FlaskClient):
     assert 'auth/login' in response.location
 
 
-def test_meals_rejects_non_shared_trip(org_logged_client: FlaskClient):
+def test_meals_shows_non_shared_trip(org_logged_client: FlaskClient):
     response = org_logged_client.get('/meals/3')
-    assert response.status_code == 403
+    assert response.status_code == 200
 
 
 def test_meals_shows_page(org_logged_client: FlaskClient):
@@ -25,7 +25,7 @@ def test_meals_shows_page(org_logged_client: FlaskClient):
 def test_meals_show_shared_trip_page(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
+            session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
     response = org_logged_client.get('/meals/3')
@@ -56,22 +56,6 @@ def test_meals_cycle_rejects_non_shared_trip(org_logged_client: FlaskClient):
                                           'src-end': '1',
                                           'dst-start': '2',
                                           'dst-end': '5'
-                                      })
-    assert response.status_code == 403
-
-
-def test_meals_cycle_rejects_insufficient_privilegies(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
-            session.commit()
-
-    response = org_logged_client.post('/meals/cycle_days/3',
-                                      data={
-                                          'src-start': '1',
-                                          'src-end': '1',
-                                          'dst-start': '2',
-                                          'dst-end': '3'
                                       })
     assert response.status_code == 403
 
@@ -116,7 +100,7 @@ def test_meals_cycle_cycles(org_logged_client: FlaskClient, app: Flask):
 def test_meals_cycle_cycles_shared_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Write))
+            session.add(TripAccess(trip_id=3, user_id=2))
             session.query(MealRecord).filter(MealRecord.day_number != 1).delete()
             session.commit()
 

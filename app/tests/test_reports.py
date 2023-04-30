@@ -3,8 +3,6 @@ from bs4 import BeautifulSoup
 from flask.testing import FlaskClient
 
 # TODO: no tests check correctness of the data
-from organizer.db import get_session
-from organizer.schema import TripAccess, TripAccessType
 from organizer.strings import STRING_TABLE
 
 
@@ -14,9 +12,9 @@ def test_shopping_rejects_not_logged_in(client: FlaskClient):
     assert 'auth/login' in response.location
 
 
-def test_shopping_rejects_non_shared_trip(org_logged_client: FlaskClient):
+def test_shopping_shows_non_shared_trip(org_logged_client: FlaskClient):
     response = org_logged_client.get('/reports/shopping/3')
-    assert response.status_code == 403
+    assert response.status_code == 200
 
 
 def test_shopping_shows_report(org_logged_client: FlaskClient):
@@ -25,17 +23,6 @@ def test_shopping_shows_report(org_logged_client: FlaskClient):
     assert b'Taganay' in response.data
     assert b'Mango' in response.data
     assert (STRING_TABLE['Shopping report pieces suffix'] + ')').encode() in response.data
-
-
-def test_shopping_shows_shared_report(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
-            session.commit()
-
-    response = org_logged_client.get('/reports/shopping/3')
-    assert response.status_code == 200
-    assert b'Admin' in response.data
 
 
 def test_shopping_returns_404_on_invalid_trip_id(org_logged_client: FlaskClient):
@@ -61,9 +48,9 @@ def test_packing_custom_rejects_not_logged_in(client: FlaskClient):
     assert 'auth/login' in response.location
 
 
-def test_packing_custom_rejects_non_shared_trip(org_logged_client: FlaskClient):
+def test_packing_custom_shows_non_shared_trip(org_logged_client: FlaskClient):
     response = org_logged_client.get('/reports/packing/3/1')
-    assert response.status_code == 403
+    assert response.status_code == 200
 
 
 def test_packing_custom_shows_report(org_logged_client: FlaskClient):
@@ -73,17 +60,6 @@ def test_packing_custom_shows_report(org_logged_client: FlaskClient):
     assert b'Mango' in response.data
     assert ('2 ' + STRING_TABLE['Packing report persons suffix']).encode() in response.data
     assert ('3 ' + STRING_TABLE['Packing report persons suffix']).encode() in response.data
-
-
-def test_packing_custom_shows_shared_report(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
-            session.commit()
-
-    response = org_logged_client.get('/reports/packing/3/1')
-    assert response.status_code == 200
-    assert b'Admin' in response.data
 
 
 def test_packing_custom_returns_404_on_invalid_trip_id(org_logged_client: FlaskClient):

@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 
 from flask.testing import FlaskClient
-import pytest
 
-from organizer.schema import SharingLink, Trip, TripAccess, TripAccessType
+from organizer.schema import SharingLink, Trip, TripAccess
 from organizer.db import get_session
 from organizer.strings import STRING_TABLE
 
@@ -28,7 +27,7 @@ def test_trips_archive_rejects_not_logged_in(client: FlaskClient):
 def test_trips_archive_rejects_non_user(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Write))
+            session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
     response = org_logged_client.get('/trips/archive/3')
@@ -65,7 +64,7 @@ def test_trips_forget_returns_404_for_non_existing_trip(org_logged_client: Flask
 def test_trips_forget_forgets_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
+            session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
     response = org_logged_client.get('/trips/forget/3')
@@ -88,9 +87,9 @@ def test_trips_download_rejects_not_logged_in(client: FlaskClient):
     assert 'auth/login' in response.location
 
 
-def test_trips_download_rejects_non_shared_trip(org_logged_client: FlaskClient):
+def test_trips_download_allows_non_shared_trip(org_logged_client: FlaskClient):
     response = org_logged_client.get('/trips/download/3')
-    assert response.status_code == 403
+    assert response.status_code == 200
 
 
 def test_trips_download_returns_csv(org_logged_client: FlaskClient):
@@ -120,11 +119,6 @@ def test_trips_download_returns_csv(org_logged_client: FlaskClient):
 
 
 def test_trips_can_download_shared_trip(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
-            session.commit()
-
     response = org_logged_client.get('/trips/download/3')
     assert response.status_code == 200
     assert response.data
@@ -181,13 +175,11 @@ def test_trips_access_rejects_non_existing_uuid(org_logged_client: FlaskClient):
     assert '/trips/incorrect' in response.location
 
 
-@pytest.mark.parametrize('access_type', [TripAccessType.Read, TripAccessType.Write])
-def test_trips_access_redirects_to_trip(org_logged_client: FlaskClient, access_type: TripAccessType):
+def test_trips_access_redirects_to_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(SharingLink(uuid='42', user_id=1, trip_id=3,
-                                    expiration_date=datetime.utcnow() + timedelta(days=1),
-                                    access_type=access_type))
+                                    expiration_date=datetime.utcnow() + timedelta(days=1)))
             session.commit()
 
     link = '/trips/access/42'
@@ -196,13 +188,11 @@ def test_trips_access_redirects_to_trip(org_logged_client: FlaskClient, access_t
     assert '/meals/3' in response.location
 
 
-@pytest.mark.parametrize('access_type', [TripAccessType.Read, TripAccessType.Write])
-def test_trips_access_gives_access(org_logged_client: FlaskClient, access_type: TripAccessType):
+def test_trips_access_gives_access(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(SharingLink(uuid='42', user_id=1, trip_id=3,
-                                    expiration_date=datetime.utcnow() + timedelta(days=1),
-                                    access_type=access_type))
+                                    expiration_date=datetime.utcnow() + timedelta(days=1)))
             session.commit()
 
     org_logged_client.get('/trips/access/42')
@@ -211,16 +201,13 @@ def test_trips_access_gives_access(org_logged_client: FlaskClient, access_type: 
         with get_session() as session:
             access = session.query(TripAccess).filter(TripAccess.trip_id == 3).first()
             assert access.user_id == 2
-            assert access.access_type == access_type
 
 
-@pytest.mark.parametrize('access_type', [TripAccessType.Read, TripAccessType.Write])
-def test_trips_access_does_not_duplicate_access(org_logged_client: FlaskClient, access_type: TripAccessType):
+def test_trips_access_does_not_duplicate_access(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(SharingLink(uuid='42', user_id=1, trip_id=3,
-                                    expiration_date=datetime.utcnow() + timedelta(days=1),
-                                    access_type=access_type))
+                                    expiration_date=datetime.utcnow() + timedelta(days=1)))
             session.commit()
 
     org_logged_client.get('/trips/access/42')
@@ -232,13 +219,11 @@ def test_trips_access_does_not_duplicate_access(org_logged_client: FlaskClient, 
             assert count == 1
 
 
-@pytest.mark.parametrize('access_type', [TripAccessType.Read, TripAccessType.Write])
-def test_trips_access_expired_links_redirect(org_logged_client: FlaskClient, access_type: TripAccessType):
+def test_trips_access_expired_links_redirect(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(SharingLink(uuid='42', user_id=1, trip_id=3,
-                                    expiration_date=datetime.utcnow() - timedelta(days=1),
-                                    access_type=access_type))
+                                    expiration_date=datetime.utcnow() - timedelta(days=1)))
             session.commit()
 
     response = org_logged_client.get('/trips/access/42')
@@ -252,19 +237,15 @@ def test_trips_access_expired_links_redirect(org_logged_client: FlaskClient, acc
             assert count == 0
 
 
-@pytest.mark.parametrize('access_type', [TripAccessType.Read, TripAccessType.Write])
-def test_trips_access_dead_links_removed(org_logged_client: FlaskClient, access_type: TripAccessType):
+def test_trips_access_dead_links_removed(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(SharingLink(uuid='42', user_id=1, trip_id=3,
-                                    expiration_date=datetime.utcnow() - timedelta(days=1),
-                                    access_type=access_type))
+                                    expiration_date=datetime.utcnow() - timedelta(days=1)))
             session.add(SharingLink(uuid='54', user_id=2, trip_id=1,
-                                    expiration_date=datetime.utcnow() - timedelta(days=1),
-                                    access_type=access_type))
+                                    expiration_date=datetime.utcnow() - timedelta(days=1)))
             session.add(SharingLink(uuid='66', user_id=2, trip_id=2,
-                                    expiration_date=datetime.utcnow() + timedelta(days=1),
-                                    access_type=access_type))
+                                    expiration_date=datetime.utcnow() + timedelta(days=1)))
             session.commit()
 
     org_logged_client.get('/trips/access/42')
@@ -276,39 +257,3 @@ def test_trips_access_dead_links_removed(org_logged_client: FlaskClient, access_
 
             link = session.query(SharingLink).first()
             assert link.uuid == '66'
-
-
-def test_trips_access_write_overwrites_read(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
-            session.add(SharingLink(uuid='42', user_id=1, trip_id=3,
-                                    expiration_date=datetime.utcnow() + timedelta(days=1),
-                                    access_type=TripAccessType.Write))
-            session.commit()
-
-    org_logged_client.get('/trips/access/42')
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            access = session.query(TripAccess).filter(TripAccess.trip_id == 3,
-                                                      TripAccess.user_id == 2).one()
-            assert access.access_type == TripAccessType.Write
-
-
-def test_trips_access_read_does_not_overwrites_write(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Write))
-            session.add(SharingLink(uuid='42', user_id=1, trip_id=3,
-                                    expiration_date=datetime.utcnow() + timedelta(days=1),
-                                    access_type=TripAccessType.Read))
-            session.commit()
-
-    org_logged_client.get('/trips/access/42')
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            access = session.query(TripAccess).filter(TripAccess.trip_id == 3).one()
-            assert access.access_type == TripAccessType.Write
-
