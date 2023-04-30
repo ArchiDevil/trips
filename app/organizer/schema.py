@@ -27,12 +27,6 @@ class UserType(PyEnum):
     Vk = 1
 
 
-class TripAccessType(PyEnum):
-    '''Defines if user can or cannot write to trip'''
-    Read = 0
-    Write = 1
-
-
 class User(BASE):
     '''Describes a native user'''
     __tablename__ = 'users'
@@ -129,7 +123,6 @@ class TripAccess(BASE):
                      primary_key=True)
     trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'),
                      primary_key=True)
-    access_type = Column(AlchemyEnum(TripAccessType), nullable=False)
 
 
 class SharingLink(BASE):
@@ -144,7 +137,6 @@ class SharingLink(BASE):
     user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'))
     trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'))
     expiration_date = Column(DateTime, nullable=False, default=make_expiration_date)
-    access_type = Column(AlchemyEnum(TripAccessType), nullable=False)
 
 
 class PasswordLink(BASE):
