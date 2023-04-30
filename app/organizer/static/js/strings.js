@@ -138,9 +138,7 @@ export const messages = {
             shareModal: {
                 title: 'Поделиться походом',
                 closeButton: 'Закрыть',
-                typeSelectorTitle: 'Люди с этой ссылкой на поход смогут:',
-                readOption: 'Смотреть',
-                writeOption: 'Изменять',
+                typeSelectorTitle: 'Люди с этой ссылкой смогут редактировать поход.',
                 linkPlaceholder: 'Ссылка появится здесь',
                 linkLoading: 'Загрузка...',
                 additionalInfo: 'Передайте полученную ссылку другим участникам, чтобы они смогли просматривать или изменять ваш поход. Ссылка действительна в течение 3-х суток с момента создания.',
@@ -339,9 +337,7 @@ export const messages = {
             shareModal: {
                 title: 'Share a trip',
                 closeButton: 'Close',
-                typeSelectorTitle: 'People with this link will be able to:',
-                readOption: 'Read',
-                writeOption: 'Edit',
+                typeSelectorTitle: 'People with this link will be able to edit the trip.',
                 linkPlaceholder: 'Link will appear here',
                 linkLoading: 'Loading...',
                 additionalInfo: 'Share the link with other participants to let them view or edit your trip. The link is valid for 3 days from the moment of creation.',
