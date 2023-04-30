@@ -170,7 +170,7 @@ def request_vk_access_token(code):
                               'client_secret': current_app.config['VK_APP_SECRET'],
                               'redirect_uri': url_for('auth.vk_redirect', _external=True),
                               'code': code
-                          })
+                          }, timeout=10.0)
 
     json_result = result.json()
     if 'error' in json_result:
@@ -186,7 +186,7 @@ def request_vk_user_name_and_photo(access_token):
                               'fields': 'photo_50',
                               'access_token': access_token,
                               'v': '5.103'
-                          })
+                          }, timeout=10.0)
 
     json_result = result.json()
     if 'error' in json_result:
