@@ -20,7 +20,7 @@ const tripsApp = createApp({
         return {
             idsLoading: true,
             tripsLoading: true,
-            tripIds: [],
+            tripUids: [],
             trips: [],
             sortingFunc: (a, b) => {
                 return new Date(a.trip.till_date) - new Date(b.trip.till_date)
@@ -58,7 +58,7 @@ const tripsApp = createApp({
         fetch(globals.urls.tripsInfo)
             .then(response => response.json())
             .then(async response => {
-                instance.tripIds = response.trips
+                instance.tripUids = response.trips
                 instance.idsLoading = false
                 await Promise.all(response.trips.map((e, idx, arr) => {
                     return fetch('/api/trips/get/' + e)

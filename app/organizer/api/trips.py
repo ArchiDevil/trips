@@ -14,28 +14,27 @@ BP = Blueprint('trips', __name__, url_prefix='/trips')
 
 @BP.get('/get')
 @api_login_required_group(AccessGroup.User)
-def get_trip_ids():
+def get_trip_uids():
     with get_session() as session:
         user_trips: List[Trip] = []
         shared_trips: List[Trip] = []
 
         if g.user.access_group == AccessGroup.Administrator:
-            user_trips = session.query(Trip).filter(Trip.archived == False).all()
+            user_trips = session.query(Trip)
         else:
-            user_trips = session.query(Trip).filter(Trip.created_by == g.user.id,
-                                                    Trip.archived == False).all()
-            shared_trips = session.query(TripAccess.trip_id).filter(TripAccess.user_id == g.user.id,
-                                                                    Trip.id == TripAccess.trip_id,
-                                                                    Trip.archived == False).all()
+            user_trips = session.query(Trip).filter(Trip.created_by == g.user.id)
+            shared_trips = session.query(Trip.uid).join(TripAccess).filter(TripAccess.user_id == g.user.id,
+                                                                           Trip.archived == False).all()
+        user_trips = user_trips.filter(Trip.archived == False).all()
 
         trips = []
         if user_trips:
             for trip in user_trips:
-                trips.append(trip.id)
+                trips.append(trip.uid)
 
         if shared_trips:
             for trip in shared_trips:
-                trips.append(trip.trip_id)
+                trips.append(trip.uid)
 
         return {'trips': trips}
 

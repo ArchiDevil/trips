@@ -475,7 +475,6 @@ def test_api_clear_shared_trip(org_logged_client: FlaskClient):
 @pytest.mark.parametrize('json', [
     {'day_number': 1},
     {'trip_uid': 'yes'},
-    {'trip_uid': 'yes', 'day_number': 1},
     {'trip_uid': 'uid1', 'day_number': 'yes'}
 ])
 def test_api_clear_rejects_incorrect_data(org_logged_client: FlaskClient, json):

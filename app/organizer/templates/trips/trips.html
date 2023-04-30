@@ -2,7 +2,7 @@
 {% block content %}
 
 <script>
-    globals.urls.tripsInfo = '{{ url_for("api.trips.get_trip_ids") }}'
+    globals.urls.tripsInfo = '{{ url_for("api.trips.get_trip_uids") }}'
     globals.urls.tripsAdd = '{{ url_for("trips.add") }}'
     globals.urls.cardImgSrc = '{{ url_for("static", filename="img/sketches/1.png") }}'
 </script>
@@ -60,7 +60,7 @@
     </div>
 
     <div class="row my-3" v-if="!idsLoading">
-        <div class="col" v-if="!tripIds.length">
+        <div class="col" v-if="!tripUids.length">
             <div class="jumbotron shadow">
                 <h1 class="display-4">{{ $t('trips.jumbotronTitle') }}</h1>
                 <p class="lead">{{ $t('trips.jumbotronText') }}</p>
@@ -73,7 +73,7 @@
             </div>
         </div>
 
-        <div class="col-auto d-none d-lg-block" v-if="tripIds.length">
+        <div class="col-auto d-none d-lg-block" v-if="tripUids.length">
             <div class="card shadow" style="width: 18rem;">
                 <img :src="cardImgSrc" class="card-img-top bg-light" alt="">
                 <h5 class="card-header">{{ $t('trips.cardTitle') }}</h5>
@@ -86,7 +86,7 @@
             </div>
         </div>
 
-        <div class="col" v-if="tripIds.length">
+        <div class="col" v-if="tripUids.length">
             <trips-list :trips="sortedTrips"></trips-list>
             <div class="spinner-border" role="status" v-if="tripsLoading"></div>
         </div>

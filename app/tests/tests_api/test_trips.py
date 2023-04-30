@@ -4,7 +4,7 @@ from flask.testing import FlaskClient
 import pytest
 
 from organizer.db import get_session
-from organizer.schema import SharingLink
+from organizer.schema import SharingLink, TripAccess
 
 
 def test_rejects_not_logged_in(client: FlaskClient):
@@ -17,6 +17,21 @@ def test_can_get_trips_for_manager(org_logged_client: FlaskClient):
     assert response.status_code == 200
     assert response.json
     assert len(response.json['trips']) == 1
+    assert response.json['trips'][0] == 'uid1'
+
+
+def test_can_get_shared_trip_uids(org_logged_client: FlaskClient):
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            session.add(TripAccess(trip_id=3, user_id=2))
+            session.commit()
+
+    response = org_logged_client.get('/api/trips/get')
+    assert response.status_code == 200
+    assert response.json
+    assert len(response.json['trips']) == 2
+    assert response.json['trips'][0] == 'uid1'
+    assert response.json['trips'][1] == 'uid3'
 
 
 def test_trips_returns_correct_data_for_admin(admin_logged_client: FlaskClient):
