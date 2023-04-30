@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, abort, g, url_for, redirect, reque
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, MealRecord, AccessGroup, TripAccessType
+from organizer.schema import Trip, MealRecord, AccessGroup
 from organizer.utils.auth import user_has_trip_access
 
 bp = Blueprint('meals', __name__, url_prefix='/meals')
@@ -17,13 +17,6 @@ def days_view(trip_id):
         trip_info: Trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip_info:
             abort(404)
-
-        if not user_has_trip_access(trip_info,
-                                    g.user.id,
-                                    g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Read):
-            abort(403)
 
         trip = {
             'id': trip_info.id
@@ -43,8 +36,7 @@ def cycle_days(trip_id):
         if not user_has_trip_access(trip_info,
                                     g.user.id,
                                     g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Write):
+                                    session):
             abort(403)
 
     if not 'src-start' in request.form or not 'src-end' in request.form:

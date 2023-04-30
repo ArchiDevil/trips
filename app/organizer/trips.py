@@ -10,7 +10,7 @@ from sentry_sdk import capture_exception
 from organizer.auth import login_required_group
 from organizer.db import get_session
 from organizer.schema import SharingLink, Trip, AccessGroup, TripAccess, Group, \
-                             Product, MealRecord, TripAccessType
+                             Product, MealRecord
 from organizer.strings import STRING_TABLE
 from organizer.utils.auth import user_has_trip_access
 
@@ -115,9 +115,10 @@ def edit(trip_id: int):
         if not trip_info:
             abort(404)
 
-        if not user_has_trip_access(trip_info, g.user.id,
-                               g.user.access_group == AccessGroup.Administrator,
-                               session, TripAccessType.Write):
+        if not user_has_trip_access(trip_info,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session):
             abort(403)
 
         trip_groups = [group.persons for group in trip_info.groups]
@@ -244,11 +245,6 @@ def download(trip_id: int):
         if not trip:
             abort(404)
 
-        if not user_has_trip_access(trip, g.user.id,
-                               g.user.access_group == AccessGroup.Administrator,
-                               session, TripAccessType.Read):
-            abort(403)
-
         data = session.query(MealRecord.mass,
                              MealRecord.day_number,
                              MealRecord.meal_number,
@@ -281,10 +277,7 @@ def access(uuid):
         access = session.query(TripAccess).filter(TripAccess.trip_id == link.trip_id,
                                                   TripAccess.user_id == g.user.id).first()
         if not access:
-            session.add(TripAccess(trip_id=link.trip_id, user_id=g.user.id, access_type=link.access_type))
-            session.commit()
-        elif access.access_type == TripAccessType.Read and link.access_type == TripAccessType.Write:
-            access.access_type = link.access_type
+            session.add(TripAccess(trip_id=link.trip_id, user_id=g.user.id))
             session.commit()
 
         return redirect(url_for('meals.days_view', trip_id=link.trip_id))

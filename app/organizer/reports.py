@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, abort, redirect, url_for, g
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, Product, MealRecord, AccessGroup, Group, TripAccessType
+from organizer.schema import Trip, Product, MealRecord, AccessGroup, Group
 from organizer.utils.auth import user_has_trip_access
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
@@ -18,13 +18,6 @@ def shopping(trip_id: int):
         trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
-
-        if not user_has_trip_access(trip,
-                                    g.user.id,
-                                    g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Read):
-            abort(403)
 
         persons_count = session.query(func.sum(Group.persons)).filter(Group.trip_id == trip_id).scalar()
         meals = session.query(MealRecord.mass,
@@ -71,13 +64,6 @@ def packing_ext(trip_id: int, columns_count: int):
         trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
             abort(404)
-
-        if not user_has_trip_access(trip,
-                                    g.user.id,
-                                    g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Read):
-            abort(403)
 
         meals = session.query(MealRecord.day_number,
                               MealRecord.meal_number,

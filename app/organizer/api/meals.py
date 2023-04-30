@@ -5,8 +5,7 @@ from flask import Blueprint, abort, request, url_for, g
 
 from organizer.auth import api_login_required_group
 from organizer.db import get_session
-from organizer.schema import AccessGroup, Trip, MealRecord, Product, \
-                             TripAccessType, Units
+from organizer.schema import AccessGroup, Trip, MealRecord, Product, Units
 from organizer.utils.auth import user_has_trip_access
 
 BP = Blueprint('meals', __name__, url_prefix='/meals')
@@ -43,8 +42,7 @@ def meals_add():
             if not user_has_trip_access(trip,
                                         g.user.id,
                                         g.user.access_group == AccessGroup.Administrator,
-                                        session,
-                                        TripAccessType.Write):
+                                        session):
                 abort(403)
 
             diff = trip.till_date - trip.from_date
@@ -126,8 +124,7 @@ def meals_remove():
         if not user_has_trip_access(trip,
                                     g.user.id,
                                     g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Write):
+                                    session):
             abort(403)
 
         session.query(MealRecord).filter(MealRecord.id == meal_id).delete()
@@ -161,8 +158,7 @@ def meals_clear():
         if not user_has_trip_access(trip,
                                     g.user.id,
                                     g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Write):
+                                    session):
             abort(403)
 
         session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
@@ -219,13 +215,6 @@ def get_meals(trip_id: int):
         if not trip:
             abort(404)
 
-        if not user_has_trip_access(trip,
-                                    g.user.id,
-                                    g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Read):
-            abort(403)
-
         days_count: int = (trip.till_date - trip.from_date).days + 1
 
     days = [
@@ -250,13 +239,6 @@ def get_day_meals(trip_id: int, day_number: int):
         days_count: int = (trip.till_date - trip.from_date).days + 1
         if day_number > days_count or day_number < 1:
             abort(404)
-
-        if not user_has_trip_access(trip,
-                                    g.user.id,
-                                    g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Read):
-            abort(403)
 
         return {'day': {
             'number': day_number,

@@ -7,7 +7,7 @@ from flask import Blueprint, url_for, abort, g
 
 from organizer.auth import api_login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, AccessGroup, TripAccess, SharingLink, TripAccessType
+from organizer.schema import Trip, AccessGroup, TripAccess, SharingLink
 
 BP = Blueprint('trips', __name__, url_prefix='/trips')
 
@@ -53,11 +53,6 @@ def get_info(trip_id):
 
         if g.user.access_group != AccessGroup.Administrator:
             if trip.created_by != g.user.id:
-                access: Optional[TripAccess] = session.query(TripAccess).filter(TripAccess.trip_id == trip_id,
-                                                                                TripAccess.user_id == g.user.id).first()
-                if not access:
-                    abort(403)
-                access_type = access.access_type
                 shared = True
 
         magic: Final = int(hashlib.sha1(
@@ -75,11 +70,9 @@ def get_info(trip_id):
                 'archived': trip.archived,
                 'groups': [group.persons for group in trip.groups],
                 'user': trip.user.login,
-                'share_read_link': url_for('api.trips.share', trip_id=trip_id, mode='read'),
-                'share_write_link': url_for('api.trips.share', trip_id=trip_id, mode='write')
+                'share_link': url_for('api.trips.share', trip_id=trip_id)
             },
             'type': 'shared' if shared else 'user',
-            'access_type': access_type.name if shared else None,
             'attendees': sum([group.persons for group in trip.groups]),
             'cover_src': url_for('static', filename=f'img/trips/{magic}.png'),
             'open_link': url_for('meals.days_view', trip_id=trip_id),
@@ -91,12 +84,9 @@ def get_info(trip_id):
         }
 
 
-@BP.get('/share/<int:trip_id>/<mode>')
+@BP.get('/share/<int:trip_id>')
 @api_login_required_group(AccessGroup.User)
-def share(trip_id, mode):
-    if mode not in ['read', 'write']:
-        abort(400)
-
+def share(trip_id):
     with get_session() as session:
         trip = session.query(Trip).filter(Trip.id == trip_id).first()
         if not trip:
@@ -106,10 +96,8 @@ def share(trip_id, mode):
         if trip.created_by != g.user.id and g.user.access_group != AccessGroup.Administrator:
             abort(403)
 
-        access_type = TripAccessType.Read if mode == 'read' else TripAccessType.Write
         link: SharingLink = session.query(SharingLink).filter(SharingLink.trip_id == trip_id,
-                                                              SharingLink.user_id == g.user.id,
-                                                              SharingLink.access_type == access_type).first()
+                                                              SharingLink.user_id == g.user.id).first()
         if link:
             uuid = link.uuid
             link.expiration_date = datetime.utcnow() + timedelta(days=3)
@@ -118,8 +106,7 @@ def share(trip_id, mode):
             uuid = str(uuid4())
             link = SharingLink(uuid=uuid,
                                trip_id=trip_id,
-                               user_id=g.user.id,
-                               access_type=access_type)
+                               user_id=g.user.id)
             session.add(link)
             session.commit()
 
