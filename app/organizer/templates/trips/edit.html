@@ -157,7 +157,7 @@
                     <p>{{ string_table['Trips edit archive modal text'] }}</p>
                 </div>
                 <div class="modal-footer">
-                    <a class="btn btn-danger" href="{{ url_for('trips.archive', trip_id=trip['id']) }}">
+                    <a class="btn btn-danger" href="{{ url_for('trips.archive', trip_uid=trip['uid']) }}">
                         {{ string_table['Trips edit archive modal archive button'] }}
                     </a>
                     <button class="btn btn-secondary" data-dismiss="modal">

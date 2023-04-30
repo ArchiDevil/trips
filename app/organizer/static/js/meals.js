@@ -90,7 +90,7 @@ let addProdApp = createApp({
 
             let url = globals.urls.addMeal
             let body = JSON.stringify({
-                'trip_id': globals.trip.id,
+                'trip_uid': globals.trip.uid,
                 'meal_name': this.mealName,
                 'day_number': this.day.number,
                 'product_id': this.currentProductId,

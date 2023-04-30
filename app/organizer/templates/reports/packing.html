@@ -12,12 +12,12 @@
                     {{ string_table['Packing report selector title'] }}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="columns-count-dropdown-button">
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=1) }}">{{ string_table['Packing report selector 1'] }}</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=2) }}">{{ string_table['Packing report selector 2'] }}</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=3) }}">{{ string_table['Packing report selector 3'] }}</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=4) }}">{{ string_table['Packing report selector 4'] }}</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=5) }}">{{ string_table['Packing report selector 5'] }}</a>
-                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_id=trip['id'], columns_count=6) }}">{{ string_table['Packing report selector 6'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_uid=trip['uid'], columns_count=1) }}">{{ string_table['Packing report selector 1'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_uid=trip['uid'], columns_count=2) }}">{{ string_table['Packing report selector 2'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_uid=trip['uid'], columns_count=3) }}">{{ string_table['Packing report selector 3'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_uid=trip['uid'], columns_count=4) }}">{{ string_table['Packing report selector 4'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_uid=trip['uid'], columns_count=5) }}">{{ string_table['Packing report selector 5'] }}</a>
+                    <a class="dropdown-item" href="{{ url_for('reports.packing_ext', trip_uid=trip['uid'], columns_count=6) }}">{{ string_table['Packing report selector 6'] }}</a>
                 </div>
             </div>
         </div>

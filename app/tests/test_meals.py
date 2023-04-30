@@ -13,12 +13,12 @@ def test_meals_rejects_not_logged_in(client: FlaskClient):
 
 
 def test_meals_shows_non_shared_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/meals/3')
+    response = org_logged_client.get('/meals/uid3')
     assert response.status_code == 200
 
 
 def test_meals_shows_page(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/meals/1')
+    response = org_logged_client.get('/meals/uid1')
     assert response.status_code == 200
 
 
@@ -28,12 +28,12 @@ def test_meals_show_shared_trip_page(org_logged_client: FlaskClient):
             session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
-    response = org_logged_client.get('/meals/3')
+    response = org_logged_client.get('/meals/uid3')
     assert response.status_code == 200
 
 
 def test_meals_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/meals/100')
+    response = org_logged_client.get('/meals/uid100')
     assert response.status_code == 404
 
 
@@ -50,7 +50,7 @@ def test_meals_cycle_rejects_not_logged_in(client: FlaskClient):
 
 
 def test_meals_cycle_rejects_non_shared_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/meals/cycle_days/3',
+    response = org_logged_client.post('/meals/cycle_days/uid3',
                                       data={
                                           'src-start': '1',
                                           'src-end': '1',
@@ -77,7 +77,7 @@ def test_meals_cycle_cycles(org_logged_client: FlaskClient, app: Flask):
             session.query(MealRecord).filter(MealRecord.day_number != 1).delete()
             session.commit()
 
-    response = org_logged_client.post('/meals/cycle_days/1',
+    response = org_logged_client.post('/meals/cycle_days/uid1',
                                       data={
                                           'src-start': '1',
                                           'src-end': '1',
@@ -85,7 +85,7 @@ def test_meals_cycle_cycles(org_logged_client: FlaskClient, app: Flask):
                                           'dst-end': '5'
                                       })
     assert response.status_code == 302
-    assert '/meals/1' in response.location
+    assert '/meals/uid1' in response.location
 
     with app.app_context():
         with get_session() as session:
@@ -104,7 +104,7 @@ def test_meals_cycle_cycles_shared_trip(org_logged_client: FlaskClient):
             session.query(MealRecord).filter(MealRecord.day_number != 1).delete()
             session.commit()
 
-    response = org_logged_client.post('/meals/cycle_days/3',
+    response = org_logged_client.post('/meals/cycle_days/uid3',
                                       data={
                                           'src-start': '1',
                                           'src-end': '1',
@@ -112,7 +112,7 @@ def test_meals_cycle_cycles_shared_trip(org_logged_client: FlaskClient):
                                           'dst-end': '3'
                                       })
     assert response.status_code == 302
-    assert '/meals/3' in response.location
+    assert '/meals/uid3' in response.location
 
     with org_logged_client.application.app_context():
         with get_session() as session:
@@ -130,7 +130,7 @@ def test_meals_cycle_cycles_with_overwrite(org_logged_client: FlaskClient, app: 
             session.query(MealRecord).filter(MealRecord.day_number != 1).delete()
             session.commit()
 
-    response = org_logged_client.post('/meals/cycle_days/1',
+    response = org_logged_client.post('/meals/cycle_days/uid1',
                                       data={
                                           'src-start': '1',
                                           'src-end': '1',
@@ -151,7 +151,7 @@ def test_meals_cycle_cycles_with_overwrite(org_logged_client: FlaskClient, app: 
                                                        MealRecord.meal_number == 0).all()
             assert records
 
-    response = org_logged_client.post('/meals/cycle_days/1',
+    response = org_logged_client.post('/meals/cycle_days/uid1',
                                       data={
                                           'src-start': '1',
                                           'src-end': '1',
@@ -170,7 +170,7 @@ def test_meals_cycle_cycles_with_overwrite(org_logged_client: FlaskClient, app: 
 
 
 def test_meals_cycle_rejects_overlapping_ranges(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/meals/cycle_days/1',
+    response = org_logged_client.post('/meals/cycle_days/uid1',
                                       data={
                                           'src-start': '1',
                                           'src-end': '3',
@@ -179,7 +179,7 @@ def test_meals_cycle_rejects_overlapping_ranges(org_logged_client: FlaskClient):
                                       })
     assert response.status_code == 400
 
-    response = org_logged_client.post('/meals/cycle_days/1',
+    response = org_logged_client.post('/meals/cycle_days/uid1',
                                       data={
                                           'src-start': '3',
                                           'src-end': '5',
@@ -188,7 +188,7 @@ def test_meals_cycle_rejects_overlapping_ranges(org_logged_client: FlaskClient):
                                       })
     assert response.status_code == 400
 
-    response = org_logged_client.post('/meals/cycle_days/1',
+    response = org_logged_client.post('/meals/cycle_days/uid1',
                                       data={
                                           'src-start': '2',
                                           'src-end': '4',
@@ -209,7 +209,7 @@ def test_meals_cycle_rejects_overlapping_ranges(org_logged_client: FlaskClient):
     {'src-start': '1', 'src-end': '1', 'dst-start': '2', 'dst-end': 'yes'}
 ])
 def test_meals_cycle_rejects_incorrect_days(org_logged_client: FlaskClient, data):
-    response = org_logged_client.post('/meals/cycle_days/1', data=data)
+    response = org_logged_client.post('/meals/cycle_days/uid1', data=data)
     assert response.status_code == 400
 
 
@@ -220,5 +220,5 @@ def test_meals_cycle_rejects_incorrect_days(org_logged_client: FlaskClient, data
     {'src-start': '1', 'src-end': '1', 'dst-start': '2'}
 ])
 def test_meals_cycle_rejects_missing_data(org_logged_client: FlaskClient, data):
-    response = org_logged_client.post('/meals/cycle_days/1', data=data)
+    response = org_logged_client.post('/meals/cycle_days/uid1', data=data)
     assert response.status_code == 400

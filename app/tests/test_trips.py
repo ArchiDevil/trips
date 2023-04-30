@@ -19,7 +19,7 @@ def test_trips_shows_trips_page(org_logged_client: FlaskClient):
 
 
 def test_trips_archive_rejects_not_logged_in(client: FlaskClient):
-    response = client.get('/trips/archive/1')
+    response = client.get('/trips/archive/uid1')
     assert response.status_code == 302
     assert 'auth/login' in response.location
 
@@ -30,12 +30,12 @@ def test_trips_archive_rejects_non_user(org_logged_client: FlaskClient):
             session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
-    response = org_logged_client.get('/trips/archive/3')
+    response = org_logged_client.get('/trips/archive/uid3')
     assert response.status_code == 403
 
 
 def test_trips_can_archive(org_logged_client: FlaskClient, app):
-    response = org_logged_client.get('/trips/archive/1')
+    response = org_logged_client.get('/trips/archive/uid1')
     assert response.status_code == 302
     assert '/' in response.location
 
@@ -46,18 +46,18 @@ def test_trips_can_archive(org_logged_client: FlaskClient, app):
 
 
 def test_trips_archive_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/archive/100')
+    response = org_logged_client.get('/trips/archive/uid100')
     assert response.status_code == 404
 
 
 def test_trips_forget_rejects_not_logged_in(client: FlaskClient):
-    response = client.get('/trips/forget/1')
+    response = client.get('/trips/forget/uid1')
     assert response.status_code == 302
     assert 'auth/login' in response.location
 
 
 def test_trips_forget_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/forget/100')
+    response = org_logged_client.get('/trips/forget/uid100')
     assert response.status_code == 404
 
 
@@ -67,7 +67,7 @@ def test_trips_forget_forgets_trip(org_logged_client: FlaskClient):
             session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
-    response = org_logged_client.get('/trips/forget/3')
+    response = org_logged_client.get('/trips/forget/uid3')
     assert response.status_code == 302
     assert '/' in response.location
 
@@ -77,23 +77,23 @@ def test_trips_forget_forgets_trip(org_logged_client: FlaskClient):
 
 
 def test_trips_forgetting_unknown_rejects(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/forget/3')
+    response = org_logged_client.get('/trips/forget/uid3')
     assert response.status_code == 403
 
 
 def test_trips_download_rejects_not_logged_in(client: FlaskClient):
-    response = client.get('/trips/download/1')
+    response = client.get('/trips/download/uid1')
     assert response.status_code == 302
     assert 'auth/login' in response.location
 
 
 def test_trips_download_allows_non_shared_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/download/3')
+    response = org_logged_client.get('/trips/download/uid3')
     assert response.status_code == 200
 
 
 def test_trips_download_returns_csv(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/download/1')
+    response = org_logged_client.get('/trips/download/uid1')
     assert response.status_code == 200
     assert response.data
 
@@ -119,7 +119,7 @@ def test_trips_download_returns_csv(org_logged_client: FlaskClient):
 
 
 def test_trips_can_download_shared_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/download/3')
+    response = org_logged_client.get('/trips/download/uid3')
     assert response.status_code == 200
     assert response.data
 
@@ -140,7 +140,7 @@ def test_trips_can_download_shared_trip(org_logged_client: FlaskClient):
 
 
 def test_trips_download_returns_empty_csv(admin_logged_client: FlaskClient):
-    response = admin_logged_client.get('/trips/download/3')
+    response = admin_logged_client.get('/trips/download/uid3')
     assert response.status_code == 200
     assert response.data
 
@@ -159,18 +159,18 @@ def test_trips_download_returns_empty_csv(admin_logged_client: FlaskClient):
 
 
 def test_trips_download_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/download/42')
+    response = org_logged_client.get('/trips/download/uid42')
     assert response.status_code == 404
 
 
 def test_trips_access_rejects_not_logged_in(client: FlaskClient):
-    response = client.get('/trips/access/1')
+    response = client.get('/trips/access/uid1')
     assert response.status_code == 302
     assert 'auth/login' in response.location
 
 
 def test_trips_access_rejects_non_existing_uuid(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/access/42')
+    response = org_logged_client.get('/trips/access/uid42')
     assert response.status_code == 302
     assert '/trips/incorrect' in response.location
 
@@ -185,7 +185,7 @@ def test_trips_access_redirects_to_trip(org_logged_client: FlaskClient):
     link = '/trips/access/42'
     response = org_logged_client.get(link)
     assert response.status_code == 302
-    assert '/meals/3' in response.location
+    assert '/meals/uid3' in response.location
 
 
 def test_trips_access_gives_access(org_logged_client: FlaskClient):
@@ -226,7 +226,7 @@ def test_trips_access_expired_links_redirect(org_logged_client: FlaskClient):
                                     expiration_date=datetime.utcnow() - timedelta(days=1)))
             session.commit()
 
-    response = org_logged_client.get('/trips/access/42')
+    response = org_logged_client.get('/trips/access/uid42')
     assert response.status_code == 302
     assert '/trips/incorrect' in response.location
 
@@ -248,7 +248,7 @@ def test_trips_access_dead_links_removed(org_logged_client: FlaskClient):
                                     expiration_date=datetime.utcnow() + timedelta(days=1)))
             session.commit()
 
-    org_logged_client.get('/trips/access/42')
+    org_logged_client.get('/trips/access/uid42')
 
     with org_logged_client.application.app_context():
         with get_session() as session:

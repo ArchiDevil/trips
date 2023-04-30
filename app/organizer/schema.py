@@ -50,6 +50,7 @@ class Trip(BASE):
     __tablename__ = 'trips'
 
     id = Column(Integer, primary_key=True)
+    uid = Column(String, nullable=False)
     name = Column(String, nullable=False)
     from_date = Column(Date, nullable=False)
     till_date = Column(Date, nullable=False)

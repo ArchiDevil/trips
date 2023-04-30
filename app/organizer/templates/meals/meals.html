@@ -1,15 +1,15 @@
 {% extends 'base.html' %} {% block content %}
 
 <script>
-    globals.urls.tripInfo = '{{ url_for("api.trips.get_info", trip_id=trip["id"]) }}'
+    globals.urls.tripInfo = '{{ url_for("api.trips.get_info", trip_uid=trip["uid"]) }}'
     globals.urls.productUnits = '{{ url_for("api.products.product_units", _external=True) }}'
     globals.urls.addMeal = '{{ url_for("api.meals.meals_add") }}'
     globals.urls.removeMeal = '{{ url_for("api.meals.meals_remove") }}'
     globals.urls.clearMeals = '{{ url_for("api.meals.meals_clear") }}'
     globals.urls.productsSearch = '{{ url_for("api.products.search", _external=True) }}'
-    globals.urls.mealsInfo = '{{ url_for("api.meals.get_meals", trip_id=trip["id"]) }}'
-    globals.urls.cycleDays = '{{ url_for("meals.cycle_days", trip_id=trip["id"]) }}'
-    globals.trip.id = "{{ trip['id'] }}"
+    globals.urls.mealsInfo = '{{ url_for("api.meals.get_meals", trip_uid=trip["uid"]) }}'
+    globals.urls.cycleDays = '{{ url_for("meals.cycle_days", trip_uid=trip["uid"]) }}'
+    globals.trip.uid = "{{ trip['uid'] }}"
 </script>
 
 {% raw %}

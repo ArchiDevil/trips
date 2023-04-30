@@ -16,19 +16,19 @@ def init_fake_data_internal(session):
                access_group=AccessGroup.User)
     session.add(org)
 
-    trip1 = Trip(name="Taganay trip",
+    trip1 = Trip(uid='uid1', name="Taganay trip",
                  from_date=datetime.strptime("2019-01-01", "%Y-%m-%d"),
                  till_date=datetime.strptime("2019-01-05", "%Y-%m-%d"))
     trip1.groups.append(Group(group_number=0, persons=2))
     trip1.groups.append(Group(group_number=1, persons=3))
 
-    trip2 = Trip(name="Archived trip",
+    trip2 = Trip(uid='uid2', name="Archived trip",
                  from_date=datetime.strptime("2019-06-06", "%Y-%m-%d"),
                  till_date=datetime.strptime("2019-06-08", "%Y-%m-%d"),
                  archived=True)
     trip2.groups.append(Group(group_number=0, persons=1))
 
-    trip3 = Trip(name="Admin trip",
+    trip3 = Trip(uid='uid3', name="Admin trip",
                  from_date=datetime.strptime("2019-06-06", "%Y-%m-%d"),
                  till_date=datetime.strptime("2019-06-08", "%Y-%m-%d"))
     trip3.groups.append(Group(group_number=1, persons=1))
