@@ -1,5 +1,7 @@
 FROM python:3.10 AS application
 
+RUN apt update && apt install -y dos2unix
+
 WORKDIR /app
 
 COPY ./app/requirements.txt /app/requirements.txt
@@ -9,7 +11,6 @@ COPY ./app/organizer /app/organizer
 COPY ./app/alembic /app/alembic
 COPY ./app/alembic.ini /app/alembic.ini
 
-RUN apt update && apt install -y dos2unix
 COPY ./app/wait-for-it.sh /app/wait-for-it.sh
 COPY ./app/run.sh /app/run.sh
 
