@@ -1,12 +1,21 @@
-FROM python:3.10-alpine AS application
+FROM python:3.10 AS application
 
-COPY ./app/requirements.txt /requirements.txt
-RUN python -m pip install -r /requirements.txt
+WORKDIR /app
 
-COPY ./app/organizer /organizer
-COPY ./app/alembic /alembic
-COPY ./app/alembic.ini /alembic.ini
+COPY ./app/requirements.txt /app/requirements.txt
+RUN python -m pip install -r /app/requirements.txt
+
+COPY ./app/organizer /app/organizer
+COPY ./app/alembic /app/alembic
+COPY ./app/alembic.ini /app/alembic.ini
+
+RUN apt update && apt install -y dos2unix
+COPY ./app/wait-for-it.sh /app/wait-for-it.sh
+COPY ./app/run.sh /app/run.sh
+
+RUN dos2unix /app/wait-for-it.sh
+RUN dos2unix /app/run.sh
 
 EXPOSE 8000
 
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "--workers=4", "organizer.wsgi:app", "--log-file", "-"]
+CMD ["/bin/bash", "/app/run.sh"]
