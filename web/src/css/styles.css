@@ -1,0 +1,27 @@
+@import 'bootstrap';
+
+.showme {
+    display: none;
+}
+
+.showhim:hover .showme {
+    display: unset;
+}
+
+@media print {
+    body {
+        line-height: 1.0;
+    }
+}
+
+@page {
+    size: auto
+}
+
+[v-cloak] {
+    display: none;
+}
+
+.fade-out {
+    filter: grayscale(80%);
+}
