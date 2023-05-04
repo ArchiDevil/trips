@@ -174,7 +174,7 @@ export default defineComponent({
           </h5>
         </div>
         <div class="modal-body">
-          <div class="form-group row">
+          <div class="mb-3 row">
             <label
               for="add-name-input"
               class="col-sm-2 col-form-label">
@@ -200,7 +200,7 @@ export default defineComponent({
               </div>
             </div>
           </div>
-          <div class="form-group row">
+          <div class="mb-3 row">
             <label
               for="add-calories-input"
               class="col-sm-2 col-form-label">
@@ -231,25 +231,25 @@ export default defineComponent({
               </div>
             </div>
           </div>
-          <div class="form-group row">
+          <div class="mb-3 row">
             <div class="col-sm-2 col-form-label"></div>
-            <div class="col-sm-10 custom-control custom-checkbox mb-3">
-              <div class="form-check pl-3">
+            <div class="col-sm-10 mb-3">
+              <div class="form-check ps-3">
                 <input
                   type="checkbox"
-                  class="custom-control-input align-middle"
+                  class="form-check-input"
                   id="lock-calories-checkbox"
                   v-model="caloriesLock"
                   tabindex="3" />
                 <label
-                  class="custom-control-label align-middle"
+                  class="form-check-label"
                   for="lock-calories-checkbox">
                   {{ $t('products.editModal.lockButton') }}
                 </label>
               </div>
             </div>
           </div>
-          <div class="form-group row">
+          <div class="mb-3 row">
             <label
               for="add-proteins-input"
               class="col-sm-2 col-form-label">
@@ -274,7 +274,7 @@ export default defineComponent({
               </div>
             </div>
           </div>
-          <div class="form-group row">
+          <div class="mb-3 row">
             <label
               for="add-fats-input"
               class="col-sm-2 col-form-label">
@@ -299,7 +299,7 @@ export default defineComponent({
               </div>
             </div>
           </div>
-          <div class="form-group row">
+          <div class="mb-3 row">
             <label
               for="add-carbs-input"
               class="col-sm-2 col-form-label">
@@ -324,7 +324,7 @@ export default defineComponent({
               </div>
             </div>
           </div>
-          <div class="form-group row">
+          <div class="mb-3 row">
             <div
               class="col-sm-2"
               :class="{
@@ -337,23 +337,23 @@ export default defineComponent({
               class="col-sm-10"
               :class="{
                 'text-info': validation.nutrition,
-                'text-danger font-weight-bolder': !validation.nutrition,
+                'text-danger fw-bolder': !validation.nutrition,
               }">
               {{ $t('products.editModal.noteDescription') }}
             </div>
           </div>
-          <div class="form-group row">
+          <div class="mb-3 row">
             <div class="col-sm-2 col-form-label"></div>
-            <div class="col-sm-10 custom-control custom-checkbox my-1">
-              <div class="form-check pl-3">
+            <div class="col-sm-10 my-1">
+              <div class="form-check ps-3">
                 <input
                   type="checkbox"
-                  class="custom-control-input align-middle"
+                  class="form-check-input"
                   id="add-custom-weight"
                   v-model="custom"
                   tabindex="7" />
                 <label
-                  class="custom-control-label align-middle"
+                  class="form-check-label"
                   for="add-custom-weight">
                   {{ $t('products.editModal.gramsCheckboxDescription') }}
                 </label>
@@ -361,7 +361,7 @@ export default defineComponent({
             </div>
           </div>
           <div
-            class="form-group row"
+            class="mb-3 row"
             v-if="custom">
             <label
               for="add-gpp-input"
@@ -394,7 +394,7 @@ export default defineComponent({
         <div class="modal-footer">
           <button
             class="btn btn-secondary col-6 col-sm-3"
-            data-dismiss="modal"
+            data-bs-dismiss="modal"
             type="button"
             tabindex="10">
             {{ $t('products.editModal.closeButton') }}

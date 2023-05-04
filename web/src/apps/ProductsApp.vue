@@ -3,12 +3,14 @@ import { defineComponent } from 'vue'
 import { userStore } from '../stores/user'
 import { navStore } from '../stores/nav'
 import { mande } from 'mande'
+import {Modal} from 'bootstrap'
 
 import { Product, ProductsInfo } from '../interfaces'
+import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
 
 export default defineComponent({
-  components: { ProductEditDialog },
+  components: { NavigationBar, ProductEditDialog },
   data() {
     return {
       page: 0,
@@ -100,10 +102,14 @@ export default defineComponent({
     },
     showModal(product: Product | undefined) {
       this.editedProduct = product
-      let modal = $('#edit-modal')
-      if (modal) {
-        ;(modal as any).modal({})
+      const modalElem = document.getElementById('edit-modal')
+      if (!modalElem) {
+        return
       }
+      const modal = new Modal(modalElem, {
+        keyboard: false,
+      })
+      modal.show()
       setTimeout(() => {
         const target = document.getElementById('add-name-input')
         if (!target) {
@@ -135,12 +141,14 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="container">
+  <NavigationBar />
+
+  <div class="container-xl">
     <div class="row my-3">
       <div class="col-8">
         <span class="display-4">{{ $t('products.title') }}</span>
         <span
-          class="spinner-border spinner-border-lg ml-3"
+          class="spinner-border spinner-border-lg ms-3"
           role="status"
           aria-hidden="true"
           v-if="contentLoading"></span>
@@ -167,7 +175,7 @@ export default defineComponent({
           class="card shadow"
           style="width: 18rem">
           <img
-            src="/6.png"
+            src="../assets/6.png"
             class="card-img-top bg-light"
             alt="" />
           <h5 class="card-header">{{ $t('products.cardHeader') }}</h5>
@@ -177,7 +185,7 @@ export default defineComponent({
               type="button"
               class="btn btn-primary w-100"
               @click="showModal(undefined)">
-              <i class="fas fa-plus"></i> {{ $t('products.addNew') }}
+              <font-awesome-icon icon="fa-solid fa-plus" /> {{ $t('products.addNew') }}
             </button>
           </div>
         </div>
@@ -185,11 +193,9 @@ export default defineComponent({
 
       <div class="col">
         <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text">
-              <i class="fas fa-search"></i>
-            </span>
-          </div>
+          <span class="input-group-text">
+            <font-awesome-icon icon="fa-solid fa-search" />
+          </span>
           <input
             :placeholder="$t('products.searchPlaceholder')"
             type="text"
@@ -199,10 +205,10 @@ export default defineComponent({
         </div>
 
         <table class="table table-sm table-hover table-responsive-xs">
-          <thead class="thead-light">
-            <tr>
+          <thead class="table-secondary">
+            <tr class="text-muted">
               <th
-                class="text-right"
+                class="text-end"
                 scope="col"
                 style="width: 8%">
                 {{ $t('products.table.id') }}
@@ -213,31 +219,31 @@ export default defineComponent({
                 {{ $t('products.table.name') }}
               </th>
               <th
-                class="text-right"
+                class="text-end"
                 scope="col"
                 style="width: 8%">
                 {{ $t('products.table.calories') }}
               </th>
               <th
-                class="text-right d-none d-sm-table-cell"
+                class="text-end d-none d-sm-table-cell"
                 scope="col"
                 style="width: 8%">
                 {{ $t('products.table.proteins') }}
               </th>
               <th
-                class="text-right d-none d-sm-table-cell"
+                class="text-end d-none d-sm-table-cell"
                 scope="col"
                 style="width: 8%">
                 {{ $t('products.table.fats') }}
               </th>
               <th
-                class="text-right d-none d-sm-table-cell"
+                class="text-end d-none d-sm-table-cell"
                 scope="col"
                 style="width: 8%">
                 {{ $t('products.table.carbs') }}
               </th>
               <th
-                class="text-right"
+                class="text-end"
                 scope="col"
                 style="width: 8%"
                 v-if="editor">
@@ -250,37 +256,35 @@ export default defineComponent({
               v-for="product in products"
               class="showhim">
               <th
-                class="text-right"
+                class="text-end"
                 scope="row">
                 {{ product.id }}
               </th>
               <td>{{ product.name }}</td>
-              <td class="text-right">{{ product.calories.toFixed(1) }}</td>
-              <td class="text-right d-none d-sm-table-cell">
+              <td class="text-end">{{ product.calories.toFixed(1) }}</td>
+              <td class="text-end d-none d-sm-table-cell">
                 {{ product.proteins.toFixed(1) }}
               </td>
-              <td class="text-right d-none d-sm-table-cell">
+              <td class="text-end d-none d-sm-table-cell">
                 {{ product.fats.toFixed(1) }}
               </td>
-              <td class="text-right d-none d-sm-table-cell">
+              <td class="text-end d-none d-sm-table-cell">
                 {{ product.carbs.toFixed(1) }}
               </td>
               <td v-if="editor">
-                <span class="text-right float-right mx-1 showme">
+                <span class="text-end float-end mx-1 showme">
                   <a
                     @click="showModal(product)"
                     href="javascript:void(0);">
-                    <i
-                      class="fas fa-pen"
-                      :title="$t('products.editButtonTitle')"></i>
+                    <font-awesome-icon icon="fa-solid fa-pen" :title="$t('products.editButtonTitle')"/>
                   </a>
                 </span>
-                <span class="text-right float-right mx-1 showme">
+                <span class="text-end float-end mx-1 showme">
                   <a
                     href="javascript:void(0);"
                     :title="$t('products.archiveButtonTitle')"
                     @click="archiveProduct(product.archive_link)">
-                    <i class="text-danger fas fa-archive"></i>
+                    <font-awesome-icon class="text-danger" icon="fa-solid fa-archive" />
                   </a>
                 </span>
               </td>
@@ -296,7 +300,7 @@ export default defineComponent({
               <a
                 class="page-link"
                 @click="prevPage">
-                <i class="fas fa-arrow-left"></i>
+                <font-awesome-icon icon="fa-solid fa-arrow-left"/>
               </a>
             </li>
 
@@ -306,7 +310,7 @@ export default defineComponent({
               <a
                 class="page-link"
                 @click="nextPage">
-                <i class="fas fa-arrow-right"></i>
+                <font-awesome-icon icon="fa-solid fa-arrow-right"/>
               </a>
             </li>
           </ul>
@@ -321,12 +325,4 @@ export default defineComponent({
     :submit-link="modalAcceptLink"
     :product="editedProduct"
     @update="requestProds" />
-
-  <!--  :data-name="product.name"
-        :data-calories="product.calories"
-        :data-proteins="product.proteins"
-        :data-fats="product.fats"
-        :data-carbs="product.carbs"
-        :data-grams="product.grams ? product.grams : ''"
-         -->
 </template>
