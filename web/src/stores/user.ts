@@ -1,11 +1,5 @@
 import { reactive } from 'vue'
-
-interface UserInfo {
-  login: string
-  displayed_name: string
-  access_group: 'User' | 'Administrator'
-  photo_url: string
-}
+import { UserInfo } from '../interfaces'
 
 export const userStore = reactive({
   isLoading: true,

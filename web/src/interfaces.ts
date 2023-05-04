@@ -1,3 +1,12 @@
+export interface UserInfo {
+  id: number
+  login: string
+  displayed_name: string
+  access_group: 'User' | 'Administrator'
+  user_type: 'Native' | 'Vk'
+  photo_url: string | null
+}
+
 export interface Product {
   id: number
   name: string
