@@ -12,7 +12,7 @@ def test_api_search_rejects_not_logged_in(client: FlaskClient):
                         query_string={
                             'search': 'Mango'
                         })
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 def test_api_search_uses_correct_method(org_logged_client: FlaskClient):
@@ -51,7 +51,7 @@ def test_api_units_uses_correct_method(org_logged_client: FlaskClient):
 def test_api_units_rejects_not_logged_in(client: FlaskClient):
     result = client.get('/api/products/units',
                         query_string={'id': 9})
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 def test_api_units_return_units(org_logged_client: FlaskClient):
@@ -122,7 +122,7 @@ def test_api_search_searches(org_logged_client: FlaskClient):
 
 def test_api_add_rejects_not_logged_in(client: FlaskClient):
     result = client.post('/api/products/add')
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 def test_api_add_uses_correct_method(org_logged_client: FlaskClient):
@@ -331,7 +331,7 @@ def test_api_edit_rejects_not_logged_in(client: FlaskClient):
                              'fats': '71.9',
                              'carbs': '41.9'
                          })
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 def test_api_edit_rejects_users(org_logged_client: FlaskClient):
@@ -487,7 +487,7 @@ def test_api_edit_returns_404_for_non_existing_product(admin_logged_client: Flas
 
 def test_api_archive_rejects_not_logged_in(client: FlaskClient):
     result = client.post('/api/products/1/archive')
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 def test_api_archive_rejects_users(org_logged_client: FlaskClient):

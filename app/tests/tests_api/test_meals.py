@@ -17,7 +17,7 @@ def test_api_rejects_adding_without_logged_in(client: FlaskClient):
                              'unit': Units.GRAMMS.value,
                              'product_id': 1
                          })
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 def test_api_rejects_adding_for_non_owned_trip(org_logged_client: FlaskClient):
@@ -38,7 +38,7 @@ def test_api_rejects_removing_without_logged_in(client: FlaskClient):
                            data={
                                'meal_id': 1
                            })
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 def test_api_rejects_removing_for_non_owned_trip(org_logged_client: FlaskClient):
@@ -502,7 +502,7 @@ def test_api_clear_updates_trip(org_logged_client: FlaskClient, app: Flask):
 
 def test_get_trip_meals_rejects_not_logged_in(client: FlaskClient):
     result = client.get('/api/meals/1')
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 def test_get_trip_meals_rejects_incorrect_data(org_logged_client: FlaskClient):
@@ -543,7 +543,7 @@ def test_get_trip_meals_returns_data_for_shared_trip(org_logged_client: FlaskCli
 
 def test_get_trip_day_meals_rejects_not_logged_in(client: FlaskClient):
     result = client.get('/api/meals/1/1')
-    assert result.status_code == 403
+    assert result.status_code == 401
 
 
 @pytest.mark.parametrize('trip_id, day_number', [(1, 200), (42, 1), (200, 200), (-100200, 200)])

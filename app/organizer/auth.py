@@ -47,7 +47,7 @@ def api_login_required_group(group=None):
         @functools.wraps(view)
         def api_wrapped_view_grouped(**kwargs):
             if 'user' not in g or g.user is None:
-                abort(403)
+                abort(401)
             if group and g.user.access_group.value < group.value:
                 abort(403)
             return view(**kwargs)
@@ -134,7 +134,7 @@ def create_vk_user(sql_session, login, user_id, displayed_name, access_token, ex
     vk_user = VkUser(id=user_id,
                      user_id=added_user.id,
                      user_token=access_token,
-                     token_exp_time= datetime.utcnow() + timedelta(seconds=expires_in),
+                     token_exp_time=datetime.utcnow() + timedelta(seconds=expires_in),
                      photo_url=photo_url)
     sql_session.add(vk_user)
     sql_session.commit()
@@ -174,8 +174,8 @@ def request_vk_access_token(code):
 
     json_result = result.json()
     if 'error' in json_result:
-        raise RuntimeError('Error from vk server [{}]: {}'.format(json_result['error'],
-                                                                  json_result['error_description']))
+        raise RuntimeError(
+            f'Error from vk server [{json_result["error"]}]: {json_result["error_description"]}')
 
     return json_result['access_token'], json_result['expires_in'], json_result['user_id']
 
@@ -190,8 +190,8 @@ def request_vk_user_name_and_photo(access_token):
 
     json_result = result.json()
     if 'error' in json_result:
-        raise RuntimeError('Error from vk server [{}]: {}'.format(json_result['error'],
-                                                                  json_result['error_description']))
+        raise RuntimeError(
+            f'Error from vk server [{json_result["error"]}]: {json_result["error_description"]}')
 
     response_user = json_result['response'][0]
     return f'{response_user["first_name"]} {response_user["last_name"]}', response_user['photo_50']

@@ -9,7 +9,7 @@ from organizer.schema import SharingLink, TripAccess
 
 def test_rejects_not_logged_in(client: FlaskClient):
     response = client.get('/api/trips/get')
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_can_get_trips_for_manager(org_logged_client: FlaskClient):
@@ -43,7 +43,7 @@ def test_trips_returns_correct_data_for_admin(admin_logged_client: FlaskClient):
 
 def test_trips_guest_cannot_access_trips(client: FlaskClient):
     response = client.get('/api/trips/get/uid1')
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_trips_org_can_get_trip(org_logged_client: FlaskClient):
@@ -78,7 +78,7 @@ def test_trips_cannot_access_non_existing_trip(org_logged_client: FlaskClient):
 
 def test_trips_share_rejects_non_logged_user(client: FlaskClient):
     response = client.get('/api/trips/share/uid1')
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_trips_share_generates_response(org_logged_client: FlaskClient):
