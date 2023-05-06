@@ -7,6 +7,11 @@ export interface UserInfo {
   photo_url: string | null
 }
 
+export interface GRecaptcha {
+  render: (element: string, options: any) => void
+  getResponse: () => string
+}
+
 export interface Product {
   id: number
   name: string
