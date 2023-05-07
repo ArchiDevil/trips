@@ -1,10 +1,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { mande, MandeError } from 'mande'
 
 import { userStore } from '../stores/user'
 import { navStore } from '../stores/nav'
 
 import globals from '../globals'
+import { UserInfo } from '../interfaces'
 
 export default defineComponent({
   data() {
@@ -13,8 +15,8 @@ export default defineComponent({
       navStore: navStore,
     }
   },
-  mounted() {
-    this.getUserData()
+  async mounted() {
+    await this.getUserData()
   },
   computed: {
     admin() {
@@ -35,13 +37,19 @@ export default defineComponent({
     adminPage: () => globals.urls.adminPage,
   },
   methods: {
-    getUserData() {
-      fetch(globals.urls.userInfo)
-        .then((response) => response.json())
-        .then((data) => {
-          this.userStore.info = data
-          this.userStore.isLoading = false
-        })
+    async getUserData() {
+      const api = mande(globals.urls.userInfo)
+      try {
+        const response = await api.get<UserInfo>()
+        this.userStore.info = response
+        this.userStore.isLoading = false
+      } catch (error) {
+        const mandeError = error as MandeError
+        console.error(mandeError)
+        if (mandeError.response.status === 401) {
+          window.location.href = '/auth/login'
+        }
+      }
     },
   },
 })
@@ -90,7 +98,8 @@ export default defineComponent({
               class="nav-link"
               :href="productsPage"
               :class="{ active: navStore.link == 'products' }">
-              <font-awesome-icon icon="fa-solid fa-pizza-slice" /> {{ $t('navbar.productsLink') }}
+              <font-awesome-icon icon="fa-solid fa-pizza-slice" />
+              {{ $t('navbar.productsLink') }}
             </a>
           </li>
           <li class="nav-item">
@@ -100,7 +109,8 @@ export default defineComponent({
               :href="usersPage"
               v-if="admin"
               :class="{ active: navStore.link == 'users' }">
-              <font-awesome-icon icon="fa-solid fa-users" /> {{ $t('navbar.usersLink') }}
+              <font-awesome-icon icon="fa-solid fa-users" />
+              {{ $t('navbar.usersLink') }}
             </a>
           </li>
           <li class="nav-item">
@@ -110,14 +120,16 @@ export default defineComponent({
               :href="adminPage"
               v-if="admin"
               :class="{ active: navStore.link == 'admin' }">
-              <font-awesome-icon icon="fa-solid fa-terminal" /> {{ $t('navbar.adminLink') }}
+              <font-awesome-icon icon="fa-solid fa-terminal" />
+              {{ $t('navbar.adminLink') }}
             </a>
           </li>
           <li class="nav-item">
             <a
               href="/tutorial.html"
               class="nav-link">
-              <font-awesome-icon icon="fa-solid fa-info" /> {{ $t('docs.howToLink') }}
+              <font-awesome-icon icon="fa-solid fa-info" />
+              {{ $t('docs.howToLink') }}
             </a>
           </li>
         </ul>
@@ -136,7 +148,8 @@ export default defineComponent({
           <a
             class="btn btn-outline-success my-2 my-sm-0"
             :href="logoutLink">
-            {{ $t('navbar.logoutLink') }} <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
+            {{ $t('navbar.logoutLink') }}
+            <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
           </a>
         </form>
       </div>

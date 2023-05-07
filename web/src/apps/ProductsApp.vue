@@ -2,8 +2,8 @@
 import { defineComponent } from 'vue'
 import { userStore } from '../stores/user'
 import { navStore } from '../stores/nav'
-import { mande } from 'mande'
-import {Modal} from 'bootstrap'
+import { mande, MandeError } from 'mande'
+import { Modal } from 'bootstrap'
 
 import { Product, ProductsInfo } from '../interfaces'
 import NavigationBar from '../components/NavigationBar.vue'
@@ -81,8 +81,12 @@ export default defineComponent({
         this.productsPerPage = response.products_per_page
         this.products = response.products
         this.totalCount = response.total_count
-      } catch (error) {
-        console.error(error)
+      } catch (error: any) {
+        const mandeError = error as MandeError
+        console.error(mandeError)
+        if (mandeError.response.status === 401) {
+          window.location.href = '/auth/login'
+        }
       }
     },
     async nextPage() {
@@ -94,11 +98,17 @@ export default defineComponent({
       await this.requestProds()
     },
     async archiveProduct(link: string) {
-      let url = link
-      await fetch(url, {
-        method: 'POST',
-      })
-      this.requestProds()
+      const api = mande(link)
+      try {
+        await api.post()
+        this.requestProds()
+      } catch (error: any) {
+        const mandeError = error as MandeError
+        console.error(mandeError)
+        if (mandeError.response.status === 401) {
+          window.location.href = '/auth/login'
+        }
+      }
     },
     showModal(product: Product | undefined) {
       this.editedProduct = product
@@ -185,7 +195,8 @@ export default defineComponent({
               type="button"
               class="btn btn-primary w-100"
               @click="showModal(undefined)">
-              <font-awesome-icon icon="fa-solid fa-plus" /> {{ $t('products.addNew') }}
+              <font-awesome-icon icon="fa-solid fa-plus" />
+              {{ $t('products.addNew') }}
             </button>
           </div>
         </div>
@@ -276,7 +287,9 @@ export default defineComponent({
                   <a
                     @click="showModal(product)"
                     href="javascript:void(0);">
-                    <font-awesome-icon icon="fa-solid fa-pen" :title="$t('products.editButtonTitle')"/>
+                    <font-awesome-icon
+                      icon="fa-solid fa-pen"
+                      :title="$t('products.editButtonTitle')" />
                   </a>
                 </span>
                 <span class="text-end float-end mx-1 showme">
@@ -284,7 +297,9 @@ export default defineComponent({
                     href="javascript:void(0);"
                     :title="$t('products.archiveButtonTitle')"
                     @click="archiveProduct(product.archive_link)">
-                    <font-awesome-icon class="text-danger" icon="fa-solid fa-archive" />
+                    <font-awesome-icon
+                      class="text-danger"
+                      icon="fa-solid fa-archive" />
                   </a>
                 </span>
               </td>
@@ -300,7 +315,7 @@ export default defineComponent({
               <a
                 class="page-link"
                 @click="prevPage">
-                <font-awesome-icon icon="fa-solid fa-arrow-left"/>
+                <font-awesome-icon icon="fa-solid fa-arrow-left" />
               </a>
             </li>
 
@@ -310,7 +325,7 @@ export default defineComponent({
               <a
                 class="page-link"
                 @click="nextPage">
-                <font-awesome-icon icon="fa-solid fa-arrow-right"/>
+                <font-awesome-icon icon="fa-solid fa-arrow-right" />
               </a>
             </li>
           </ul>
