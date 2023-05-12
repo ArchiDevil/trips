@@ -221,6 +221,7 @@ export default defineComponent({
                     'is-valid': validation.cals,
                     'is-invalid': !validation.cals,
                   }"
+                  :disabled="caloriesLock"
                   :readonly="caloriesLock"
                   tabindex="2" />
               </div>
@@ -234,7 +235,7 @@ export default defineComponent({
           <div class="mb-3 row">
             <div class="col-sm-2 col-form-label"></div>
             <div class="col-sm-10 mb-3">
-              <div class="form-check ps-3">
+              <div class="form-check">
                 <input
                   type="checkbox"
                   class="form-check-input"
@@ -345,7 +346,7 @@ export default defineComponent({
           <div class="mb-3 row">
             <div class="col-sm-2 col-form-label"></div>
             <div class="col-sm-10 my-1">
-              <div class="form-check ps-3">
+              <div class="form-check">
                 <input
                   type="checkbox"
                   class="form-check-input"
