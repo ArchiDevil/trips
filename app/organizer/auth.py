@@ -66,8 +66,8 @@ def load_logged_in_user():
             if result.user_type == UserType.Vk:
                 result = sql_session.query(User.id, User.access_group,
                                            User.displayed_name, User.login,
-                                           User.user_type, VkUser.photo_url).filter(User.id == user_id,
-                                                                                    VkUser.user_id == user_id).one()
+                                           User.user_type, VkUser.photo_url).join(
+                                               VkUser).filter(User.id == user_id).one()
             else:
                 result = sql_session.query(User.id, User.access_group,
                                            User.displayed_name, User.login,
