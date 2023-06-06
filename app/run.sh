@@ -6,4 +6,4 @@
 alembic upgrade head
 
 # then run the app
-gunicorn organizer.wsgi:app -b 0.0.0.0:8000 --workers=4 --access-logfile=- --error-logfile=-
+exec gunicorn organizer.wsgi:app -b 0.0.0.0:8000 --workers=4 --access-logfile=- --error-logfile=-
