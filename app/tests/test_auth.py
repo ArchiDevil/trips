@@ -21,7 +21,7 @@ def test_auth_any_access_updates_last_login(org_logged_client: FlaskClient, app:
             user = session.query(User).filter(User.login == "Organizer").first()
             first_date = user.last_logged_in
 
-    response = org_logged_client.get('/meals/1')
+    response = org_logged_client.get('/meals/uid1')
     assert response.status_code == 200
 
     with app.app_context():
@@ -40,7 +40,7 @@ def test_auth_logout_requires_login(client: FlaskClient):
 
 def test_auth_can_logout(org_logged_client: FlaskClient):
     response = org_logged_client.get('/auth/logout')
-    assert not org_logged_client.cookie_jar
+    assert not org_logged_client.get_cookie('session')
     assert response.status_code == 302
     assert '/' in response.location
 

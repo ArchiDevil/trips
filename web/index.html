@@ -2,186 +2,219 @@
 <html lang="ru" prefix="og: http://ogp.me/ns#">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="https://hikehub.ru/">
-    <meta name="description" content="Сервис для подготовки еды в поход. Собирайте питание умно и легко.">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://hikehub.ru/">
+  <meta name="description" content="Сервис для подготовки еды в поход. Собирайте питание умно и легко.">
 
-    <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="./src/css/landing.css">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="theme-color" content="#ffffff">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="theme-color" content="#ffffff">
 
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Hikehub">
-    <meta property="og:description" content="Сервис для подготовки еды в поход. Собирайте питание умно и легко.">
-    <meta property="og:url" content="https://hikehub.ru/">
-    <meta property="og:image" content="https://hikehub.ru/apple-touch-icon.png">
-    <meta property="og:locale" content="ru_RU">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hikehub">
+  <meta property="og:description" content="Сервис для подготовки еды в поход. Собирайте питание умно и легко.">
+  <meta property="og:url" content="https://hikehub.ru/">
+  <meta property="og:image" content="https://hikehub.ru/apple-touch-icon.png">
+  <meta property="og:locale" content="ru_RU">
 
-    <title>Hikehub - собираем еду в поход</title>
+  <title>Hikehub - собираем еду в поход</title>
 
-    <!-- Yandex.Metrika counter -->
-    <script type="text/javascript">
-        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+    (function (m, e, t, r, i, k, a) {
+      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+      m[i].l = 1 * new Date();
+      for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+      k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+    })
+      (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
 
-        ym(88901903, "init", {
-            clickmap:true,
-            trackLinks:true,
-            accurateTrackBounce:true
-        });
-    </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/88901903" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    <!-- /Yandex.Metrika counter -->
+    ym(88901903, "init", {
+      clickmap: true,
+      trackLinks: true,
+      accurateTrackBounce: true,
+      webvisor: true
+    });
+  </script>
+  <noscript>
+    <div><img src="https://mc.yandex.ru/watch/88901903" style="position:absolute; left:-9999px;" alt="" /></div>
+  </noscript>
+  <!-- /Yandex.Metrika counter -->
 </head>
 
 <body>
-    <div class="container-fluid" id="header">
-        <div class="container py-5">
-            <div class="row d-none d-md-block" style="padding-top: 10rem;"></div>
-            <div class="row d-none d-sm-block d-md-none" style="padding-top: 5rem;"></div>
-            <div class="row mt-5 justify-content-center">
-                <div class="col-md-8 justify-content-lg-center">
-                    <h1 class="display-2 text-uppercase text-white text-center text-lg-left">Hikehub</h1>
-                    <p class="h2 text-white text-center text-lg-left">
-                        Сервис для подготовки еды в&nbsp;поход.<br/>
-                        Собирайте питание умно и&nbsp;легко.
-                    </p>
-                    <div class="row mt-4">
-                        <div class="col-lg-6 mb-3">
-                            <a class="btn btn-primary btn-lg p-2 p-md-3 d-block" href="/auth/signup">Регистрация</a>
-                        </div>
-                        <div class="col-lg-6">
-                            <a class="btn btn-secondary btn-lg p-2 p-md-3 d-block" href="/auth/login">Вход</a>
-                        </div>
-                    </div>
-                </div>
+  <div class="container-fluid" id="header">
+    <div class="container py-5">
+      <div class="row d-none d-md-block" style="padding-top: 10rem;"></div>
+      <div class="row d-none d-sm-block d-md-none" style="padding-top: 5rem;"></div>
+      <div class="row mt-5 justify-content-center">
+        <div class="col-md-8 justify-content-lg-center">
+          <h1 class="display-2 text-uppercase text-white text-center text-lg-left">Hikehub</h1>
+          <p class="h2 text-white text-center text-lg-left">
+            Сервис для подготовки еды в&nbsp;поход.<br />
+            Собирайте питание умно и&nbsp;легко.
+          </p>
+          <div class="row mt-4">
+            <div class="col-lg-6 mb-3">
+              <a class="btn btn-primary btn-lg p-2 p-md-3 d-block" href="/auth/signup">Регистрация</a>
             </div>
+            <div class="col-lg-6">
+              <a class="btn btn-secondary btn-lg p-2 p-md-3 d-block" href="/auth/login">Вход</a>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
+  <div class="container">
+    <div class="row pt-5 justify-content-center">
+      <div class="col-md-8">
+        <img src="./static/img/2.jpg" class="w-100" />
+      </div>
+    </div>
+    <div class="row pt-3 justify-content-center">
+      <div class="col-md-8">
+        <h2>Сэкономьте свое время</h2>
+      </div>
+    </div>
+    <div class="row pb-5 justify-content-center">
+      <div class="col-md-8">
+        <p>
+          Так выглядит день похода в&nbsp;<strong>HIKEHUB</strong>.
+          Вместо многостраничных таблиц&nbsp;&mdash; простой сайт, где с&nbsp;первого взгляда понятно, что
+          вы&nbsp;будете есть.
+          Сервис сам посчитает калорийность, пищевую ценность и&nbsp;вес продуктов.
+          Автоматически составит список покупок и&nbsp;отчет для фасовки.
+          Вам остается придумать меню и&nbsp;добавить продукты.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row pt-5 justify-content-center">
+      <div class="col-md-8">
+        <video width="100%" height="100%" muted="true" loop="true" autoplay>
+          <source src="./static/vid/1.mp4" type="video/mp4">
+          Ваш браузер не поддерживает воспроизведение видео.
+        </video>
+      </div>
+    </div>
+    <div class="row pt-3 justify-content-center">
+      <div class="col-md-8">
+        <h2>Не&nbsp;тратьте время на&nbsp;поиск продуктов</h2>
+      </div>
+    </div>
+    <div class="row pb-5 justify-content-center">
+      <div class="col-md-8">
+        <p>
+          В&nbsp;сервисе уже есть база продуктов, сформированная туристами.
+          Выбирайте продукты из&nbsp;имеющихся или легко добавляйте свои.
+          Когда вы&nbsp;добавляете продукты в&nbsp;базу, они становятся доступными для всех пользователей.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row pt-5 justify-content-center">
+      <div class="col-md-8">
+        <img src="./static/img/3.jpg" class="w-100" />
+      </div>
+    </div>
+    <div class="row pt-3 justify-content-center">
+      <div class="col-md-8">
+        <h2>Упростите покупки</h2>
+      </div>
+    </div>
+    <div class="row pb-5 justify-content-center">
+      <div class="col-md-8">
+        <p>
+          Сайт автоматически считает количество продуктов, которые вы&nbsp;добавляете в&nbsp;меню и&nbsp;создает список
+          покупок.
+          Откройте список на&nbsp;смартфоне или распечатайте, чтобы взять с&nbsp;собой в&nbsp;магазин.
+          Ведите заметки, чтобы распределить покупки и&nbsp;не&nbsp;забыть, если каких-то продуктов не&nbsp;оказалось
+          в&nbsp;магазине.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid py-5" id="footer">
     <div class="container">
-        <div class="row pt-5 justify-content-center">
-            <div class="col-md-8">
-                <img src="static/img/2.jpg" class="w-100"/>
-            </div>
+      <div class="row justify-content-center pb-2">
+        <div class="col-md-8 text-white">
+          <h2 class="text-center text-lg-left">Облегчите подготовку к&nbsp;походу с&nbsp;HIKEHUB</h2>
         </div>
-        <div class="row pt-3 justify-content-center">
-            <div class="col-md-8">
-                <h2>Сэкономьте свое время</h2>
-            </div>
+      </div>
+      <div class="row pb-5">
+        <div class="col-md-2"></div>
+        <div class="col-md-8 col-lg-6">
+          <a class="btn btn-primary btn-lg p-3 d-block" href="/auth/signup">Регистрация</a>
         </div>
-        <div class="row pb-5 justify-content-center">
-            <div class="col-md-8">
-                <p>
-                    Так выглядит день похода в&nbsp;<strong>HIKEHUB</strong>.
-                    Вместо многостраничных таблиц&nbsp;&mdash; простой сайт, где с&nbsp;первого взгляда понятно, что вы&nbsp;будете есть.
-                    Сервис сам посчитает калорийность, пищевую ценность и&nbsp;вес продуктов.
-                    Автоматически составит список покупок и&nbsp;отчет для фасовки.
-                    Вам остается придумать меню и&nbsp;добавить продукты.
-                </p>
-            </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-md-8">
+          <p class="text-white">
+            Дизайн сайта выполнен <a class="text-white" href="https://t.me/RinaYudina">Ириной</a>.
+          </p>
+          <p class="text-white">
+            У&nbsp;нас есть <a class="text-white" href="https://t.me/hikehubru">чат в&nbsp;телеграм</a>.
+            Там можно задать вопросы и&nbsp;предложить улучшения.
+            Ещё есть <a class="text-white" href="/info.html">страница</a> со&nbsp;всякой дополнительной информацией
+            и&nbsp;документами.
+          </p>
+          <p class="text-white">Поделитесь ссылкой на&nbsp;сайт в&nbsp;соцсетях. Это поможет развитию проекта.</p>
+          <div class="d-none d-md-block">
+            <a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+              target="_blank"><img src="https://static.addtoany.com/buttons/vk.svg" width="40" height="40"
+                class="share-button"></a>
+            <a href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+              target="_blank"><img src="https://static.addtoany.com/buttons/telegram.svg" width="40" height="40"
+                class="share-button"></a>
+            <a href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+              target="_blank"><img src="https://static.addtoany.com/buttons/facebook.svg" width="40" height="40"
+                class="share-button"></a>
+            <a href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+              target="_blank"><img src="https://static.addtoany.com/buttons/twitter.svg" width="40" height="40"
+                class="share-button"></a>
+            <a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+              target="_blank"><img src="https://static.addtoany.com/buttons/viber.svg" width="40" height="40"
+                class="share-button"></a>
+            <a href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+              target="_blank"><img src="https://static.addtoany.com/buttons/whatsapp.svg" width="40" height="40"
+                class="share-button"></a>
+          </div>
         </div>
+      </div>
+      <div class="row d-flex d-md-none">
+        <div class="col"><a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+            target="_blank"><img src="https://static.addtoany.com/buttons/vk.svg" class="share-button"></a></div>
+        <div class="col"><a
+            href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+            target="_blank"><img src="https://static.addtoany.com/buttons/telegram.svg" class="share-button"></a></div>
+        <div class="col"><a
+            href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+            target="_blank"><img src="https://static.addtoany.com/buttons/facebook.svg" class="share-button"></a></div>
+        <div class="col"><a
+            href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+            target="_blank"><img src="https://static.addtoany.com/buttons/twitter.svg" class="share-button"></a></div>
+        <div class="col"><a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+            target="_blank"><img src="https://static.addtoany.com/buttons/viber.svg" class="share-button"></a></div>
+        <div class="col"><a
+            href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
+            target="_blank"><img src="https://static.addtoany.com/buttons/whatsapp.svg" class="share-button"></a></div>
+      </div>
     </div>
-
-    <div class="container">
-        <div class="row pt-5 justify-content-center">
-            <div class="col-md-8">
-                <video width="100%" height="100%" muted="true" loop="true" autoplay>
-                    <source src="static/vid/1.mp4" type="video/mp4">
-                    Ваш браузер не поддерживает воспроизведение видео.
-                </video>
-            </div>
-        </div>
-        <div class="row pt-3 justify-content-center">
-            <div class="col-md-8">
-                <h2>Не&nbsp;тратьте время на&nbsp;поиск продуктов</h2>
-            </div>
-        </div>
-        <div class="row pb-5 justify-content-center">
-            <div class="col-md-8">
-                <p>
-                    В&nbsp;сервисе уже есть база продуктов, сформированная туристами.
-                    Выбирайте продукты из&nbsp;имеющихся или легко добавляйте свои.
-                    Когда вы&nbsp;добавляете продукты в&nbsp;базу, они становятся доступными для всех пользователей.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="row pt-5 justify-content-center">
-            <div class="col-md-8">
-                <img src="static/img/3.jpg" class="w-100"/>
-            </div>
-        </div>
-        <div class="row pt-3 justify-content-center">
-            <div class="col-md-8">
-                <h2>Упростите покупки</h2>
-            </div>
-        </div>
-        <div class="row pb-5 justify-content-center">
-            <div class="col-md-8">
-                <p>
-                    Сайт автоматически считает количество продуктов, которые вы&nbsp;добавляете в&nbsp;меню и&nbsp;создает список покупок.
-                    Откройте список на&nbsp;смартфоне или распечатайте, чтобы взять с&nbsp;собой в&nbsp;магазин.
-                    Ведите заметки, чтобы распределить покупки и&nbsp;не&nbsp;забыть, если каких-то продуктов не&nbsp;оказалось в&nbsp;магазине.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div class="container-fluid py-5" id="footer">
-        <div class="container">
-            <div class="row justify-content-center pb-2">
-                <div class="col-md-8 text-white">
-                    <h2 class="text-center text-lg-left">Облегчите подготовку к&nbsp;походу с&nbsp;HIKEHUB</h2>
-                </div>
-            </div>
-            <div class="row pb-5">
-                <div class="col-md-2"></div>
-                <div class="col-md-8 col-lg-6">
-                    <a class="btn btn-primary btn-lg p-3 d-block" href="/auth/signup">Регистрация</a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-2"></div>
-                <div class="col-md-8">
-                    <p class="text-white">
-                        Дизайн сайта выполнен <a class="text-white" href="https://t.me/RinaYudina">Ириной</a>.
-                    </p>
-                    <p class="text-white">
-                        У&nbsp;нас есть <a class="text-white" href="https://t.me/hikehubru">чат в&nbsp;телеграм</a>.
-                        Там можно задать вопросы и&nbsp;предложить улучшения.
-                        Ещё есть <a class="text-white" href="/info.html">страница</a> со&nbsp;всякой дополнительной информацией и&nbsp;документами.
-                    </p>
-                    <p class="text-white">Поделитесь ссылкой на&nbsp;сайт в&nbsp;соцсетях. Это поможет развитию проекта.</p>
-                    <div class="d-none d-md-block">
-                        <a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/vk.svg" width="40" height="40" class="share-button"></a>
-                        <a href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/telegram.svg" width="40" height="40" class="share-button"></a>
-                        <a href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/facebook.svg" width="40" height="40" class="share-button"></a>
-                        <a href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/twitter.svg" width="40" height="40" class="share-button"></a>
-                        <a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/viber.svg" width="40" height="40" class="share-button"></a>
-                        <a href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/whatsapp.svg" width="40" height="40" class="share-button"></a>
-                    </div>
-                </div>
-            </div>
-            <div class="row d-flex d-md-none">
-                <div class="col"><a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/vk.svg" class="share-button"></a></div>
-                <div class="col"><a href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/telegram.svg" class="share-button"></a></div>
-                <div class="col"><a href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/facebook.svg" class="share-button"></a></div>
-                <div class="col"><a href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/twitter.svg" class="share-button"></a></div>
-                <div class="col"><a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/viber.svg" class="share-button"></a></div>
-                <div class="col"><a href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank"><img src="https://static.addtoany.com/buttons/whatsapp.svg" class="share-button"></a></div>
-            </div>
-        </div>
-    </div>
+  </div>
 </body>
 
 </html>

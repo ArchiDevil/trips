@@ -48,7 +48,7 @@ def test_cannot_create_user_with_incorrect_data(client: FlaskClient, json: dict)
 
 def test_cannot_create_user_with_incorrect_request(client: FlaskClient):
     response = client.post('/api/auth/signup/')
-    assert 400 == response.status_code
+    assert 415 == response.status_code
 
 
 def test_cannon_create_user_with_the_same_login(client: FlaskClient):

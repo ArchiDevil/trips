@@ -26,20 +26,14 @@ services:
       VK_CLIENT_ID: ${VK_CLIENT_ID}
     restart: on-failure
 
-  # do not forget to add certificate updating each day or week into cron
-  # with command like:
-  # 0 9 * * 2 docker container exec trips-proxy-1 acme-nginx -d <domain>
   proxy:
     build:
       context: .
       dockerfile: proxy.Dockerfile
     ports:
-      - "80:80"
-      - "443:443"
+      - "6161:6161"
     links:
       - app
-    volumes:
-      - /root/nginx-vol/:/etc/ssl/private/
     restart: on-failure
 
 volumes:

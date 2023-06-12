@@ -41,8 +41,7 @@ export default {
                                 <a class="dropdown-item" type="button"
                                    href="javascript:void(0)" data-toggle="modal"
                                    data-target="#shareModal"
-                                   :data-read-link="shareLinks.read"
-                                   :data-write-link="shareLinks.write"
+                                   :data-share-link="shareLink"
                                    v-if="trip.type === 'user'">
                                    <i class="fas fa-share-alt"></i> {{ $t('trips.shareButton') }}
                                 </a>
@@ -68,11 +67,8 @@ export default {
         forgetLink() {
             return this.trip.forget_link
         },
-        shareLinks() {
-            return {
-                read: this.trip.trip.share_read_link,
-                write: this.trip.trip.share_write_link,
-            }
+        shareLink() {
+            return this.trip.trip.share_link
         },
         fromDate() {
             const date = new Date(this.trip.trip.from_date)

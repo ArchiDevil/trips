@@ -20,7 +20,7 @@ const tripsApp = createApp({
         return {
             idsLoading: true,
             tripsLoading: true,
-            tripIds: [],
+            tripUids: [],
             trips: [],
             sortingFunc: (a, b) => {
                 return new Date(a.trip.till_date) - new Date(b.trip.till_date)
@@ -58,7 +58,7 @@ const tripsApp = createApp({
         fetch(globals.urls.tripsInfo)
             .then(response => response.json())
             .then(async response => {
-                instance.tripIds = response.trips
+                instance.tripUids = response.trips
                 instance.idsLoading = false
                 await Promise.all(response.trips.map((e, idx, arr) => {
                     return fetch('/api/trips/get/' + e)
@@ -80,30 +80,24 @@ tripsApp.mount('#app')
 const modalApp = createApp({
     data() {
         return {
-            sharingType: '0',
             linkText: this.$t('trips.shareModal.linkPlaceholder'),
-            readLink: '',
-            writeLink: '',
+            shareLink: '',
             copyStatus: '',
         }
     },
-    watch: {
-        sharingType(newType, oldType) {
-            if (newType === '0')
-                return
-
-            let link = ''
+    methods: {
+        copyLink() {
+            navigator.clipboard.writeText(this.linkText)
+            this.copyStatus = this.$t('trips.shareModal.copiedStatus')
+        },
+        reset() {
+            this.linkText = this.$t('trips.shareModal.linkPlaceholder')
             this.copyStatus = undefined
-
-            if (newType === 'read') {
-                link = this.readLink
-            } else if (newType === 'write') {
-                link = this.writeLink
-            } else {
-                console.error('Unknown sharing type: ' + newType)
-                return
-            }
-
+            this.shareLink = ''
+        },
+        generateLink() {
+            let link = this.shareLink
+            this.copyStatus = undefined
             this.linkText = this.$t('trips.shareModal.linkLoading')
             fetch(link)
                 .then(response => response.json())
@@ -114,21 +108,6 @@ const modalApp = createApp({
                     console.error(error)
                 })
         }
-    },
-    methods: {
-        copyLink() {
-            if (this.sharingType !== '0') {
-                navigator.clipboard.writeText(this.linkText)
-                this.copyStatus = this.$t('trips.shareModal.copiedStatus')
-            }
-        },
-        reset() {
-            this.sharingType = '0'
-            this.linkText = this.$t('trips.shareModal.linkPlaceholder')
-            this.copyStatus = undefined
-            this.readLink = ''
-            this.writeLink = ''
-        }
     }
 })
 
@@ -138,6 +117,6 @@ let mountedModalApp = modalApp.mount('#shareModal')
 $(document).on('show.bs.modal', '#shareModal', function (event) {
     let target = $(event.relatedTarget); // Button that triggered the modal
     mountedModalApp.reset();
-    mountedModalApp.readLink = target.data('read-link');
-    mountedModalApp.writeLink = target.data('write-link');
+    mountedModalApp.shareLink = target.data('share-link');
+    mountedModalApp.generateLink();
 });

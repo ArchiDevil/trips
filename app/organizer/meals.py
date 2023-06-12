@@ -5,46 +5,38 @@ from flask import Blueprint, render_template, abort, g, url_for, redirect, reque
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, MealRecord, AccessGroup, TripAccessType
+from organizer.schema import Trip, MealRecord, AccessGroup
 from organizer.utils.auth import user_has_trip_access
 
 bp = Blueprint('meals', __name__, url_prefix='/meals')
 
-@bp.get('/<int:trip_id>')
+@bp.get('/<trip_uid>')
 @login_required_group(AccessGroup.User)
-def days_view(trip_id):
+def days_view(trip_uid: str):
     with get_session() as session:
-        trip_info: Trip = session.query(Trip).filter(Trip.id == trip_id).first()
-        if not trip_info:
+        trip: Trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        if not trip:
             abort(404)
 
-        if not user_has_trip_access(trip_info,
-                                    g.user.id,
-                                    g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Read):
-            abort(403)
-
-        trip = {
-            'id': trip_info.id
+        trip_info = {
+            'uid': trip.uid
         }
 
-    return render_template('meals/meals.html', trip=trip)
+    return render_template('meals/meals.html', trip=trip_info)
 
 
-@bp.post('/cycle_days/<int:trip_id>')
+@bp.post('/cycle_days/<trip_uid>')
 @login_required_group(AccessGroup.User)
-def cycle_days(trip_id):
+def cycle_days(trip_uid: str):
     with get_session() as session:
-        trip_info: Optional[Trip] = session.query(Trip).filter(Trip.id == trip_id).first()
+        trip_info: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip_info:
             abort(404)
 
         if not user_has_trip_access(trip_info,
                                     g.user.id,
                                     g.user.access_group == AccessGroup.Administrator,
-                                    session,
-                                    TripAccessType.Write):
+                                    session):
             abort(403)
 
     if not 'src-start' in request.form or not 'src-end' in request.form:
@@ -81,14 +73,17 @@ def cycle_days(trip_id):
 
     with get_session() as session:
         if 'overwrite' in request.form:
-            session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
+            session.query(MealRecord).filter(MealRecord.trip_id == trip_info.id,
                                              MealRecord.day_number >= dst_start,
                                              MealRecord.day_number <= dst_end).delete()
             session.commit()
 
-        meals_info = session.query(MealRecord).filter(MealRecord.trip_id == trip_id,
-                                                      MealRecord.day_number >= src_start,
-                                                      MealRecord.day_number <= src_start + src_days_count).order_by(MealRecord.day_number).all()
+        meals_info = session.query(MealRecord).filter(
+            MealRecord.trip_id == trip_info.id,
+            MealRecord.day_number >= src_start,
+            MealRecord.day_number <= src_start + src_days_count).order_by(
+                MealRecord.day_number).all()
+
         meals_per_day = defaultdict(list)
         for meal in meals_info:
             meals_per_day[meal.day_number - src_start].append(meal)
@@ -101,7 +96,7 @@ def cycle_days(trip_id):
         for day_number in range(dst_start, dst_end + 1):
             idx = (day_number - dst_start) % src_days_count
             for meal in meals_per_day[idx]:
-                new_record = MealRecord(trip_id=trip_id,
+                new_record = MealRecord(trip_id=trip_info.id,
                                         product_id=meal.product_id,
                                         day_number=day_number,
                                         meal_number=meal.meal_number,
@@ -109,4 +104,4 @@ def cycle_days(trip_id):
                 session.add(new_record)
         session.commit()
 
-    return redirect(url_for('meals.days_view', trip_id=trip_id))
+    return redirect(url_for('meals.days_view', trip_uid=trip_info.uid))

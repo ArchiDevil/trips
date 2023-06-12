@@ -1,11 +1,10 @@
 from datetime import date
 from typing import Dict
-from flask import Flask
 from flask.testing import FlaskClient
 import pytest
 
 from organizer.db import get_session
-from organizer.schema import Trip, TripAccess, TripAccessType
+from organizer.schema import Trip, TripAccess
 from organizer.strings import STRING_TABLE
 
 
@@ -16,12 +15,7 @@ def test_trips_edit_rejects_not_logged_in(client: FlaskClient):
 
 
 def test_trips_edit_rejects_insufficient_privileges(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Read))
-            session.commit()
-
-    response = org_logged_client.post('/trips/edit/3',
+    response = org_logged_client.post('/trips/edit/uid3',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '10-09-2019 - 12-09-2019',
@@ -38,19 +32,19 @@ def test_trips_edit_rejects_insufficient_privileges(org_logged_client: FlaskClie
 
 
 def test_trips_can_see_edit_trip_page(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/edit/1')
+    response = org_logged_client.get('/trips/edit/uid1')
     assert response.status_code == 200
     assert STRING_TABLE['Trips edit edit button'].encode() in response.data
     assert STRING_TABLE['Trips edit archive button'].encode() in response.data
 
 
 def test_trips_edit_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/edit/100')
+    response = org_logged_client.get('/trips/edit/uid100')
     assert response.status_code == 404
 
 
 def test_trips_can_edit_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/trips/edit/1',
+    response = org_logged_client.post('/trips/edit/uid1',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '10-09-2019 - 12-09-2019',
@@ -72,10 +66,10 @@ def test_trips_can_edit_trip(org_logged_client: FlaskClient):
 def test_trips_can_edit_shared_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2, access_type=TripAccessType.Write))
+            session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
-    response = org_logged_client.post('/trips/edit/1',
+    response = org_logged_client.post('/trips/edit/uid1',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '10-09-2019 - 12-09-2019',
@@ -95,7 +89,7 @@ def test_trips_can_edit_shared_trip(org_logged_client: FlaskClient):
 
 
 def test_trips_admin_can_edit_any_trip(admin_logged_client: FlaskClient):
-    response = admin_logged_client.post('/trips/edit/1',
+    response = admin_logged_client.post('/trips/edit/uid1',
                                         data={
                                             'name': 'Test trip',
                                             'daterange': '10-09-2019 - 12-09-2019',
@@ -116,7 +110,7 @@ def test_trips_admin_can_edit_any_trip(admin_logged_client: FlaskClient):
 
 
 def test_trips_redirects_correctly(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/trips/edit/1',
+    response = org_logged_client.post('/trips/edit/uid1',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '10-09-2019 - 12-09-2019',
@@ -129,20 +123,20 @@ def test_trips_redirects_correctly(org_logged_client: FlaskClient):
 
 
 def test_trips_redirect_created_if_provided(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/edit/1', headers={'Referer': 'test.com'})
+    response = org_logged_client.get('/trips/edit/uid1', headers={'Referer': 'test.com'})
     assert response.status_code == 200
     assert 'name="redirect" value="test.com"' in response.data.decode(encoding='utf-8')
 
 
 def test_trips_redirect_created_if_not_provided(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/edit/1')
+    response = org_logged_client.get('/trips/edit/uid1')
     assert response.status_code == 200
     assert 'name="redirect" value="/trips/"' in response.data.decode(encoding='utf-8')
 
 
 @pytest.mark.parametrize('name', ['', 'a' * 51])
 def test_trips_edit_rejects_wrong_name(org_logged_client: FlaskClient, name: str):
-    response = org_logged_client.post('/trips/edit/1',
+    response = org_logged_client.post('/trips/edit/uid1',
                                       data={
                                           'name': name,
                                           'daterange': '10-09-2019 - 12-09-2019',
@@ -165,7 +159,7 @@ def test_trips_edit_rejects_wrong_name(org_logged_client: FlaskClient, name: str
                                    '42-09-2019 - 56-09-2019',
                                    '10-09-2019 - 08-09-2019'])
 def test_trips_edit_rejects_incorrect_dates(org_logged_client: FlaskClient, dates: str):
-    response = org_logged_client.post('/trips/edit/1',
+    response = org_logged_client.post('/trips/edit/uid1',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': dates,
@@ -185,7 +179,7 @@ def test_trips_edit_rejects_incorrect_dates(org_logged_client: FlaskClient, date
 
 
 def test_trips_edit_shows_redirect_error(org_logged_client: FlaskClient):
-    response = org_logged_client.post('/trips/edit/1',
+    response = org_logged_client.post('/trips/edit/uid1',
                                       data={
                                           'name': 'Test trip',
                                           'daterange': '08-09-2019 - 10-09-2019',
@@ -206,7 +200,7 @@ def test_trips_edit_rejects_empty_groups(org_logged_client: FlaskClient, groups:
             'redirect': '/'}
     data.update(groups)
 
-    response = org_logged_client.post('/trips/edit/1',
+    response = org_logged_client.post('/trips/edit/uid1',
                                       data=data)
     assert STRING_TABLE['Trips edit error incorrect groups'].encode() in response.data
 

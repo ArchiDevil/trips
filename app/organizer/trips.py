@@ -2,6 +2,7 @@ import csv
 import io
 from datetime import datetime
 from typing import Any, List, Optional
+import secrets
 
 from flask import Blueprint, render_template, request, url_for, redirect, \
                   abort, g, flash, send_file
@@ -10,7 +11,7 @@ from sentry_sdk import capture_exception
 from organizer.auth import login_required_group
 from organizer.db import get_session
 from organizer.schema import SharingLink, Trip, AccessGroup, TripAccess, Group, \
-                             Product, MealRecord, TripAccessType
+                             Product, MealRecord
 from organizer.strings import STRING_TABLE
 from organizer.utils.auth import user_has_trip_access
 
@@ -80,16 +81,26 @@ def add():
                                    submit_url=add_url)
 
         with get_session() as session:
-            new_trip = Trip(name=name,
-                            from_date=from_date,
-                            till_date=till_date,
-                            created_by=g.user.id)
+            while True:
+                new_uid = secrets.token_urlsafe(8)
+                existing = session.query(Trip).filter(Trip.uid == new_uid).first()
+                if not existing:
+                    break
+
+            new_trip = Trip(
+                uid=new_uid,
+                name=name,
+                from_date=from_date,
+                till_date=till_date,
+                created_by=g.user.id)
+
             for i, persons in enumerate(groups):
                 new_trip.groups.append(Group(group_number=i, persons=persons))
+
             session.add(new_trip)
             session.commit()
 
-            end_url = url_for('meals.days_view', trip_id=new_trip.id)
+            end_url = url_for('meals.days_view', trip_uid=new_trip.uid)
         return redirect(end_url)
 
     return render_template(template_file,
@@ -99,25 +110,26 @@ def add():
                            submit_url=add_url)
 
 
-@bp.route('/edit/<int:trip_id>', methods=['GET', 'POST'])
+@bp.route('/edit/<trip_uid>', methods=['GET', 'POST'])
 @login_required_group(AccessGroup.User)
-def edit(trip_id: int):
+def edit(trip_uid: str):
     template_file = 'trips/edit.html'
     caption = STRING_TABLE['Trips edit title']
     submit_caption = STRING_TABLE['Trips edit edit button']
-    edit_url = url_for('trips.edit', trip_id=trip_id)
+    edit_url = url_for('trips.edit', trip_uid=trip_uid)
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
     if not redirect_location:
         redirect_location = url_for('trips.index')
 
     with get_session() as session:
-        trip_info = session.query(Trip).filter(Trip.id == trip_id).first()
+        trip_info = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip_info:
             abort(404)
 
-        if not user_has_trip_access(trip_info, g.user.id,
-                               g.user.access_group == AccessGroup.Administrator,
-                               session, TripAccessType.Write):
+        if not user_has_trip_access(trip_info,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session):
             abort(403)
 
         trip_groups = [group.persons for group in trip_info.groups]
@@ -143,15 +155,15 @@ def edit(trip_id: int):
                                        redirect=url_for('.index'))
 
             redirect_location = request.form['redirect']
-            session.query(Group).filter(Group.trip_id == trip_id).delete()
+            session.query(Group).filter(Group.trip_id == trip_info.id).delete()
             session.commit()
 
-            trip = session.query(Trip).filter(Trip.id == trip_id).one()
+            trip = session.query(Trip).filter(Trip.id == trip_info.id).one()
             trip.name = name
             trip.from_date = from_date
             trip.till_date = till_date
             for i, group in enumerate(groups):
-                trip.groups.append(Group(trip_id=trip_id, group_number=i, persons=group))
+                trip.groups.append(Group(trip_id=trip.id, group_number=i, persons=group))
 
             trip.last_update = datetime.utcnow()
             session.commit()
@@ -168,11 +180,11 @@ def edit(trip_id: int):
                            redirect=redirect_location)
 
 
-@bp.get('/archive/<int:trip_id>')
+@bp.get('/archive/<trip_uid>')
 @login_required_group(AccessGroup.User)
-def archive(trip_id: int):
+def archive(trip_uid: str):
     with get_session() as session:
-        trip: Optional[Trip] = session.query(Trip).filter(Trip.id == trip_id).first()
+        trip: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 
@@ -186,16 +198,18 @@ def archive(trip_id: int):
     return redirect(url_for('.index'))
 
 
-@bp.get('/forget/<int:trip_id>')
+@bp.get('/forget/<trip_uid>')
 @login_required_group(AccessGroup.User)
-def forget(trip_id: int):
+def forget(trip_uid: str):
     with get_session() as session:
-        trip = session.query(Trip).filter(Trip.id == trip_id).first()
+        trip: Optional[Trip] = session.query(Trip).filter(
+            Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 
-        trip_access = session.query(TripAccess).filter(TripAccess.trip_id == trip_id,
-                                                       TripAccess.user_id == g.user.id).first()
+        trip_access = session.query(TripAccess).filter(
+            TripAccess.trip_id == trip.id,
+            TripAccess.user_id == g.user.id).first()
         if not trip_access:
             abort(403)
 
@@ -221,9 +235,9 @@ def send_csv_file(rows: List[List[Any]]):
                      as_attachment=True, download_name='data.csv')
 
 
-@bp.get('/download/<int:trip_id>')
+@bp.get('/download/<trip_uid>')
 @login_required_group(AccessGroup.User)
-def download(trip_id: int):
+def download(trip_uid: str):
     csv_content = [[
         STRING_TABLE['CSV name'],
         STRING_TABLE['CSV day'],
@@ -240,21 +254,16 @@ def download(trip_id: int):
     }
 
     with get_session() as session:
-        trip = session.query(Trip).filter(Trip.id == trip_id).first()
+        trip: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
-
-        if not user_has_trip_access(trip, g.user.id,
-                               g.user.access_group == AccessGroup.Administrator,
-                               session, TripAccessType.Read):
-            abort(403)
 
         data = session.query(MealRecord.mass,
                              MealRecord.day_number,
                              MealRecord.meal_number,
                              Product.name,
                              Product.calories).join(Product).order_by(MealRecord.day_number,
-                                                                      MealRecord.meal_number).filter(MealRecord.trip_id == trip_id).all()
+                                                                      MealRecord.meal_number).filter(MealRecord.trip_id == trip.id).all()
         for record in data:
             csv_content.append([record.name,
                                 record.day_number,
@@ -274,20 +283,19 @@ def access(uuid):
         session.query(SharingLink).filter(SharingLink.expiration_date < current_time).delete()
         session.commit()
 
-        link: SharingLink = session.query(SharingLink).filter(SharingLink.uuid == uuid).first()
+        link: Optional[SharingLink] = session.query(SharingLink).filter(SharingLink.uuid == uuid).first()
         if not link:
             return redirect(url_for('trips.incorrect'))
 
-        access = session.query(TripAccess).filter(TripAccess.trip_id == link.trip_id,
-                                                  TripAccess.user_id == g.user.id).first()
+        access: Optional[TripAccess] = session.query(TripAccess).filter(
+            TripAccess.trip_id == link.trip_id,
+            TripAccess.user_id == g.user.id).first()
         if not access:
-            session.add(TripAccess(trip_id=link.trip_id, user_id=g.user.id, access_type=link.access_type))
-            session.commit()
-        elif access.access_type == TripAccessType.Read and link.access_type == TripAccessType.Write:
-            access.access_type = link.access_type
+            session.add(TripAccess(trip_id=link.trip_id, user_id=g.user.id))
             session.commit()
 
-        return redirect(url_for('meals.days_view', trip_id=link.trip_id))
+        trip = session.query(Trip).filter(Trip.id == link.trip_id).one()
+        return redirect(url_for('meals.days_view', trip_uid=trip.uid))
 
 
 @bp.get('/incorrect')

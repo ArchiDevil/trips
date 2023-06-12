@@ -3,7 +3,7 @@ import datetime
 from flask.app import Flask
 from flask.testing import FlaskClient
 
-from organizer.schema import TripAccess, TripAccessType, VkUser
+from organizer.schema import TripAccess, VkUser
 from organizer.db import get_session
 from organizer.strings import STRING_TABLE
 
@@ -169,7 +169,7 @@ def test_users_remove_cannot_remove_current_user(admin_logged_client: FlaskClien
 def test_users_remove_trip_access(admin_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
-            session.add(TripAccess(user_id=2, trip_id=1, access_type=TripAccessType.Read))
+            session.add(TripAccess(user_id=2, trip_id=1))
             session.commit()
 
     response = admin_logged_client.get('/users/remove/2')

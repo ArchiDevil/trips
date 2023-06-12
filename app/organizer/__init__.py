@@ -90,9 +90,6 @@ def create_app(test_config=None):
     from . import meals
     app.register_blueprint(meals.bp)
 
-    from . import products
-    app.register_blueprint(products.bp)
-
     from . import api
     app.register_blueprint(api.BP)
 

@@ -40,7 +40,6 @@ py -m venv .venv
 pip install -r requirements.txt
 
 $ENV:FLASK_APP="organizer"
-$ENV:FLASK_ENV="development"
 
-flask run
+flask run --debug
 ```

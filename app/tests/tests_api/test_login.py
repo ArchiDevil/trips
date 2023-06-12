@@ -13,9 +13,8 @@ def test_auth_can_log_in_as_user(client: FlaskClient):
                                'login': 'Administrator',
                                'password': 'qwerty'
                            })
-    assert client.cookie_jar
-    for x in client.cookie_jar:
-        assert not x.expires
+    assert client.get_cookie('session')
+    assert not client.get_cookie('session').expires
 
     assert response.status_code == 200
     assert response.json
@@ -49,9 +48,8 @@ def test_auth_can_log_in_as_user_with_remember(client: FlaskClient):
                                'password': 'qwerty',
                                'remember': 'true'
                            })
-    assert client.cookie_jar
-    for x in client.cookie_jar:
-        assert x.expires
+    assert client.get_cookie('session')
+    assert client.get_cookie('session').expires
 
     assert response.status_code == 200
     assert response.json
