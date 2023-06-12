@@ -78,7 +78,8 @@ def load_logged_in_user():
 @bp.get('/', defaults={'path': ''})
 @bp.get('/<path:path>')
 def index(path):
-    redirect_location = request.args['redirect'] if 'redirect' in request.args else url_for('trips.index')
+    redirect_location = request.args['redirect'] if 'redirect' in request.args else url_for(
+        'trips.index')
 
     if 'user' in g and g.user is not None:
         return redirect(redirect_location)
@@ -116,7 +117,7 @@ def vk_login():
     url = 'https://oauth.vk.com/authorize?'
     query = urlencode({
         'client_id': current_app.config['VK_CLIENT_ID'],
-        'redirect_uri': url_for('auth.vk_redirect', _external=True),
+        'redirect_uri': url_for('auth.vk_redirect', _external=True, _scheme='https'),
         'state': request.args['redirect']
     })
     return redirect(url + query)
@@ -168,7 +169,7 @@ def request_vk_access_token(code):
                           params={
                               'client_id': current_app.config['VK_CLIENT_ID'],
                               'client_secret': current_app.config['VK_APP_SECRET'],
-                              'redirect_uri': url_for('auth.vk_redirect', _external=True),
+                              'redirect_uri': url_for('auth.vk_redirect', _external=True, _scheme='https'),
                               'code': code
                           }, timeout=10.0)
 
