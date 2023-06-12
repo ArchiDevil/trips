@@ -18,5 +18,4 @@ COPY ./nginx/ /etc/nginx/
 COPY --from=build /web/dist /var/www/hikehub.ru
 COPY ./app/organizer/static /var/www/hikehub.ru/static
 
-VOLUME [ "/etc/ssl/private/" ]
-EXPOSE 80 443
+EXPOSE 6161
