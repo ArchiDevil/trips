@@ -113,5 +113,5 @@ def share(trip_uid: str):
 
     return {
         'uuid': uuid,
-        'link': url_for('trips.access', uuid=uuid, _external=True)
+        'link': url_for('trips.access', uuid=uuid, _external=True, _scheme='https')
     }
