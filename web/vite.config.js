@@ -11,6 +11,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         info: resolve(__dirname, 'info.html'),
+        trips: resolve(__dirname, 'trips.html'),
         tutorial: resolve(__dirname, 'tutorial.html'),
         products: resolve(__dirname, 'products.html'),
         // auth: resolve(__dirname, 'auth.html'),
