@@ -139,7 +139,7 @@ export const messages = {
         typeSelectorTitle: 'Люди с этой ссылкой смогут редактировать поход.',
         linkPlaceholder: 'Ссылка появится здесь',
         linkLoading: 'Загрузка...',
-        additionalInfo: 'Передайте полученную ссылку другим участникам, чтобы они смогли просматривать или изменять ваш поход. Ссылка действительна в течение 3-х суток с момента создания.',
+        additionalInfo: 'Дайте эту ссылку другим туристам, чтобы они смогли посмотреть или изменить ваш поход. Ссылка действительна в течение 3-х суток с момента создания.',
         copiedStatus: 'Ссылка скопирована в буфер обмена',
       }
     },
@@ -336,7 +336,7 @@ export const messages = {
         typeSelectorTitle: 'People with this link will be able to edit the trip.',
         linkPlaceholder: 'Link will appear here',
         linkLoading: 'Loading...',
-        additionalInfo: 'Share the link with other participants to let them view or edit your trip. The link is valid for 3 days from the moment of creation.',
+        additionalInfo: 'Share the link with other tourists to let them view or edit your trip. The link is valid for 3 days from the moment of creation.',
         copiedStatus: 'Link copied to the clipboard',
       }
     },

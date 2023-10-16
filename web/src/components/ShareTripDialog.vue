@@ -37,28 +37,24 @@ export default defineComponent({
             :aria-label="$t('trips.shareModal.closeButton')"></button>
         </div>
         <div class="modal-body">
-          <div class="form-group row">
-            <label
-              for="sharingType"
-              class="col-sm-12">
+          <div class="row mb-2">
+            <label class="col-sm-12">
               {{ $t('trips.shareModal.typeSelectorTitle') }}
             </label>
           </div>
-          <div class="form-group row">
+          <div class="row mb-2">
             <div class="input-group col">
               <input
                 type="text"
                 class="form-control"
                 :placeholder="linkText"
                 readonly />
-              <div class="input-group-append">
-                <button
-                  class="btn btn-outline-primary"
-                  type="button"
-                  @click="$emit('copyLink')">
-                  <font-awesome-icon icon="fa-solid fa-copy" />
-                </button>
-              </div>
+              <button
+                class="btn btn-outline-primary"
+                type="button"
+                @click="$emit('copyLink')">
+                <font-awesome-icon icon="fa-solid fa-copy" />
+              </button>
             </div>
           </div>
           <div class="row mb-1">
@@ -75,7 +71,7 @@ export default defineComponent({
         <div class="modal-footer">
           <button
             type="button"
-            class="btn btn-primary"
+            class="btn btn-secondary"
             data-bs-dismiss="modal">
             {{ $t('trips.shareModal.closeButton') }}
           </button>
