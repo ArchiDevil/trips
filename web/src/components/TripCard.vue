@@ -16,28 +16,11 @@ export default defineComponent({
     },
   },
   computed: {
-    coverSrc(): string {
-      return this.trip.cover_src
-    },
-    openLink(): string {
-      return this.trip.open_link
-    },
-    editLink(): string {
-      return this.trip.edit_link
-    },
-    forgetLink(): string {
-      return this.trip.forget_link
-    },
-    shareLink(): string {
-      return this.trip.trip.share_link
-    },
     fromDate(): string {
-      const date = new Date(this.trip.trip.from_date)
-      return date.toLocaleDateString()
+      return new Date(this.trip.trip.from_date).toLocaleDateString()
     },
     tillDate(): string {
-      const date = new Date(this.trip.trip.till_date)
-      return date.toLocaleDateString()
+      return new Date(this.trip.trip.till_date).toLocaleDateString()
     },
     past(): boolean {
       const now = new Date()
@@ -65,7 +48,7 @@ export default defineComponent({
     <div class="row no-gutters">
       <div class="d-none d-md-block col-md-4 col-xl-3">
         <img
-          :src="coverSrc"
+          :src="trip.cover_src"
           class="w-100 rounded-left"
           alt=""
           :class="{ 'fade-out': past }" />
@@ -91,7 +74,7 @@ export default defineComponent({
           <div class="row">
             <div class="col">
               <a
-                :href="openLink"
+                :href="trip.open_link"
                 class="btn w-100"
                 :class="{ 'btn-primary': !past, 'btn-secondary': past }">
                 {{ $t('trips.openButton') }}
@@ -110,7 +93,7 @@ export default defineComponent({
                 <li v-if="trip.type == 'user'">
                   <a
                     class="dropdown-item"
-                    :href="editLink">
+                    :href="trip.edit_link">
                     <font-awesome-icon icon="fa-solid fa-pen" />
                     {{ $t('trips.editButton') }}
                   </a>
@@ -118,7 +101,7 @@ export default defineComponent({
                 <li v-else>
                   <a
                     class="dropdown-item"
-                    :href="forgetLink">
+                    :href="trip.forget_link">
                     <font-awesome-icon icon="fa-solid fa-eye-slash" />
                     {{ $t('trips.hideButton') }}
                   </a>
@@ -127,7 +110,7 @@ export default defineComponent({
                   <a
                     class="dropdown-item"
                     href="javascript:void(0)"
-                    @click="$emit('share', shareLink)">
+                    @click="$emit('share', trip.trip.share_link)">
                     <font-awesome-icon icon="fa-solid fa-share-alt" />
                     {{ $t('trips.shareButton') }}
                   </a>

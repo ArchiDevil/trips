@@ -5,6 +5,7 @@ import { useNavStore } from '../stores/nav'
 import { useProductsStore } from '../stores/products'
 import { Modal } from 'bootstrap'
 
+import cardImg from '../assets/6.png'
 import { Product } from '../interfaces'
 import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
@@ -24,6 +25,7 @@ export default defineComponent({
     contentLoading: () => useUserStore().isLoading,
     page: () => useProductsStore().page,
     products: () => useProductsStore().products,
+    cardImg: () => cardImg,
     creator() {
       const store = useUserStore()
       return (
@@ -146,7 +148,7 @@ export default defineComponent({
           class="card shadow"
           style="width: 18rem">
           <img
-            src="../assets/6.png"
+            :src="cardImg"
             class="card-img-top bg-light"
             alt="" />
           <h5 class="card-header">{{ $t('products.cardHeader') }}</h5>

@@ -24,6 +24,8 @@ export default defineComponent({
     }
   },
   computed: {
+    addTripLink: () => '/trips/add',
+    cardImgSrc: () => cardImg,
     sortedTrips() {
       const sortingFunc = (a: Trip, b: Trip) => {
         return (
@@ -48,12 +50,6 @@ export default defineComponent({
         ...upcomingTrips.sort(sortingFunc),
         ...pastTrips.sort(reverseSortingFunc),
       ]
-    },
-    addTripLink() {
-      return '/trips/add'
-    },
-    cardImgSrc() {
-      return cardImg
     },
   },
   async mounted() {
