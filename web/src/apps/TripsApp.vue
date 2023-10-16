@@ -3,23 +3,24 @@ import { defineComponent } from 'vue'
 
 import { useNavStore } from '../stores/nav'
 import NavigationBar from '../components/NavigationBar.vue'
+import ShareTripDialog from '../components/ShareTripDialog.vue'
 import TripsList from '../components/TripsList.vue'
 import cardImg from '../assets/1.png'
 import { Trip } from '../interfaces'
 import { Modal } from 'bootstrap'
 
 export default defineComponent({
-  components: { NavigationBar, TripsList },
+  components: { NavigationBar, ShareTripDialog, TripsList },
   data() {
     return {
       idsLoading: true,
       tripsLoading: true,
       tripUids: [] as number[],
       trips: [] as Trip[],
-      linkText: this.$t('trips.shareModal.linkPlaceholder'),
       shareLink: '' as string,
-      copyStatus: '' as string | undefined,
       shareModal: undefined as Modal | undefined,
+      linkText: this.$t('trips.shareModal.linkPlaceholder'),
+      copyStatus: '' as string | undefined,
     }
   },
   computed: {
@@ -115,74 +116,10 @@ export default defineComponent({
 
 <template>
   <NavigationBar />
-
-  <div
-    class="modal fade"
-    id="shareModal"
-    tabindex="-1"
-    aria-labelledby="shareModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5
-            class="modal-title"
-            id="shareModalLabel">
-            {{ $t('trips.shareModal.title') }}
-          </h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            :aria-label="$t('trips.shareModal.closeButton')"></button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group row">
-            <label
-              for="sharingType"
-              class="col-sm-12">
-              {{ $t('trips.shareModal.typeSelectorTitle') }}
-            </label>
-          </div>
-          <div class="form-group row">
-            <div class="input-group col">
-              <input
-                type="text"
-                class="form-control"
-                :placeholder="linkText"
-                readonly />
-              <div class="input-group-append">
-                <button
-                  class="btn btn-outline-primary"
-                  type="button"
-                  @click="copyLink">
-                  <font-awesome-icon icon="fa-solid fa-copy" />
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="row mb-1">
-            <small class="col">
-              {{ $t('trips.shareModal.additionalInfo') }}
-            </small>
-          </div>
-          <div
-            class="row"
-            v-if="copyStatus">
-            <small class="col text-success">{{ copyStatus }}</small>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-primary"
-            data-bs-dismiss="modal">
-            {{ $t('trips.shareModal.closeButton') }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <ShareTripDialog
+    :link-text="linkText"
+    :copy-status="copyStatus"
+    @copy-link="copyLink()" />
 
   <div
     id="app"
