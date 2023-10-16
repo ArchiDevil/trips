@@ -52,4 +52,4 @@ productsApp.use(i18n)
 productsApp.component('font-awesome-icon', FontAwesomeIcon)
 productsApp.mount('#products-app')
 
-await useUserStore().fetchUserData()
+useUserStore().fetchUserData()

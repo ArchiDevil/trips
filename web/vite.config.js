@@ -13,7 +13,7 @@ export default defineConfig({
         info: resolve(__dirname, 'info.html'),
         tutorial: resolve(__dirname, 'tutorial.html'),
         products: resolve(__dirname, 'products.html'),
-        auth: resolve(__dirname, 'auth.html'),
+        // auth: resolve(__dirname, 'auth.html'),
       },
     },
   },
