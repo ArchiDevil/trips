@@ -20,6 +20,8 @@ import {
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { createPinia } from 'pinia'
+import { useUserStore } from './stores/user'
 
 library.add(
   faRoute,
@@ -36,6 +38,8 @@ library.add(
   faArrowRight
 )
 
+const pinia = createPinia()
+
 const i18n = createI18n({
   locale: 'ru',
   fallbackLocale: 'en',
@@ -43,6 +47,9 @@ const i18n = createI18n({
 })
 
 const productsApp = createApp(ProductsApp)
+productsApp.use(pinia)
 productsApp.use(i18n)
 productsApp.component('font-awesome-icon', FontAwesomeIcon)
 productsApp.mount('#products-app')
+
+await useUserStore().fetchUserData()
