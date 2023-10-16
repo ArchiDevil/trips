@@ -30,3 +30,28 @@ export interface ProductsInfo {
   total_count: number
   products: Product[]
 }
+
+export interface Trip {
+  uid: string
+  trip: {
+    name: string
+    from_date: string
+    till_date: string
+    days_count: number
+    created_by: number
+    last_update: string
+    archived: false
+    groups: number[]
+    user: string
+    share_link: string
+  }
+  type: 'user' | 'shared'
+  attendees: number
+  cover_src: string
+  open_link: string
+  edit_link: string
+  forget_link: string
+  packing_link: string
+  shopping_link: string
+  download_link: string
+}
