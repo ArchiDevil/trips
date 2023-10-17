@@ -18,12 +18,6 @@ from organizer.utils.auth import user_has_trip_access
 bp = Blueprint('trips', __name__, url_prefix='/trips')
 
 
-@bp.get('/')
-@login_required_group(AccessGroup.User)
-def index():
-    return render_template('trips/trips.html')
-
-
 def validate_input_data():
     name = request.form['name']
     if not name or len(name) > 50:
@@ -66,7 +60,7 @@ def add():
     caption = STRING_TABLE['Trips add title']
     submit_caption = STRING_TABLE['Trips add edit button']
     add_url = url_for('.add')
-    end_url = url_for('.index')
+    end_url = '/trips/'
 
     if request.method == 'POST':
         try:
@@ -106,7 +100,7 @@ def add():
     return render_template(template_file,
                            caption=caption,
                            submit_caption=submit_caption,
-                           close_url=url_for('.index'),
+                           close_url='/trips/',
                            submit_url=add_url)
 
 
@@ -119,7 +113,7 @@ def edit(trip_uid: str):
     edit_url = url_for('trips.edit', trip_uid=trip_uid)
     redirect_location = request.referrer if request.referrer else request.headers.get('Referer')
     if not redirect_location:
-        redirect_location = url_for('trips.index')
+        redirect_location = '/trips/'
 
     with get_session() as session:
         trip_info = session.query(Trip).filter(Trip.uid == trip_uid).first()
@@ -149,10 +143,10 @@ def edit(trip_uid: str):
                                        trip=trip_info,
                                        archive_button=True,
                                        submit_caption=submit_caption,
-                                       close_url=url_for('.index'),
+                                       close_url='/trips/',
                                        submit_url=edit_url,
                                        groups=trip_groups,
-                                       redirect=url_for('.index'))
+                                       redirect='/trips/')
 
             redirect_location = request.form['redirect']
             session.query(Group).filter(Group.trip_id == trip_info.id).delete()
@@ -195,7 +189,7 @@ def archive(trip_uid: str):
         trip.last_update = datetime.utcnow()
         session.commit()
 
-    return redirect(url_for('.index'))
+    return redirect('/trips/')
 
 
 @bp.get('/forget/<trip_uid>')
@@ -216,7 +210,7 @@ def forget(trip_uid: str):
         session.delete(trip_access)
         session.commit()
 
-    return redirect(url_for('.index'))
+    return redirect('/trips/')
 
 
 def send_csv_file(rows: List[List[Any]]):

@@ -7,17 +7,6 @@ from organizer.db import get_session
 from organizer.strings import STRING_TABLE
 
 
-def test_trips_rejects_not_logged_in(client: FlaskClient):
-    response = client.get('/trips/')
-    assert response.status_code == 302
-    assert 'auth/login' in response.location
-
-
-def test_trips_shows_trips_page(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/trips/')
-    assert response.status_code == 200
-
-
 def test_trips_archive_rejects_not_logged_in(client: FlaskClient):
     response = client.get('/trips/archive/uid1')
     assert response.status_code == 302
