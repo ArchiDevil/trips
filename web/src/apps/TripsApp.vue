@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { mande } from 'mande'
 import { Modal } from 'bootstrap'
 
 import { Trip } from '../interfaces'
@@ -65,16 +66,16 @@ export default defineComponent({
   async mounted() {
     useNavStore().link = 'trips'
 
-    const response = await fetch('/api/trips/get')
-    const jsonResponse = (await response.json()) as { trips: number[] }
+    const api = mande('/api/trips')
+    const response = await api.get<{ trips: number[] }>('/get')
     try {
-      this.tripUids = jsonResponse.trips
+      this.tripUids = response.trips
       this.idsLoading = false
       const instance = this
       await Promise.all(
-        jsonResponse.trips.map(async (e) => {
-          const response = await fetch('/api/trips/get/' + e)
-          instance.trips.push(await response.json())
+        this.tripUids.map(async (e) => {
+          const response = await api.get<Trip>('/get/' + e)
+          instance.trips.push(response)
         })
       )
       this.tripsLoading = false
