@@ -14,8 +14,8 @@ export const useUserStore = defineStore('user', {
       const api = mande('/api/auth/user')
       try {
         const response = await api.get<UserInfo>()
-        useUserStore().info = response
-        useUserStore().isLoading = false
+        this.info = response
+        this.isLoading = false
       } catch (error) {
         const mandeError = error as MandeError
         console.error(mandeError)
