@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 
-import { Trip } from '../interfaces'
+import { Trip } from '../../interfaces'
 import TripCard from './TripCard.vue'
 
 export default defineComponent({

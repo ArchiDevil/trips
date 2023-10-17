@@ -1,16 +1,26 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-
-import { useNavStore } from '../stores/nav'
-import NavigationBar from '../components/NavigationBar.vue'
-import ShareTripDialog from '../components/ShareTripDialog.vue'
-import TripsList from '../components/TripsList.vue'
-import cardImg from '../assets/1.png'
-import { Trip } from '../interfaces'
 import { Modal } from 'bootstrap'
 
+import { Trip } from '../interfaces'
+import { useNavStore } from '../stores/nav'
+import Jumbotron from '../components/trips/Jumbotron.vue'
+import LoadingTitle from '../components/LoadingTitle.vue'
+import PageCard from '../components/PageCard.vue'
+import NavigationBar from '../components/NavigationBar.vue'
+import ShareTripDialog from '../components/ShareTripDialog.vue'
+import TripsList from '../components/trips/TripsList.vue'
+import cardImg from '../assets/1.png'
+
 export default defineComponent({
-  components: { NavigationBar, ShareTripDialog, TripsList },
+  components: {
+    Jumbotron,
+    LoadingTitle,
+    PageCard,
+    NavigationBar,
+    ShareTripDialog,
+    TripsList,
+  },
   data() {
     return {
       idsLoading: true,
@@ -112,25 +122,18 @@ export default defineComponent({
 
 <template>
   <NavigationBar />
-  <ShareTripDialog
-    :link-text="linkText"
-    :copy-status="copyStatus"
-    @copy-link="copyLink()" />
 
   <div
-    id="app"
     class="container"
     v-cloak>
-    <div class="row my-3">
+    <div
+      class="row my-3"
+      v-if="tripUids.length">
       <div class="col-6">
-        <span class="display-4">{{ $t('trips.title') }}</span>
-        <span
-          class="spinner-border spinner-border-lg ml-3"
-          role="status"
-          aria-hidden="true"
-          v-if="idsLoading"></span>
+        <LoadingTitle
+          :title="$t('trips.title')"
+          :loading="idsLoading" />
       </div>
-
       <div
         class="col-6 d-flex flex-row-reverse align-items-end"
         v-if="!idsLoading">
@@ -145,51 +148,29 @@ export default defineComponent({
 
     <div
       class="row my-3"
+      :class="{ 'mt-5': !tripUids.length }"
       v-if="!idsLoading">
       <div
         class="col"
         v-if="!tripUids.length">
-        <div class="jumbotron shadow">
-          <h1 class="display-4">{{ $t('trips.jumbotronTitle') }}</h1>
-          <p class="lead">{{ $t('trips.jumbotronText') }}</p>
-          <hr class="my-4" />
-          <p>{{ $t('trips.jumbotronText2') }}</p>
-          <a
-            href="/tutorial.html"
-            class="d-block mb-3"
-            >{{ $t('docs.howToLink') }}</a
-          >
-          <a
-            class="btn btn-primary btn-lg"
-            :href="addTripLink"
-            role="button">
-            {{ $t('trips.jumbotronCreateButton') }}
-          </a>
-        </div>
+        <Jumbotron :add-trip-link="addTripLink" />
       </div>
 
       <div
         class="col-auto d-none d-lg-block"
         v-if="tripUids.length">
-        <div
-          class="card shadow"
-          style="width: 18rem">
-          <img
-            :src="cardImgSrc"
-            class="card-img-top bg-light"
-            alt="" />
-          <h5 class="card-header">{{ $t('trips.cardTitle') }}</h5>
-          <div class="card-body">
-            <p class="card-text">{{ $t('trips.cardText') }}</p>
-            <a
-              :href="addTripLink"
-              class="btn btn-primary w-100"
-              role="button">
-              <font-awesome-icon icon="fa-solid fa-plus" />
-              {{ $t('trips.createButton') }}
-            </a>
-          </div>
-        </div>
+        <PageCard
+          :image="cardImgSrc"
+          :header-text="$t('trips.cardTitle')"
+          :body-text="$t('trips.cardText')">
+          <a
+            :href="addTripLink"
+            class="btn btn-primary w-100"
+            role="button">
+            <font-awesome-icon icon="fa-solid fa-plus" />
+            {{ $t('trips.createButton') }}
+          </a>
+        </PageCard>
       </div>
 
       <div
@@ -205,4 +186,9 @@ export default defineComponent({
       </div>
     </div>
   </div>
+
+  <ShareTripDialog
+    :link-text="linkText"
+    :copy-status="copyStatus"
+    @copy-link="copyLink()" />
 </template>

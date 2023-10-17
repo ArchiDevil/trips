@@ -1,6 +1,6 @@
 <script lang="ts">
 import { PropType, defineComponent } from 'vue'
-import { Trip } from '../interfaces'
+import { Trip } from '../../interfaces'
 import { Dropdown } from 'bootstrap'
 
 export default defineComponent({

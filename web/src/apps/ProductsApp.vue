@@ -7,11 +7,13 @@ import { Modal } from 'bootstrap'
 
 import cardImg from '../assets/6.png'
 import { Product } from '../interfaces'
+import LoadingTitle from '../components/LoadingTitle.vue'
+import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
 
 export default defineComponent({
-  components: { NavigationBar, ProductEditDialog },
+  components: { LoadingTitle, PageCard, NavigationBar, ProductEditDialog },
   data() {
     return {
       search: '',
@@ -119,12 +121,9 @@ export default defineComponent({
   <div class="container-xl">
     <div class="row my-3">
       <div class="col-8">
-        <span class="display-4">{{ $t('products.title') }}</span>
-        <span
-          class="spinner-border spinner-border-lg ms-3"
-          role="status"
-          aria-hidden="true"
-          v-if="contentLoading"></span>
+        <LoadingTitle
+          :title="$t('products.title')"
+          :loading="contentLoading" />
       </div>
       <div
         class="col d-flex flex-row-reverse align-items-end"
@@ -144,25 +143,18 @@ export default defineComponent({
       <div
         class="col-auto d-none d-lg-block"
         v-if="creator">
-        <div
-          class="card shadow"
-          style="width: 18rem">
-          <img
-            :src="cardImg"
-            class="card-img-top bg-light"
-            alt="" />
-          <h5 class="card-header">{{ $t('products.cardHeader') }}</h5>
-          <div class="card-body">
-            <p class="card-text">{{ $t('products.cardText') }}</p>
-            <button
-              type="button"
-              class="btn btn-primary w-100"
-              @click="showModal(undefined)">
-              <font-awesome-icon icon="fa-solid fa-plus" />
-              {{ $t('products.addNew') }}
-            </button>
-          </div>
-        </div>
+        <PageCard
+          :image="cardImg"
+          :header-text="$t('products.cardHeader')"
+          :body-text="$t('products.cardText')">
+          <button
+            type="button"
+            class="btn btn-primary w-100"
+            @click="showModal(undefined)">
+            <font-awesome-icon icon="fa-solid fa-plus" />
+            {{ $t('products.addNew') }}
+          </button>
+        </PageCard>
       </div>
 
       <div class="col">
