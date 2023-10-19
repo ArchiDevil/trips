@@ -1,5 +1,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
+import moment from 'moment'
+
+import DatePicker from 'vue-datepicker-next'
+import 'vue-datepicker-next/index.css'
+import 'vue-datepicker-next/locale/ru'
+
 import { useTripsStore } from '../../stores/trips'
 import UserGroup from './UserGroup.vue'
 
@@ -7,10 +13,10 @@ import UserGroup from './UserGroup.vue'
 // don't do this on editing?
 
 function getInitialDates(from: string, till: string) {
-  const fromFormatted = new Date(`${from}`).toLocaleDateString('ru-RU')
-  const tillFormatted = new Date(`${till}`).toLocaleDateString('ru-RU')
+  const format = 'ddd, DD MMM YYYY HH:mm:ss z'
+  const fromFormatted = moment(from, format).format('DD-MM-YYYY')
+  const tillFormatted = moment(till, format).format('DD-MM-YYYY')
   return `${fromFormatted} - ${tillFormatted}`
-  return "{{ trip['from_date'].strftime('%d-%m-%Y') if trip else today_date }} - {{ trip['till_date'].strftime('%d-%m-%Y') if trip else today_date }}"
 }
 
 function getInitialGroups(groups: number[]) {
@@ -25,7 +31,7 @@ function getInitialGroups(groups: number[]) {
 }
 
 export default defineComponent({
-  components: { UserGroup },
+  components: { DatePicker, UserGroup },
   props: {
     // Either dialog in edit or adding mode
     editMode: {
@@ -51,6 +57,7 @@ export default defineComponent({
           : 1
         : 1,
       lastErrors: [] as string[],
+      value1: [new Date(2019, 9, 8), new Date(2019, 9, 19)],
     }
   },
   computed: {
@@ -109,11 +116,59 @@ export default defineComponent({
       // TODO: implement API request
     },
     setTripDates(tripDates: string) {
-      // this.tripDates = tripDates
+      this.tripDates = tripDates
     },
   },
   mounted() {
     this.changeGroups()
+    // const dow = [
+    //   'Воскресенье',
+    //   'Понедельник',
+    //   'Вторник',
+    //   'Среда',
+    //   'Четверг',
+    //   'Пятница',
+    //   'Суббота',
+    // ]
+    // const mon = [
+    //   'Январь',
+    //   'Февраль',
+    //   'Март',
+    //   'Апрель',
+    //   'Май',
+    //   'Июнь',
+    //   'Июль',
+    //   'Август',
+    //   'Сентябрь',
+    //   'Октябрь',
+    //   'Ноябрь',
+    //   'Декабрь',
+    // ]
+    // const format = 'DD-MM-YYYY'
+    // const separator = ' - '
+    // const instance = this
+    // const picker = new DateRangePicker(
+    //   document.querySelector('#daterange')!,
+    //   {
+    //     autoApply: true,
+    //     autoUpdateInput: true,
+    //     startDate: moment(),
+    //     // "{{ trip['from_date'].strftime('%d-%m-%Y') if trip else today_date }}",
+    //     endDate: moment(),
+    //     // "{{ trip['till_date'].strftime('%d-%m-%Y') if trip else today_date }}",
+    //     locale: {
+    //       format: format,
+    //       separator: separator,
+    //       daysOfWeek: dow,
+    //       monthNames: mon,
+    //       firstDay: 1,
+    //     },
+    //   },
+    //   (start, end, label) => {
+    //     const dates = start.format(format) + separator + end.format(format)
+    //     instance.setTripDates(dates)
+    //   }
+    // )
   },
 })
 </script>
@@ -170,17 +225,29 @@ export default defineComponent({
             for="input-date">
             {{ $t('trips.editModal.datesTitle') }}
           </label>
-          <div
+
+          <br />
+
+          <DatePicker
+            v-model:value="value1"
+            type="date"
+            range
+            format="DD-MM-YYYY"
+            input-class="form-control w-100"
+            :clearable="false"
+            separator=" - "
+            placeholder="Select date range" />
+          <!-- <div
             id="daterange"
             class="form-control btn-outline-secondary"
             style="cursor: pointer">
             {{ tripDates }}
-          </div>
+          </div> -->
 
-          <input
+          <!-- <input
             class="d-none"
             name="daterange"
-            v-model="tripDates" />
+            v-model="tripDates" /> -->
 
           <label
             class="form-label mt-3"
@@ -215,24 +282,23 @@ export default defineComponent({
             {{ $t('trips.editModal.groupConfigSubhelp') }}
           </div>
 
-          <input
+          <!-- FIX -->
+          <!-- <input
             class="d-none"
             name="redirect"
-            :value="redirect" />
+            :value="redirect" /> -->
 
-          <div class="form-group">
-            <UserGroup
-              v-for="group in groups"
-              :key="group.id"
-              :group="group"
-              :validator="
-                function (n) {
-                  return /^[0-9]+$/.test(n) && +n > 0
-                }
-              "
-              :group_name_prefix="$t('trips.editModal.groupNamePrefix')"
-              :error_message="$t('trips.editModal.groupErrorMessage')" />
-          </div>
+          <UserGroup
+            v-for="group in groups"
+            :key="group.id"
+            :group="group"
+            :validator="
+              function (n) {
+                return /^[0-9]+$/.test(n.toString()) && +n > 0
+              }
+            "
+            :group_name_prefix="$t('trips.editModal.groupNamePrefix')"
+            :error_message="$t('trips.editModal.groupErrorMessage')" />
         </div>
         <div class="modal-footer">
           <button

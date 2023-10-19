@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.6",
-    "@types/jquery": "^3.5.16",
     "@vitejs/plugin-vue": "^4.4.0",
     "typescript": "^5.0.4",
     "vite": "^4.4.11",
@@ -22,9 +21,11 @@
     "@fortawesome/vue-fontawesome": "^3.0.3",
     "bootstrap": "^5.0.2",
     "mande": "^2.0.8",
+    "moment": "^2.29.4",
     "pinia": "^2.1.6",
     "popper.js": "^1.16.1",
     "vue": "^3.3.4",
+    "vue-datepicker-next": "^1.0.3",
     "vue-i18n": "^9.1.10",
     "vue-router": "^4.2.5"
   }
