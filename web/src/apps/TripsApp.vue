@@ -9,9 +9,11 @@ import Jumbotron from '../components/trips/Jumbotron.vue'
 import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
-import ShareTripDialog from '../components/ShareTripDialog.vue'
+import ShareTripDialog from '../components/trips/ShareTripDialog.vue'
 import TripsList from '../components/trips/TripsList.vue'
 import cardImg from '../assets/1.png'
+import TripEditorModal from '../components/trips/TripEditorModal.vue'
+import { useTripsStore } from '../stores/trips'
 
 export default defineComponent({
   components: {
@@ -21,13 +23,13 @@ export default defineComponent({
     NavigationBar,
     ShareTripDialog,
     TripsList,
+    TripEditorModal,
   },
   data() {
     return {
       idsLoading: true,
       tripsLoading: true,
       tripUids: [] as number[],
-      trips: [] as Trip[],
       shareLink: '' as string,
       shareModal: undefined as Modal | undefined,
       linkText: this.$t('trips.shareModal.linkPlaceholder'),
@@ -51,10 +53,11 @@ export default defineComponent({
         )
       }
 
-      let upcomingTrips = this.trips.filter((trip) => {
+      const store = useTripsStore()
+      let upcomingTrips = store.trips.filter((trip) => {
         return new Date(trip.trip.till_date).getTime() - Date.now() >= 0
       })
-      let pastTrips = this.trips.filter((trip) => {
+      let pastTrips = store.trips.filter((trip) => {
         return new Date(trip.trip.till_date).getTime() - Date.now() < 0
       })
       return [
@@ -71,11 +74,10 @@ export default defineComponent({
     try {
       this.tripUids = response.trips
       this.idsLoading = false
-      const instance = this
       await Promise.all(
         this.tripUids.map(async (e) => {
           const response = await api.get<Trip>('/get/' + e)
-          instance.trips.push(response)
+          useTripsStore().trips.push(response)
         })
       )
       this.tripsLoading = false
@@ -104,7 +106,7 @@ export default defineComponent({
         console.error(error)
       }
     },
-    showModal(shareLink: string) {
+    showShareModal(shareLink: string) {
       this.reset()
       this.shareLink = shareLink
       this.generateLink()
@@ -117,6 +119,16 @@ export default defineComponent({
       })
       this.shareModal.show()
     },
+    showAddModal() {
+      const modalElem = document.getElementById('edit-app')
+      if (!modalElem) {
+        return
+      }
+      const modal = new Modal(modalElem, {
+        keyboard: false,
+      })
+      modal.show()
+    },
   },
 })
 </script>
@@ -124,9 +136,7 @@ export default defineComponent({
 <template>
   <NavigationBar />
 
-  <div
-    class="container"
-    v-cloak>
+  <div class="container">
     <div
       class="row my-3"
       v-if="tripUids.length">
@@ -164,13 +174,13 @@ export default defineComponent({
           :image="cardImgSrc"
           :header-text="$t('trips.cardTitle')"
           :body-text="$t('trips.cardText')">
-          <a
-            :href="addTripLink"
+          <button
+            @click="showAddModal()"
             class="btn btn-primary w-100"
             role="button">
             <font-awesome-icon icon="fa-solid fa-plus" />
             {{ $t('trips.createButton') }}
-          </a>
+          </button>
         </PageCard>
       </div>
 
@@ -179,7 +189,7 @@ export default defineComponent({
         v-if="tripUids.length">
         <TripsList
           :trips="sortedTrips"
-          @share="(shareLink) => showModal(shareLink)" />
+          @share="(shareLink) => showShareModal(shareLink)" />
         <div
           class="spinner-border"
           role="status"
@@ -192,4 +202,7 @@ export default defineComponent({
     :link-text="linkText"
     :copy-status="copyStatus"
     @copy-link="copyLink()" />
+
+  <!-- TODO: FIX MODE -->
+  <TripEditorModal :edit-mode="false" />
 </template>
