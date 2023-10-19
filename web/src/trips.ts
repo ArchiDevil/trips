@@ -18,12 +18,14 @@ import {
   faWalking,
   faPen,
   faShareAlt,
+  faArchive,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
 
 library.add(
+  faArchive,
   faCopy,
   faRoute,
   faPizzaSlice,
