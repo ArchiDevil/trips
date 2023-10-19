@@ -33,8 +33,7 @@ export default defineComponent({
 <template>
   <nav
     class="navbar navbar-expand-lg navbar-light bg-light shadow"
-    id="nav-app"
-    v-cloak>
+    id="nav-app">
     <div class="container-fluid">
       <a
         class="navbar-brand"
