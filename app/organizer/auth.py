@@ -78,8 +78,7 @@ def load_logged_in_user():
 @bp.get('/', defaults={'path': ''})
 @bp.get('/<path:path>')
 def index(path):
-    redirect_location = request.args['redirect'] if 'redirect' in request.args else url_for(
-        'trips.index')
+    redirect_location = request.args['redirect'] if 'redirect' in request.args else '/trips/'
 
     if 'user' in g and g.user is not None:
         return redirect(redirect_location)
@@ -90,7 +89,7 @@ def index(path):
 @bp.get('/reset/<uuid:token>')
 def reset(token):
     if 'user' in g and g.user is not None:
-        return redirect(url_for('trips.index'))
+        return redirect('/trips/')
 
     with get_session() as session:
         link: Optional[PasswordLink] = session.query(PasswordLink).filter(PasswordLink.uuid == str(token)).first()
@@ -109,7 +108,7 @@ def logout():
     with configure_scope() as scope:
         scope.user = None
     session.clear()
-    return redirect(url_for('trips.index'))
+    return redirect('/trips/')
 
 
 @bp.get('/vk_login')

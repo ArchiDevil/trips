@@ -1,6 +1,10 @@
-import { reactive } from 'vue'
+import { defineStore } from 'pinia'
 
-export const navStore = reactive({
-  page: '',
-  link: '',
+export const useNavStore = defineStore('nav', {
+  state() {
+    return {
+      page: '',
+      link: '',
+    }
+  },
 })

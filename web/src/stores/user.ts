@@ -1,7 +1,28 @@
-import { reactive } from 'vue'
+import { MandeError, mande } from 'mande'
 import { UserInfo } from '../interfaces'
+import { defineStore } from 'pinia'
 
-export const userStore = reactive({
-  isLoading: true,
-  info: {} as UserInfo,
+export const useUserStore = defineStore('user', {
+  state() {
+    return {
+      isLoading: true,
+      info: {} as UserInfo,
+    }
+  },
+  actions: {
+    async fetchUserData() {
+      const api = mande('/api/auth/user')
+      try {
+        const response = await api.get<UserInfo>()
+        this.info = response
+        this.isLoading = false
+      } catch (error) {
+        const mandeError = error as MandeError
+        console.error(mandeError)
+        if (mandeError.response.status === 401) {
+          window.location.href = '/auth/login'
+        }
+      }
+    },
+  },
 })

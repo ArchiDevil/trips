@@ -2,10 +2,11 @@ import { createI18n } from 'vue-i18n'
 import { createApp } from 'vue'
 
 import { messages } from './strings'
-import ProductsApp from './apps/ProductsApp.vue'
+import TripsApp from './apps/TripsApp.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faCopy,
   faRoute,
   faPizzaSlice,
   faUsers,
@@ -13,17 +14,17 @@ import {
   faInfo,
   faSignOutAlt,
   faPlus,
-  faSearch,
+  faCalendarDay,
+  faWalking,
   faPen,
-  faArchive,
-  faArrowLeft,
-  faArrowRight,
+  faShareAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
 
 library.add(
+  faCopy,
   faRoute,
   faPizzaSlice,
   faUsers,
@@ -31,11 +32,10 @@ library.add(
   faInfo,
   faSignOutAlt,
   faPlus,
-  faSearch,
+  faCalendarDay,
+  faWalking,
   faPen,
-  faArchive,
-  faArrowLeft,
-  faArrowRight
+  faShareAlt
 )
 
 const pinia = createPinia()
@@ -46,10 +46,10 @@ const i18n = createI18n({
   messages,
 })
 
-const productsApp = createApp(ProductsApp)
-productsApp.use(pinia)
-productsApp.use(i18n)
-productsApp.component('font-awesome-icon', FontAwesomeIcon)
-productsApp.mount('#products-app')
+const tripsApp = createApp(TripsApp)
+tripsApp.use(pinia)
+tripsApp.use(i18n)
+tripsApp.component('font-awesome-icon', FontAwesomeIcon)
+tripsApp.mount('#trips-app')
 
 useUserStore().fetchUserData()

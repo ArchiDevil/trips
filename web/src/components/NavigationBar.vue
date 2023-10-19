@@ -1,55 +1,30 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { mande, MandeError } from 'mande'
 
-import { userStore } from '../stores/user'
-import { navStore } from '../stores/nav'
+import { useUserStore } from '../stores/user'
+import { useNavStore } from '../stores/nav'
 
 import globals from '../globals'
-import { UserInfo } from '../interfaces'
 
 export default defineComponent({
-  data() {
-    return {
-      userStore: userStore,
-      navStore: navStore,
-    }
-  },
-  async mounted() {
-    await this.getUserData()
-  },
   computed: {
-    admin() {
-      return this.userStore.info.access_group == 'Administrator'
-    },
-    displayedName() {
-      if (this.userStore.isLoading) return ''
-
-      return this.userStore.info.displayed_name
-        ? this.userStore.info.displayed_name
-        : this.userStore.info.login
-    },
+    admin: () => useUserStore().info.access_group == 'Administrator',
     logoutLink: () => globals.urls.logout,
     mainPage: () => globals.urls.mainPage,
     tripsPage: () => globals.urls.tripsPage,
     productsPage: () => globals.urls.productsPage,
     usersPage: () => globals.urls.usersPage,
     adminPage: () => globals.urls.adminPage,
-  },
-  methods: {
-    async getUserData() {
-      const api = mande(globals.urls.userInfo)
-      try {
-        const response = await api.get<UserInfo>()
-        this.userStore.info = response
-        this.userStore.isLoading = false
-      } catch (error) {
-        const mandeError = error as MandeError
-        console.error(mandeError)
-        if (mandeError.response.status === 401) {
-          window.location.href = '/auth/login'
-        }
-      }
+    navLink: () => useNavStore().link,
+    userLoading: () => useUserStore().isLoading,
+    userPhotoUrl: () => useUserStore().info.photo_url,
+    displayedName() {
+      const store = useUserStore()
+      if (store.isLoading) return ''
+
+      return store.info.displayed_name
+        ? store.info.displayed_name
+        : store.info.login
     },
   },
 })
@@ -87,7 +62,7 @@ export default defineComponent({
               id="trips-link"
               class="nav-link"
               :href="tripsPage"
-              :class="{ active: navStore.link == 'trips' }">
+              :class="{ active: navLink == 'trips' }">
               <font-awesome-icon icon="fa-solid fa-route" />
               {{ $t('navbar.tripsLink') }}
             </a>
@@ -97,7 +72,7 @@ export default defineComponent({
               id="products-link"
               class="nav-link"
               :href="productsPage"
-              :class="{ active: navStore.link == 'products' }">
+              :class="{ active: navLink == 'products' }">
               <font-awesome-icon icon="fa-solid fa-pizza-slice" />
               {{ $t('navbar.productsLink') }}
             </a>
@@ -108,7 +83,7 @@ export default defineComponent({
               class="nav-link"
               :href="usersPage"
               v-if="admin"
-              :class="{ active: navStore.link == 'users' }">
+              :class="{ active: navLink == 'users' }">
               <font-awesome-icon icon="fa-solid fa-users" />
               {{ $t('navbar.usersLink') }}
             </a>
@@ -119,7 +94,7 @@ export default defineComponent({
               class="nav-link"
               :href="adminPage"
               v-if="admin"
-              :class="{ active: navStore.link == 'admin' }">
+              :class="{ active: navLink == 'admin' }">
               <font-awesome-icon icon="fa-solid fa-terminal" />
               {{ $t('navbar.adminLink') }}
             </a>
@@ -136,10 +111,10 @@ export default defineComponent({
 
         <form
           class="d-flex my-2 my-lg-0"
-          v-if="!userStore.isLoading">
+          v-if="!userLoading">
           <img
-            v-if="userStore.info.photo_url"
-            :src="userStore.info.photo_url"
+            v-if="userPhotoUrl"
+            :src="userPhotoUrl"
             class="img-fluid rounded-circle me-2"
             style="height: 2em" />
           <label class="form-label me-3 mt-2">

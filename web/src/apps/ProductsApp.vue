@@ -1,50 +1,44 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { userStore } from '../stores/user'
-import { navStore } from '../stores/nav'
-import { mande, MandeError } from 'mande'
+import { useUserStore } from '../stores/user'
+import { useNavStore } from '../stores/nav'
+import { useProductsStore } from '../stores/products'
 import { Modal } from 'bootstrap'
 
-import { Product, ProductsInfo } from '../interfaces'
+import cardImg from '../assets/6.png'
+import { Product } from '../interfaces'
+import LoadingTitle from '../components/LoadingTitle.vue'
+import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
 
 export default defineComponent({
-  components: { NavigationBar, ProductEditDialog },
+  components: { LoadingTitle, PageCard, NavigationBar, ProductEditDialog },
   data() {
     return {
-      page: 0,
-      productsPerPage: 10,
-      totalCount: 0,
       search: '',
-      products: [] as Product[],
       lastRequest: undefined as number | undefined,
-      userStore: userStore,
       editedProduct: undefined as Product | undefined,
     }
   },
   computed: {
-    lastPage() {
-      return Math.floor(this.totalCount / this.productsPerPage)
-    },
+    lastPage: () => useProductsStore().lastPage,
+    addProductLink: () => '/api/products/add',
+    contentLoading: () => useUserStore().isLoading,
+    page: () => useProductsStore().page,
+    products: () => useProductsStore().products,
+    cardImg: () => cardImg,
     creator() {
+      const store = useUserStore()
       return (
-        !this.userStore.isLoading &&
-        (this.userStore.info.access_group === 'User' ||
-          this.userStore.info.access_group === 'Administrator')
+        !store.isLoading &&
+        (store.info.access_group === 'User' ||
+          store.info.access_group === 'Administrator')
       )
     },
     editor() {
-      return (
-        !this.userStore.isLoading &&
-        this.userStore.info.access_group === 'Administrator'
-      )
-    },
-    addProductLink() {
-      return '/api/products/add'
-    },
-    contentLoading() {
-      return this.userStore.isLoading
+      const store = useUserStore()
+      return !store.isLoading && store.info.access_group === 'Administrator'
     },
     modalTitle() {
       if (this.editedProduct) {
@@ -69,46 +63,19 @@ export default defineComponent({
     },
   },
   methods: {
-    async requestProds() {
-      let searchApi = mande('/api/products/search')
-      try {
-        const response = await searchApi.get<ProductsInfo>('', {
-          query: {
-            search: this.search,
-            page: this.page,
-          },
-        })
-        this.productsPerPage = response.products_per_page
-        this.products = response.products
-        this.totalCount = response.total_count
-      } catch (error: any) {
-        const mandeError = error as MandeError
-        console.error(mandeError)
-        if (mandeError.response.status === 401) {
-          window.location.href = '/auth/login'
-        }
-      }
+    async fetchProducts() {
+      const store = useProductsStore()
+      store.search = this.search
+      await store.fetchProducts()
     },
     async nextPage() {
-      this.page++
-      await this.requestProds()
+      await useProductsStore().nextPage()
     },
     async prevPage() {
-      this.page--
-      await this.requestProds()
+      await useProductsStore().prevPage()
     },
     async archiveProduct(link: string) {
-      const api = mande(link)
-      try {
-        await api.post()
-        this.requestProds()
-      } catch (error: any) {
-        const mandeError = error as MandeError
-        console.error(mandeError)
-        if (mandeError.response.status === 401) {
-          window.location.href = '/auth/login'
-        }
-      }
+      await useProductsStore().archiveProduct(link)
     },
     showModal(product: Product | undefined) {
       this.editedProduct = product
@@ -122,28 +89,26 @@ export default defineComponent({
       modal.show()
       setTimeout(() => {
         const target = document.getElementById('add-name-input')
-        if (!target) {
-          return
-        }
-        ;(target as HTMLInputElement).select()
+        ;(target as HTMLInputElement)?.select()
       }, 500)
     },
   },
   async mounted() {
-    navStore.link = 'products'
-    await this.requestProds()
-    document.getElementById('input-search')?.focus()
+    useNavStore().link = 'products'
+    await this.fetchProducts()
+    setTimeout(() => {
+      ;(this.$refs.searchbox as HTMLElement).focus()
+    }, 500)
   },
   watch: {
     search(newSearch, oldSearch) {
-      if (this.lastRequest) {
-        clearTimeout(this.lastRequest)
-      }
+      clearTimeout(this.lastRequest)
 
-      let instance = this
+      const instance = this
       this.lastRequest = setTimeout(() => {
-        instance.page = 0
-        instance.requestProds()
+        useProductsStore().page = 0
+        instance.fetchProducts()
+        instance.lastRequest = undefined
       }, 500)
     },
   },
@@ -156,12 +121,9 @@ export default defineComponent({
   <div class="container-xl">
     <div class="row my-3">
       <div class="col-8">
-        <span class="display-4">{{ $t('products.title') }}</span>
-        <span
-          class="spinner-border spinner-border-lg ms-3"
-          role="status"
-          aria-hidden="true"
-          v-if="contentLoading"></span>
+        <LoadingTitle
+          :title="$t('products.title')"
+          :loading="contentLoading" />
       </div>
       <div
         class="col d-flex flex-row-reverse align-items-end"
@@ -181,25 +143,18 @@ export default defineComponent({
       <div
         class="col-auto d-none d-lg-block"
         v-if="creator">
-        <div
-          class="card shadow"
-          style="width: 18rem">
-          <img
-            src="../assets/6.png"
-            class="card-img-top bg-light"
-            alt="" />
-          <h5 class="card-header">{{ $t('products.cardHeader') }}</h5>
-          <div class="card-body">
-            <p class="card-text">{{ $t('products.cardText') }}</p>
-            <button
-              type="button"
-              class="btn btn-primary w-100"
-              @click="showModal(undefined)">
-              <font-awesome-icon icon="fa-solid fa-plus" />
-              {{ $t('products.addNew') }}
-            </button>
-          </div>
-        </div>
+        <PageCard
+          :image="cardImg"
+          :header-text="$t('products.cardHeader')"
+          :body-text="$t('products.cardText')">
+          <button
+            type="button"
+            class="btn btn-primary w-100"
+            @click="showModal(undefined)">
+            <font-awesome-icon icon="fa-solid fa-plus" />
+            {{ $t('products.addNew') }}
+          </button>
+        </PageCard>
       </div>
 
       <div class="col">
@@ -212,6 +167,7 @@ export default defineComponent({
             type="text"
             class="form-control"
             v-model="search"
+            ref="searchbox"
             id="input-search" />
         </div>
 
@@ -339,5 +295,5 @@ export default defineComponent({
     :button-name="modalButtonTitle"
     :submit-link="modalAcceptLink"
     :product="editedProduct"
-    @update="requestProds" />
+    @update="fetchProducts" />
 </template>
