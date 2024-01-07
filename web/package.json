@@ -10,10 +10,10 @@
   "devDependencies": {
     "@types/bootstrap": "^5.2.6",
     "@vitejs/plugin-vue": "^4.4.0",
-    "typescript": "^5.0.4",
+    "typescript": "^5.3.3",
     "vite": "^4.4.11",
     "vite-plugin-mock-server": "^1.1.0",
-    "vue-tsc": "^1.8.16"
+    "vue-tsc": "^1.8.27"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
