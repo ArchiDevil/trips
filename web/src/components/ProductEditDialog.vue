@@ -1,157 +1,142 @@
-<script lang="ts">
-import { defineComponent, PropType } from 'vue'
+<script setup lang="ts">
+import { computed, PropType, ref, watch } from 'vue'
 import { isNumber, notEmpty, min, between } from '../utils'
-
 import { Product } from '../interfaces'
+import { mande } from 'mande'
 
-export default defineComponent({
-  props: {
-    modalTitle: {
-      type: String,
-      required: true,
-    },
-    buttonName: {
-      type: String,
-      required: true,
-    },
-    submitLink: {
-      type: String,
-      required: true,
-    },
-    product: {
-      type: Object as PropType<Product>,
-    },
+const props = defineProps({
+  modalTitle: {
+    type: String,
+    required: true,
   },
-  emits: ['update'],
-  data() {
-    return {
-      productName: '',
-      caloriesInternal: 0,
-      proteins: 0,
-      fats: 0,
-      carbs: 0,
-      grams: 1 as number | null,
-      custom: false,
-      caloriesLock: false,
-    }
+  buttonName: {
+    type: String,
+    required: true,
   },
-  computed: {
-    validation() {
-      return {
-        name:
-          this.productName &&
-          this.productName.length > 0 &&
-          this.productName.length < 101,
-        cals:
-          isNumber(this.calories) &&
-          notEmpty(this.calories) &&
-          min(this.calories, 0),
-        proteins:
-          isNumber(this.proteins) &&
-          notEmpty(this.proteins) &&
-          between(this.proteins, 0, 100),
-        fats:
-          isNumber(this.fats) &&
-          notEmpty(this.fats) &&
-          between(this.fats, 0, 100),
-        carbs:
-          isNumber(this.carbs) &&
-          notEmpty(this.carbs) &&
-          between(this.carbs, 0, 100),
-        grams:
-          isNumber(this.grams) &&
-          notEmpty(this.grams) &&
-          min(this.grams ? this.grams : 0.0, 0.1),
-        nutrition: +this.proteins + +this.fats + +this.carbs <= 100,
-      }
-    },
-    formValid() {
-      return (
-        this.validation.name &&
-        this.validation.cals &&
-        this.validation.proteins &&
-        this.validation.fats &&
-        this.validation.carbs &&
-        this.validation.nutrition &&
-        (this.custom ? this.validation.grams : true)
-      )
-    },
-    title() {
-      if (this.product) {
-        return this.modalTitle + ': ' + this.product.name
-      } else {
-        return this.modalTitle
-      }
-    },
-    calories: {
-      get(): number {
-        if (this.caloriesLock === true) {
-          const value = this.proteins * 4.0 + this.fats * 9.0 + this.carbs * 4.0
-          return Number.parseFloat(value.toFixed(1))
-        } else {
-          return this.caloriesInternal
-        }
-      },
-      set(v: string) {
-        this.caloriesInternal = Number.parseInt(v)
-      },
-    },
+  submitLink: {
+    type: String,
+    required: true,
   },
-  methods: {
-    lockCalories() {
-      this.caloriesLock = !this.caloriesLock
-    },
-    async submitForm() {
-      let body = JSON.stringify({
-        name: this.productName,
-        calories: this.calories,
-        proteins: this.proteins,
-        fats: this.fats,
-        carbs: this.carbs,
-        grams: this.grams,
-      })
-      let result = await fetch(this.submitLink, {
-        method: 'POST',
-        body: body,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      let response = await result.json()
-      if (result.ok && response.result === true) {
-        this.$emit('update')
-      }
-    },
-    selectTarget(event: FocusEvent) {
-      if (!event.target) {
-        return
-      }
-      ;(event.target as HTMLInputElement).select()
-    },
-  },
-  watch: {
-    product(newProduct: Product | undefined, oldProduct: Product | undefined) {
-      this.caloriesLock = false
-      if (newProduct === undefined) {
-        this.productName = ''
-        this.caloriesInternal = 0
-        this.proteins = 0
-        this.fats = 0
-        this.carbs = 0
-        this.grams = 1
-        this.custom = false
-      } else {
-        this.productName = newProduct.name
-        this.caloriesInternal = newProduct.calories
-        this.proteins = newProduct.proteins
-        this.fats = newProduct.fats
-        this.carbs = newProduct.carbs
-        this.custom = newProduct.grams !== null
-        this.grams = this.custom ? newProduct.grams : 1
-      }
-    },
+  product: {
+    type: Object as PropType<Product>,
   },
 })
+
+const emit = defineEmits(['update'])
+
+const productName = ref('')
+const caloriesInternal = ref('0')
+const proteins = ref('0')
+const fats = ref('0')
+const carbs = ref('0')
+const grams = ref<number | null>(1)
+const custom = ref(false)
+const caloriesLock = ref(false)
+
+const validation = computed(() => {
+  const nutrientOk = (nutrient: number) => {
+    return isNumber(nutrient) && notEmpty(nutrient) && between(nutrient, 0, 100)
+  }
+  return {
+    name:
+      productName.value &&
+      productName.value.length > 0 &&
+      productName.value.length < 101,
+    cals:
+      isNumber(calories.value) &&
+      notEmpty(calories.value) &&
+      min(Number.parseFloat(calories.value), 0),
+    proteins: nutrientOk(Number.parseFloat(proteins.value)),
+    fats: nutrientOk(Number.parseFloat(fats.value)),
+    carbs: nutrientOk(Number.parseFloat(carbs.value)),
+    grams:
+      isNumber(grams.value) &&
+      notEmpty(grams.value) &&
+      min(grams.value ? grams.value : 0.0, 0.1),
+    nutrition: +proteins.value + +fats.value + +carbs.value <= 100,
+  }
+})
+
+const formValid = computed(() => {
+  return (
+    validation.value.name &&
+    validation.value.cals &&
+    validation.value.proteins &&
+    validation.value.fats &&
+    validation.value.carbs &&
+    validation.value.nutrition &&
+    (custom.value ? validation.value.grams : true)
+  )
+})
+
+const title = computed(() => {
+  return props.product
+    ? `${props.modalTitle}: ${props.product.name}`
+    : props.modalTitle
+})
+
+const calories = computed<string>({
+  get(): string {
+    if (caloriesLock.value === false) {
+      return caloriesInternal.value.toString()
+    }
+
+    const value =
+      Number.parseFloat(proteins.value) * 4.0 +
+      Number.parseFloat(fats.value) * 9.0 +
+      Number.parseFloat(carbs.value) * 4.0
+    return Number.parseFloat(value.toFixed(1)).toString()
+  },
+  set(v: string) {
+    caloriesInternal.value = v
+  },
+})
+
+const submitForm = async () => {
+  const api = mande(props.submitLink)
+  const response = await api.post<{ result: boolean }>('', {
+    name: productName.value,
+    calories: calories.value,
+    proteins: proteins.value,
+    fats: fats.value,
+    carbs: carbs.value,
+    grams: grams.value,
+  })
+  if (response.result == true) {
+    emit('update')
+  }
+}
+
+const selectTarget = (event: FocusEvent) => {
+  if (!event.target) {
+    return
+  }
+  ;(event.target as HTMLInputElement).select()
+}
+
+watch(
+  () => props.product,
+  async (newProduct: Product | undefined) => {
+    caloriesLock.value = false
+    if (newProduct === undefined) {
+      productName.value = ''
+      caloriesInternal.value = '0'
+      proteins.value = '0'
+      fats.value = '0'
+      carbs.value = '0'
+      grams.value = 1
+      custom.value = false
+    } else {
+      productName.value = newProduct.name
+      caloriesInternal.value = newProduct.calories.toString()
+      proteins.value = newProduct.proteins.toString()
+      fats.value = newProduct.fats.toString()
+      carbs.value = newProduct.carbs.toString()
+      custom.value = newProduct.grams !== null
+      grams.value = custom.value ? newProduct.grams : 1
+    }
+  }
+)
 </script>
 
 <template>

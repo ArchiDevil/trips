@@ -1,5 +1,6 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../stores/user'
 import { useNavStore } from '../stores/nav'
 import { useProductsStore } from '../stores/products'
@@ -12,106 +13,98 @@ import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
 
-export default defineComponent({
-  components: { LoadingTitle, PageCard, NavigationBar, ProductEditDialog },
-  data() {
-    return {
-      search: '',
-      lastRequest: undefined as number | undefined,
-      editedProduct: undefined as Product | undefined,
-    }
-  },
-  computed: {
-    lastPage: () => useProductsStore().lastPage,
-    addProductLink: () => '/api/products/add',
-    contentLoading: () => useUserStore().isLoading,
-    page: () => useProductsStore().page,
-    products: () => useProductsStore().products,
-    cardImg: () => cardImg,
-    creator() {
-      const store = useUserStore()
-      return (
-        !store.isLoading &&
-        (store.info.access_group === 'User' ||
-          store.info.access_group === 'Administrator')
-      )
-    },
-    editor() {
-      const store = useUserStore()
-      return !store.isLoading && store.info.access_group === 'Administrator'
-    },
-    modalTitle() {
-      if (this.editedProduct) {
-        return this.$t('products.editModal.editTitle')
-      } else {
-        return this.$t('products.editModal.addTitle')
-      }
-    },
-    modalButtonTitle() {
-      if (this.editedProduct) {
-        return this.$t('products.editModal.editButton')
-      } else {
-        return this.$t('products.editModal.addButton')
-      }
-    },
-    modalAcceptLink() {
-      if (this.editedProduct) {
-        return this.editedProduct.edit_link
-      } else {
-        return this.addProductLink
-      }
-    },
-  },
-  methods: {
-    async fetchProducts() {
-      const store = useProductsStore()
-      store.search = this.search
-      await store.fetchProducts()
-    },
-    async nextPage() {
-      await useProductsStore().nextPage()
-    },
-    async prevPage() {
-      await useProductsStore().prevPage()
-    },
-    async archiveProduct(link: string) {
-      await useProductsStore().archiveProduct(link)
-    },
-    showModal(product: Product | undefined) {
-      this.editedProduct = product
-      const modalElem = document.getElementById('edit-modal')
-      if (!modalElem) {
-        return
-      }
-      const modal = new Modal(modalElem, {
-        keyboard: false,
-      })
-      modal.show()
-      setTimeout(() => {
-        const target = document.getElementById('add-name-input')
-        ;(target as HTMLInputElement)?.select()
-      }, 500)
-    },
-  },
-  async mounted() {
-    useNavStore().link = 'products'
-    await this.fetchProducts()
-    setTimeout(() => {
-      ;(this.$refs.searchbox as HTMLElement).focus()
-    }, 500)
-  },
-  watch: {
-    search(newSearch, oldSearch) {
-      clearTimeout(this.lastRequest)
+const { t } = useI18n()
 
-      const instance = this
-      this.lastRequest = setTimeout(() => {
-        useProductsStore().page = 0
-        instance.fetchProducts()
-        instance.lastRequest = undefined
-      }, 500)
-    },
-  },
+const search = ref('')
+const lastRequest = ref<number | undefined>(undefined)
+const editedProduct = ref<Product | undefined>(undefined)
+const searchbox = ref<HTMLElement | null>(null)
+
+const lastPage = computed(() => useProductsStore().lastPage)
+const contentLoading = computed(() => useUserStore().isLoading)
+const page = computed(() => useProductsStore().page)
+const products = computed(() => useProductsStore().products)
+
+const creator = computed(() => {
+  const store = useUserStore()
+  return (
+    !store.isLoading &&
+    (store.info.access_group === 'User' ||
+      store.info.access_group === 'Administrator')
+  )
+})
+const editor = computed(() => {
+  const store = useUserStore()
+  return !store.isLoading && store.info.access_group === 'Administrator'
+})
+
+const modalTitle = computed(() => {
+  return editedProduct.value
+    ? t('products.editModal.editTitle')
+    : t('products.editModal.addTitle')
+})
+
+const modalButtonTitle = computed(() => {
+  return editedProduct.value
+    ? t('products.editModal.editButton')
+    : t('products.editModal.addButton')
+})
+
+const modalAcceptLink = computed(() => {
+  return editedProduct.value
+    ? editedProduct.value.edit_link
+    : '/api/products/add'
+})
+
+const fetchProducts = async () => {
+  const store = useProductsStore()
+  store.search = search.value
+  await store.fetchProducts()
+}
+
+const nextPage = async () => {
+  await useProductsStore().nextPage()
+}
+
+const prevPage = async () => {
+  await useProductsStore().prevPage()
+}
+
+const archiveProduct = async (link: string) => {
+  await useProductsStore().archiveProduct(link)
+}
+
+const showModal = (product: Product | undefined) => {
+  editedProduct.value = product
+  const modalElem = document.getElementById('edit-modal')
+  if (!modalElem) {
+    return
+  }
+  const modal = new Modal(modalElem, {
+    keyboard: false,
+  })
+  modal.show()
+  setTimeout(() => {
+    const target = document.getElementById('add-name-input')
+    ;(target as HTMLInputElement)?.select()
+  }, 500)
+}
+
+onMounted(async () => {
+  useNavStore().link = 'products'
+  await fetchProducts()
+  setTimeout(() => {
+    ;(searchbox.value as HTMLElement)?.focus()
+  }, 500)
+})
+
+watch(search, () => {
+  clearTimeout(lastRequest.value)
+  lastRequest.value = setTimeout(() => {
+    useProductsStore().page = 0
+    fetchProducts()
+    lastRequest.value = undefined
+  }, 500)
 })
 </script>
 
