@@ -44,6 +44,7 @@ export interface Trip {
     groups: number[]
     user: string
     share_link: string
+    archive_link: string
   }
   type: 'user' | 'shared'
   attendees: number

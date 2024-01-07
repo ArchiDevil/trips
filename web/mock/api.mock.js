@@ -75,7 +75,8 @@ const tripGetterHandler = {
         'archived': false,
         'groups': [2, 3],
         'user': 'ArchiDevil',
-        'share_link': ''
+        'share_link': '/api/trips/12356/share',
+        'archive_link': '/api/trips/12356/archive'
       },
       'type': 'user',
       'attendees': 5,
