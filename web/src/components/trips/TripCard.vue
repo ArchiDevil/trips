@@ -1,42 +1,39 @@
-<script lang="ts">
-import { PropType, defineComponent } from 'vue'
+<script setup lang="ts">
+import { PropType, computed, onMounted, ref } from 'vue'
 import { Trip } from '../../interfaces'
 import { Dropdown } from 'bootstrap'
 
-export default defineComponent({
-  props: {
-    trip: {
-      required: true,
-      type: Object as PropType<Trip>,
-    },
+const props = defineProps({
+  trip: {
+    required: true,
+    type: Object as PropType<Trip>,
   },
-  emits: {
-    share(shareLink: string) {
-      return true
-    },
-  },
-  computed: {
-    fromDate(): string {
-      return new Date(this.trip.trip.from_date).toLocaleDateString()
-    },
-    tillDate(): string {
-      return new Date(this.trip.trip.till_date).toLocaleDateString()
-    },
-    past(): boolean {
-      const now = new Date()
-      now.setHours(0, 0, 0, 0) // to avoid rounding issues for the same day
-      return now > new Date(this.trip.trip.till_date)
-    },
-  },
-  data() {
-    return {
-      dropdown: null as Dropdown | null,
-    }
-  },
-  mounted() {
-    const toggle = this.$refs.dropdownToggle as HTMLElement
-    this.dropdown = new Dropdown(toggle)
-  },
+})
+
+defineEmits({
+  share: (shareLink: string) => true,
+})
+
+const fromDate = computed(() => {
+  return new Date(props.trip.trip.from_date).toLocaleDateString()
+})
+
+const tillDate = computed(() => {
+  return new Date(props.trip.trip.till_date).toLocaleDateString()
+})
+
+const past = computed(() => {
+  const now = new Date()
+  now.setHours(0, 0, 0, 0) // to avoid rounding issues for the same day
+  return now > new Date(props.trip.trip.till_date)
+})
+
+const dropdown = ref<Dropdown | null>(null)
+const dropdownToggle = ref<HTMLButtonElement | null>(null)
+
+onMounted(() => {
+  const toggle = dropdownToggle.value as HTMLButtonElement
+  dropdown.value = new Dropdown(toggle)
 })
 </script>
 
