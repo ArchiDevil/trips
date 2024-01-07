@@ -39,7 +39,6 @@ const navbarApp = createApp({
         tripsPage: () => globals.urls.tripsPage,
         productsPage: () => globals.urls.productsPage,
         usersPage: () => globals.urls.usersPage,
-        adminPage: () => globals.urls.adminPage,
     },
     methods: {
         getUserData() {
@@ -72,9 +71,6 @@ const navbarApp = createApp({
                 </a>
                 <a id="users-link" class="nav-item nav-link" :href="usersPage" v-if="admin" :class="{'active': navStore.link == 'users'}">
                     <i class="fas fa-users"></i> {{ $t('navbar.usersLink') }}
-                </a>
-                <a id="developer-console-link" class="nav-item nav-link" :href="adminPage" v-if="admin" :class="{'active': navStore.link == 'admin'}">
-                    <i class="fas fa-terminal"></i> {{ $t('navbar.adminLink') }}
                 </a>
                 <a href="/tutorial.html" class="nav-item nav-link">
                     <i class="fas fa-info"></i> {{ $t('docs.howToLink') }}

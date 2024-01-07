@@ -1,32 +1,31 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 
 import { useUserStore } from '../stores/user'
 import { useNavStore } from '../stores/nav'
 
 import globals from '../globals'
 
-export default defineComponent({
-  computed: {
-    admin: () => useUserStore().info.access_group == 'Administrator',
-    logoutLink: () => globals.urls.logout,
-    mainPage: () => globals.urls.mainPage,
-    tripsPage: () => globals.urls.tripsPage,
-    productsPage: () => globals.urls.productsPage,
-    usersPage: () => globals.urls.usersPage,
-    adminPage: () => globals.urls.adminPage,
-    navLink: () => useNavStore().link,
-    userLoading: () => useUserStore().isLoading,
-    userPhotoUrl: () => useUserStore().info.photo_url,
-    displayedName() {
-      const store = useUserStore()
-      if (store.isLoading) return ''
+const admin = computed(
+  () => useUserStore().info.access_group == 'Administrator'
+)
+const logoutLink = computed(() => globals.urls.logout)
+const mainPage = computed(() => globals.urls.mainPage)
+const tripsPage = computed(() => globals.urls.tripsPage)
+const productsPage = computed(() => globals.urls.productsPage)
+const usersPage = computed(() => globals.urls.usersPage)
+const navLink = computed(() => useNavStore().link)
+const userLoading = computed(() => useUserStore().isLoading)
+const userPhotoUrl = computed(() => useUserStore().info.photo_url)
+const displayedName = computed(() => {
+  const store = useUserStore()
+  if (store.isLoading) {
+    return ''
+  }
 
-      return store.info.displayed_name
-        ? store.info.displayed_name
-        : store.info.login
-    },
-  },
+  return store.info.displayed_name
+    ? store.info.displayed_name
+    : store.info.login
 })
 </script>
 
@@ -85,17 +84,6 @@ export default defineComponent({
               :class="{ active: navLink == 'users' }">
               <font-awesome-icon icon="fa-solid fa-users" />
               {{ $t('navbar.usersLink') }}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              id="developer-console-link"
-              class="nav-link"
-              :href="adminPage"
-              v-if="admin"
-              :class="{ active: navLink == 'admin' }">
-              <font-awesome-icon icon="fa-solid fa-terminal" />
-              {{ $t('navbar.adminLink') }}
             </a>
           </li>
           <li class="nav-item">

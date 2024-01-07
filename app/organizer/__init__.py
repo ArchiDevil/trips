@@ -99,9 +99,6 @@ def create_app(test_config=None):
     from . import users
     app.register_blueprint(users.bp)
 
-    from . import developer
-    app.register_blueprint(developer.bp)
-
     @app.context_processor
     def inject_props():
         from . import schema

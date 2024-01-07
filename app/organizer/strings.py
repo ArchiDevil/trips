@@ -6,9 +6,6 @@ Every new string comes here.
 STRING_TABLE = {
     'Site title': 'Hikehub - собираем еду в поход',
 
-    'Developer section title': 'Администрирование',
-    'Developer section wip': 'Раздел находится в разработке',
-
     'Login errors invalid creds': 'Неверный логин или пароль',
     'Login errors vk error': 'Внутренняя ошибка',
     'Login success': 'Вход успешен, переходим дальше...',
