@@ -4,7 +4,7 @@ from flask.testing import FlaskClient
 import pytest
 
 from organizer.db import get_session
-from organizer.schema import SharingLink, TripAccess
+from organizer.schema import SharingLink, Trip, TripAccess
 
 
 def test_rejects_not_logged_in(client: FlaskClient):
@@ -52,6 +52,26 @@ def test_trips_org_can_get_trip(org_logged_client: FlaskClient):
     assert response.json
     assert response.json['trip']
     assert response.json['uid'] == 'uid1'
+    assert response.json['type'] == 'user'
+    assert response.json['attendees'] == 5
+    assert response.json['cover_src'] == '/static/img/trips/7.png'
+    assert response.json['open_link'] == '/meals/uid1'
+    assert response.json['edit_link'] == '/trips/edit/uid1'
+    assert response.json['forget_link'] == '/trips/forget/uid1'
+    assert response.json['packing_link'] == '/reports/packing/uid1'
+    assert response.json['shopping_link'] == '/reports/shopping/uid1'
+    assert response.json['download_link'] == '/trips/download/uid1'
+
+    assert response.json['trip']['name'] == 'Taganay trip'
+    assert response.json['trip']['from_date'] == 'Tue, 01 Jan 2019 00:00:00 GMT'
+    assert response.json['trip']['till_date'] == 'Sat, 05 Jan 2019 00:00:00 GMT'
+    assert response.json['trip']['days_count'] == 5
+    assert response.json['trip']['created_by'] == 2
+    assert response.json['trip']['archived'] is False
+    assert response.json['trip']['groups'] == [2, 3]
+    assert response.json['trip']['user'] == 'Organizer'
+    assert response.json['trip']['share_link'] == '/api/trips/share/uid1'
+    assert response.json['trip']['archive_link'] == '/api/trips/archive/uid1'
 
 
 def test_trips_org_can_access_shared_trip(org_logged_client: FlaskClient):
@@ -168,3 +188,29 @@ def test_trips_share_rejects_non_accessed_trip(org_logged_client: FlaskClient):
 def test_trips_share_rejects_non_existing_trip(org_logged_client: FlaskClient):
     response = org_logged_client.get('/api/trips/share/uid100500')
     assert response.status_code == 404
+
+
+def test_trips_can_archive(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/archive/uid1')
+    assert response.status_code == 200
+    assert response.json == {'status': 'ok'}
+
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            trip = session.query(Trip).filter(Trip.uid == 'uid1').one()
+            assert trip.archived
+
+
+def test_trips_archive_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/archive/uid100500')
+    assert response.status_code == 404
+
+
+def test_trips_archive_rejects_non_accessed_trip(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/archive/uid3')
+    assert response.status_code == 403
+
+
+def test_trips_archive_rejects_non_logged_user(client: FlaskClient):
+    response = client.post('/api/trips/archive/uid1')
+    assert response.status_code == 401

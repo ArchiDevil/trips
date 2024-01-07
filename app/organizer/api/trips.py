@@ -69,17 +69,18 @@ def get_info(trip_uid: str):
                 'archived': trip.archived,
                 'groups': [group.persons for group in trip.groups],
                 'user': trip.user.login,
-                'share_link': url_for('api.trips.share', trip_uid=trip.uid)
+                'share_link': url_for('api.trips.share', trip_uid=trip.uid),
+                'archive_link': url_for('api.trips.archive', trip_uid=trip.uid),
             },
             'type': 'shared' if shared else 'user',
-            'attendees': sum([group.persons for group in trip.groups]),
+            'attendees': sum(group.persons for group in trip.groups),
             'cover_src': url_for('static', filename=f'img/trips/{magic}.png'),
             'open_link': url_for('meals.days_view', trip_uid=trip.uid),
             'edit_link': url_for('trips.edit', trip_uid=trip.uid),
             'forget_link': url_for('trips.forget', trip_uid=trip.uid),
             'packing_link': url_for('reports.packing', trip_uid=trip.uid),
             'shopping_link': url_for('reports.shopping', trip_uid=trip.uid),
-            'download_link': url_for('trips.download', trip_uid=trip.uid)
+            'download_link': url_for('trips.download', trip_uid=trip.uid),
         }
 
 
@@ -115,3 +116,23 @@ def share(trip_uid: str):
         'uuid': uuid,
         'link': url_for('trips.access', uuid=uuid, _external=True, _scheme='https')
     }
+
+
+@BP.post('/archive/<trip_uid>')
+@api_login_required_group(AccessGroup.User)
+def archive(trip_uid: str):
+    with get_session() as session:
+        trip: Optional[Trip] = None
+
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        if not trip:
+            abort(404)
+
+        if trip.created_by != g.user.id:
+            abort(403)
+
+        trip.archived = True
+        trip.last_update = datetime.utcnow()
+        session.commit()
+
+    return {'status': 'ok'}
