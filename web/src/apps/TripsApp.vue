@@ -12,6 +12,7 @@ import Jumbotron from '../components/trips/Jumbotron.vue'
 import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
+import ArchiveTripDialog from '../components/trips/ArchiveTripDialog.vue'
 import ShareTripDialog from '../components/trips/ShareTripDialog.vue'
 import TripsList from '../components/trips/TripsList.vue'
 import TripEditorModal from '../components/trips/TripEditorModal.vue'
@@ -45,27 +46,6 @@ const sortedTrips = computed(() => {
   ]
 })
 
-onMounted(async () => {
-  useNavStore().link = 'trips'
-
-  const api = mande('/api/trips')
-  const response = await api.get<{ trips: number[] }>('/get')
-  try {
-    tripUids.value = response.trips
-    idsLoading.value = false
-    await Promise.all(
-      tripUids.value.map(async (e) => {
-        const response = await api.get<Trip>(`/get/${e}`)
-        useTripsStore().trips.push(response)
-      })
-    )
-    tripsLoading.value = false
-  } catch (error) {
-    console.log(error)
-  }
-})
-
-const shareLink = ref('')
 const linkText = ref(t('trips.shareModal.linkPlaceholder'))
 const copyStatus = ref<string | undefined>('')
 
@@ -74,7 +54,7 @@ const copyLink = () => {
   copyStatus.value = t('trips.shareModal.copiedStatus')
 }
 
-const reset = () => {
+const resetShare = () => {
   linkText.value = t('trips.shareModal.linkPlaceholder')
   copyStatus.value = undefined
   shareLink.value = ''
@@ -92,12 +72,13 @@ const generateLink = async () => {
   }
 }
 
+const shareLink = ref('')
 const shareModal = ref<Modal | undefined>(undefined)
 const showShareModal = (shareLink_: string) => {
-  reset()
+  resetShare()
   shareLink.value = shareLink_
   generateLink()
-  const modalElem = document.getElementById('shareModal')
+  const modalElem = document.getElementById('share-modal')
   if (!modalElem) {
     return
   }
@@ -107,8 +88,22 @@ const showShareModal = (shareLink_: string) => {
   shareModal.value.show()
 }
 
+const archiveLink = ref('')
+const archiveModal = ref<Modal | undefined>(undefined)
+const showArchiveModal = (archiveLink_: string) => {
+  archiveLink.value = archiveLink_
+  const modalElem = document.getElementById('archive-modal')
+  if (!modalElem) {
+    return
+  }
+  archiveModal.value = new Modal(modalElem, {
+    keyboard: false,
+  })
+  archiveModal.value.show()
+}
+
 const showAddModal = () => {
-  const modalElem = document.getElementById('edit-app')
+  const modalElem = document.getElementById('edit-modal')
   if (!modalElem) {
     return
   }
@@ -117,6 +112,29 @@ const showAddModal = () => {
   })
   modal.show()
 }
+
+const fetchTrips = async () => {
+  const api = mande('/api/trips')
+  const response = await api.get<{ trips: number[] }>('/get')
+  try {
+    tripUids.value = response.trips
+    idsLoading.value = false
+    await Promise.all(
+      tripUids.value.map(async (e) => {
+        const response = await api.get<Trip>(`/get/${e}`)
+        useTripsStore().trips.push(response)
+      })
+    )
+    tripsLoading.value = false
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+onMounted(async () => {
+  useNavStore().link = 'trips'
+  await fetchTrips()
+})
 </script>
 
 <template>
@@ -175,7 +193,8 @@ const showAddModal = () => {
         v-if="tripUids.length">
         <TripsList
           :trips="sortedTrips"
-          @share="(shareLink) => showShareModal(shareLink)" />
+          @share="(shareLink) => showShareModal(shareLink)"
+          @archive="(archiveLink) => showArchiveModal(archiveLink)" />
         <div
           class="spinner-border"
           role="status"
@@ -185,10 +204,18 @@ const showAddModal = () => {
   </div>
 
   <ShareTripDialog
+    id="share-modal"
     :link-text="linkText"
     :copy-status="copyStatus"
     @copy-link="copyLink()" />
 
+  <ArchiveTripDialog
+    id="archive-modal"
+    :archive-link="archiveLink"
+    @archive="fetchTrips()" />
+
   <!-- TODO: FIX MODE -->
-  <TripEditorModal :edit-mode="false" />
+  <TripEditorModal
+    id="edit-modal"
+    :edit-mode="false" />
 </template>

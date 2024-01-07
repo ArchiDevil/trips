@@ -12,6 +12,7 @@ const props = defineProps({
 
 defineEmits({
   share: (shareLink: string) => true,
+  archive: (archiveLink: string) => true,
 })
 
 const fromDate = computed(() => {
@@ -103,15 +104,26 @@ onMounted(() => {
                     {{ $t('trips.hideButton') }}
                   </a>
                 </li>
-                <li v-if="trip.type === 'user'">
-                  <a
-                    class="dropdown-item"
-                    href="javascript:void(0)"
-                    @click="$emit('share', trip.trip.share_link)">
-                    <font-awesome-icon icon="fa-solid fa-share-alt" />
-                    {{ $t('trips.shareButton') }}
-                  </a>
-                </li>
+                <template v-if="trip.type === 'user'">
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="javascript:void(0)"
+                      @click="$emit('share', trip.trip.share_link)">
+                      <font-awesome-icon icon="fa-solid fa-share-alt" />
+                      {{ $t('trips.shareButton') }}
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="javascript:void(0)"
+                      @click="$emit('archive', trip.trip.archive_link)">
+                      <font-awesome-icon icon="fa-solid fa-archive" />
+                      {{ $t('trips.archiveButton') }}
+                    </a>
+                  </li>
+                </template>
               </ul>
             </div>
           </div>

@@ -12,6 +12,7 @@ defineProps({
 
 defineEmits({
   share: (shareLink: string) => true,
+  archive: (archiveLink: string) => true,
 })
 </script>
 
@@ -19,5 +20,6 @@ defineEmits({
   <TripCard
     v-for="trip in trips"
     :trip="trip"
-    @share="(shareLink) => $emit('share', shareLink)" />
+    @share="(shareLink) => $emit('share', shareLink)"
+    @archive="(archiveLink) => $emit('archive', archiveLink)" />
 </template>

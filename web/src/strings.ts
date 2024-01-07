@@ -132,6 +132,7 @@ export const messages = {
       jumbotronCreateButton: 'Создать поход',
       lastUpdatePrefix: 'Последнее обновление',
       optionsButton: 'Дополнительно',
+      archiveButton: 'Архивировать',
       shareButton: 'Поделиться',
       shareModal: {
         title: 'Поделиться походом',
@@ -164,6 +165,13 @@ export const messages = {
         groupNamePrefix: 'Группа',
         groupErrorMessage: 'Введите целое число больше 0',
         archiveButtonTitle: 'Архивировать',
+      },
+      archiveModal: {
+        title: 'Архивировать поход',
+        text: 'Вы действительно хотите поместить этот поход в архив?',
+        archiveButton: 'Архивировать',
+        closeButton: 'Закрыть',
+        error: 'Произошла ошибка при архивировании похода. Попробуйте перезагрузить страницу.',
       }
     },
     navbar: {

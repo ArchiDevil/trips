@@ -14,7 +14,6 @@ defineProps({
 <template>
   <div
     class="modal fade"
-    id="shareModal"
     tabindex="-1"
     aria-labelledby="shareModalLabel"
     aria-hidden="true">
