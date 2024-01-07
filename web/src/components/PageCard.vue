@@ -1,20 +1,16 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  props: {
-    image: {
-      required: true,
-      type: String,
-    },
-    headerText: {
-      required: true,
-      type: String,
-    },
-    bodyText: {
-      required: true,
-      type: String,
-    },
+<script setup lang="ts">
+defineProps({
+  image: {
+    required: true,
+    type: String,
+  },
+  headerText: {
+    required: true,
+    type: String,
+  },
+  bodyText: {
+    required: true,
+    type: String,
   },
 })
 </script>

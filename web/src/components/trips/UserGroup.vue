@@ -1,24 +1,22 @@
-<script lang="ts">
-import { PropType, defineComponent } from 'vue'
+<script setup lang="ts">
+import { PropType } from 'vue'
 
-export default defineComponent({
-  props: {
-    group: {
-      type: Object as PropType<{ name: string; number: number; count: number }>,
-      required: true,
-    },
-    validator: {
-      type: Function as PropType<(count: number) => boolean>,
-      required: true,
-    },
-    group_name_prefix: {
-      type: String,
-      required: true,
-    },
-    error_message: {
-      type: String,
-      required: true,
-    },
+defineProps({
+  group: {
+    type: Object as PropType<{ name: string; number: number; count: number }>,
+    required: true,
+  },
+  validator: {
+    type: Function as PropType<(count: number) => boolean>,
+    required: true,
+  },
+  group_name_prefix: {
+    type: String,
+    required: true,
+  },
+  error_message: {
+    type: String,
+    required: true,
   },
 })
 </script>

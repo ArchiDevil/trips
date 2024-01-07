@@ -1,10 +1,6 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  props: {
-    addTripLink: String,
-  },
+<script setup lang="ts">
+defineProps({
+  addTripLink: String,
 })
 </script>
 

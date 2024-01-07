@@ -1,16 +1,12 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  emits: ['copyLink'],
-  props: {
-    linkText: {
-      required: true,
-      type: String,
-    },
-    copyStatus: {
-      type: String,
-    },
+<script setup lang="ts">
+defineEmits(['copyLink'])
+defineProps({
+  linkText: {
+    required: true,
+    type: String,
+  },
+  copyStatus: {
+    type: String,
   },
 })
 </script>

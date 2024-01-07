@@ -1,24 +1,17 @@
-<script lang="ts">
-import { defineComponent, PropType } from 'vue'
-
+<script setup lang="ts">
+import { PropType } from 'vue'
 import { Trip } from '../../interfaces'
 import TripCard from './TripCard.vue'
 
-export default defineComponent({
-  components: {
-    TripCard,
+defineProps({
+  trips: {
+    required: true,
+    type: Object as PropType<Trip[]>,
   },
-  emits: {
-    share(shareLink: string) {
-      return true
-    },
-  },
-  props: {
-    trips: {
-      required: true,
-      type: Object as PropType<Trip[]>,
-    },
-  },
+})
+
+defineEmits({
+  share: (shareLink: string) => true,
 })
 </script>
 
