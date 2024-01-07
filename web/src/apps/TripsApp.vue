@@ -1,136 +1,122 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import { mande } from 'mande'
+import { useI18n } from 'vue-i18n'
 import { Modal } from 'bootstrap'
 
 import { Trip } from '../interfaces'
 import { useNavStore } from '../stores/nav'
+import { useTripsStore } from '../stores/trips'
+
 import Jumbotron from '../components/trips/Jumbotron.vue'
 import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import ShareTripDialog from '../components/trips/ShareTripDialog.vue'
 import TripsList from '../components/trips/TripsList.vue'
-import cardImg from '../assets/1.png'
 import TripEditorModal from '../components/trips/TripEditorModal.vue'
-import { useTripsStore } from '../stores/trips'
+import cardImg from '../assets/1.png'
 
-export default defineComponent({
-  components: {
-    Jumbotron,
-    LoadingTitle,
-    PageCard,
-    NavigationBar,
-    ShareTripDialog,
-    TripsList,
-    TripEditorModal,
-  },
-  data() {
-    return {
-      idsLoading: true,
-      tripsLoading: true,
-      tripUids: [] as number[],
-      shareLink: '' as string,
-      shareModal: undefined as Modal | undefined,
-      linkText: this.$t('trips.shareModal.linkPlaceholder'),
-      copyStatus: '' as string | undefined,
-    }
-  },
-  computed: {
-    addTripLink: () => '/trips/add',
-    cardImgSrc: () => cardImg,
-    sortedTrips() {
-      const sortingFunc = (a: Trip, b: Trip) => {
-        return (
-          new Date(a.trip.till_date).getTime() -
-          new Date(b.trip.till_date).getTime()
-        )
-      }
-      const reverseSortingFunc = (a: Trip, b: Trip) => {
-        return (
-          new Date(b.trip.till_date).getTime() -
-          new Date(a.trip.till_date).getTime()
-        )
-      }
+const { t } = useI18n()
 
-      const store = useTripsStore()
-      let upcomingTrips = store.trips.filter((trip) => {
-        return new Date(trip.trip.till_date).getTime() - Date.now() >= 0
-      })
-      let pastTrips = store.trips.filter((trip) => {
-        return new Date(trip.trip.till_date).getTime() - Date.now() < 0
-      })
-      return [
-        ...upcomingTrips.sort(sortingFunc),
-        ...pastTrips.sort(reverseSortingFunc),
-      ]
-    },
-  },
-  async mounted() {
-    useNavStore().link = 'trips'
+const idsLoading = ref(true)
+const tripsLoading = ref(true)
+const tripUids = ref<number[]>([])
 
-    const api = mande('/api/trips')
-    const response = await api.get<{ trips: number[] }>('/get')
-    try {
-      this.tripUids = response.trips
-      this.idsLoading = false
-      await Promise.all(
-        this.tripUids.map(async (e) => {
-          const response = await api.get<Trip>('/get/' + e)
-          useTripsStore().trips.push(response)
-        })
-      )
-      this.tripsLoading = false
-    } catch (error) {
-      console.log(error)
-    }
-  },
-  methods: {
-    copyLink() {
-      navigator.clipboard.writeText(this.linkText)
-      this.copyStatus = this.$t('trips.shareModal.copiedStatus')
-    },
-    reset() {
-      this.linkText = this.$t('trips.shareModal.linkPlaceholder')
-      this.copyStatus = undefined
-      this.shareLink = ''
-    },
-    async generateLink() {
-      const link = this.shareLink
-      this.copyStatus = undefined
-      this.linkText = this.$t('trips.shareModal.linkLoading')
-      try {
-        const response = await fetch(link)
-        this.linkText = (await response.json()).link
-      } catch (error) {
-        console.error(error)
-      }
-    },
-    showShareModal(shareLink: string) {
-      this.reset()
-      this.shareLink = shareLink
-      this.generateLink()
-      const modalElem = document.getElementById('shareModal')
-      if (!modalElem) {
-        return
-      }
-      this.shareModal = new Modal(modalElem, {
-        keyboard: false,
-      })
-      this.shareModal.show()
-    },
-    showAddModal() {
-      const modalElem = document.getElementById('edit-app')
-      if (!modalElem) {
-        return
-      }
-      const modal = new Modal(modalElem, {
-        keyboard: false,
-      })
-      modal.show()
-    },
-  },
+const addTripLink = '/trips/add'
+const sortedTrips = computed(() => {
+  const sortingFunc = (a: Trip, b: Trip) => {
+    return (
+      new Date(a.trip.till_date).getTime() -
+      new Date(b.trip.till_date).getTime()
+    )
+  }
+
+  const store = useTripsStore()
+  let upcomingTrips = store.trips.filter((trip) => {
+    return new Date(trip.trip.till_date).getTime() - Date.now() >= 0
+  })
+  let pastTrips = store.trips.filter((trip) => {
+    return new Date(trip.trip.till_date).getTime() - Date.now() < 0
+  })
+  return [
+    ...upcomingTrips.sort(sortingFunc),
+    ...pastTrips.sort((a, b) => sortingFunc(b, a)),
+  ]
 })
+
+onMounted(async () => {
+  useNavStore().link = 'trips'
+
+  const api = mande('/api/trips')
+  const response = await api.get<{ trips: number[] }>('/get')
+  try {
+    tripUids.value = response.trips
+    idsLoading.value = false
+    await Promise.all(
+      tripUids.value.map(async (e) => {
+        const response = await api.get<Trip>(`/get/${e}`)
+        useTripsStore().trips.push(response)
+      })
+    )
+    tripsLoading.value = false
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+const shareLink = ref('')
+const linkText = ref(t('trips.shareModal.linkPlaceholder'))
+const copyStatus = ref<string | undefined>('')
+
+const copyLink = () => {
+  navigator.clipboard.writeText(linkText.value)
+  copyStatus.value = t('trips.shareModal.copiedStatus')
+}
+
+const reset = () => {
+  linkText.value = t('trips.shareModal.linkPlaceholder')
+  copyStatus.value = undefined
+  shareLink.value = ''
+}
+
+const generateLink = async () => {
+  const link = shareLink.value
+  copyStatus.value = undefined
+  linkText.value = t('trips.shareModal.linkLoading')
+  try {
+    const response = await fetch(link)
+    linkText.value = (await response.json()).link
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const shareModal = ref<Modal | undefined>(undefined)
+const showShareModal = (shareLink_: string) => {
+  reset()
+  shareLink.value = shareLink_
+  generateLink()
+  const modalElem = document.getElementById('shareModal')
+  if (!modalElem) {
+    return
+  }
+  shareModal.value = new Modal(modalElem, {
+    keyboard: false,
+  })
+  shareModal.value.show()
+}
+
+const showAddModal = () => {
+  const modalElem = document.getElementById('edit-app')
+  if (!modalElem) {
+    return
+  }
+  const modal = new Modal(modalElem, {
+    keyboard: false,
+  })
+  modal.show()
+}
 </script>
 
 <template>
@@ -171,7 +157,7 @@ export default defineComponent({
         class="col-auto d-none d-lg-block"
         v-if="tripUids.length">
         <PageCard
-          :image="cardImgSrc"
+          :image="cardImg"
           :header-text="$t('trips.cardTitle')"
           :body-text="$t('trips.cardText')">
           <button
