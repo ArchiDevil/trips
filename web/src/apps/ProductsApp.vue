@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../stores/user'
 import { useNavStore } from '../stores/nav'
 import { useProductsStore } from '../stores/products'
@@ -8,12 +7,11 @@ import { Modal } from 'bootstrap'
 
 import cardImg from '../assets/6.png'
 import { Product } from '../interfaces'
+
 import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
-
-const { t } = useI18n()
 
 const search = ref('')
 const lastRequest = ref<number | undefined>(undefined)
@@ -36,18 +34,6 @@ const creator = computed(() => {
 const editor = computed(() => {
   const store = useUserStore()
   return !store.isLoading && store.info.access_group === 'Administrator'
-})
-
-const modalTitle = computed(() => {
-  return editedProduct.value
-    ? t('products.editModal.editTitle')
-    : t('products.editModal.addTitle')
-})
-
-const modalButtonTitle = computed(() => {
-  return editedProduct.value
-    ? t('products.editModal.editButton')
-    : t('products.editModal.addButton')
 })
 
 const modalAcceptLink = computed(() => {
@@ -290,8 +276,7 @@ watch(search, () => {
   </div>
 
   <ProductEditDialog
-    :modal-title="modalTitle"
-    :button-name="modalButtonTitle"
+    id="edit-modal"
     :submit-link="modalAcceptLink"
     :product="editedProduct"
     @update="onProductsUpdate" />

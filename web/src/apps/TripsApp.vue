@@ -239,7 +239,6 @@ onMounted(async () => {
     :archive-link="archiveLink"
     @archive="onTripArchived" />
 
-  <!-- TODO: FIX MODE -->
   <TripEditorModal
     id="edit-modal"
     :trip="currentTrip" />
