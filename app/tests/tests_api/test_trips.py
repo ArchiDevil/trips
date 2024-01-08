@@ -63,8 +63,8 @@ def test_trips_org_can_get_trip(org_logged_client: FlaskClient):
     assert response.json['download_link'] == '/trips/download/uid1'
 
     assert response.json['trip']['name'] == 'Taganay trip'
-    assert response.json['trip']['from_date'] == 'Tue, 01 Jan 2019 00:00:00 GMT'
-    assert response.json['trip']['till_date'] == 'Sat, 05 Jan 2019 00:00:00 GMT'
+    assert response.json['trip']['from_date'] == '2019-01-01'
+    assert response.json['trip']['till_date'] == '2019-01-05'
     assert response.json['trip']['days_count'] == 5
     assert response.json['trip']['created_by'] == 2
     assert response.json['trip']['archived'] is False
@@ -116,7 +116,9 @@ def test_trips_share_generates_response(org_logged_client: FlaskClient):
 
 
 @pytest.mark.parametrize('trip_id', [1, 2, 3])
-def test_trips_share_admin_can_share_any_trip(admin_logged_client: FlaskClient, trip_id: int):
+def test_trips_share_admin_can_share_any_trip(
+    admin_logged_client: FlaskClient, trip_id: int
+):
     response = admin_logged_client.get(f'/api/trips/share/uid{trip_id}')
     assert response.status_code == 200
 
@@ -140,7 +142,9 @@ def test_trips_share_stores_link_info(org_logged_client: FlaskClient):
         with get_session() as session:
             link2: SharingLink = session.query(SharingLink).one()
             assert link2.uuid == uuid
-            assert link2.expiration_date.day == (datetime.utcnow() + timedelta(days=3)).day
+            assert (
+                link2.expiration_date.day == (datetime.utcnow() + timedelta(days=3)).day
+            )
 
 
 def test_trips_share_does_not_duplicate_link(org_logged_client: FlaskClient):
@@ -167,7 +171,11 @@ def test_trips_share_updates_expiration_time(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            link: SharingLink = session.query(SharingLink).filter(SharingLink.uuid == response.json['uuid']).one()
+            link: SharingLink = (
+                session.query(SharingLink)
+                .filter(SharingLink.uuid == response.json['uuid'])
+                .one()
+            )
             first_time = link.expiration_date
 
     response = org_logged_client.get('/api/trips/share/uid1')
@@ -176,7 +184,11 @@ def test_trips_share_updates_expiration_time(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            link: SharingLink = session.query(SharingLink).filter(SharingLink.uuid == response.json['uuid']).one()
+            link: SharingLink = (
+                session.query(SharingLink)
+                .filter(SharingLink.uuid == response.json['uuid'])
+                .one()
+            )
             assert first_time != link.expiration_date
 
 
@@ -201,7 +213,9 @@ def test_trips_can_archive(org_logged_client: FlaskClient):
             assert trip.archived
 
 
-def test_trips_archive_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
+def test_trips_archive_returns_404_for_non_existing_trip(
+    org_logged_client: FlaskClient,
+):
     response = org_logged_client.post('/api/trips/archive/uid100500')
     assert response.status_code == 404
 
@@ -214,3 +228,98 @@ def test_trips_archive_rejects_non_accessed_trip(org_logged_client: FlaskClient)
 def test_trips_archive_rejects_non_logged_user(client: FlaskClient):
     response = client.post('/api/trips/archive/uid1')
     assert response.status_code == 401
+
+
+def test_trips_add_rejects_not_logged_in(client: FlaskClient):
+    response = client.post('/api/trips/add')
+    assert response.status_code == 401
+
+
+def test_trips_can_add_trip(org_logged_client: FlaskClient):
+    response = org_logged_client.post(
+        '/api/trips/add',
+        json={
+            'name': 'Test trip',
+            'from_date': '2019-09-10',
+            'till_date': '2019-09-12',
+            'group1': '3',
+            'group2': '6',
+        },
+    )
+    assert response.json
+    assert response.json['trip']['name'] == 'Test trip'
+    assert response.json['trip']['from_date'] == '2019-09-10'
+    assert response.json['trip']['till_date'] == '2019-09-12'
+    assert response.json['trip']['groups'] == [3, 6]
+
+
+@pytest.mark.parametrize('name', ['', 'a' * 51])
+def test_trips_add_rejects_incorrect_name(org_logged_client: FlaskClient, name: str):
+    response = org_logged_client.post(
+        '/api/trips/add',
+        json={
+            'name': name,
+            'from_date': '2019-09-10',
+            'till_date': '2019-09-12',
+            'group1': '3',
+            'group2': '6',
+        },
+    )
+    assert response.status_code == 400
+
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').first()
+            assert not trip
+
+
+@pytest.mark.parametrize(
+    'dates',
+    [('2019-09-42', '2019-09-56'), ('2019-09-10', '2019-09-08')],
+)
+def test_trips_add_rejects_incorrect_dates(
+    org_logged_client: FlaskClient, dates: list[str]
+):
+    response = org_logged_client.post(
+        '/api/trips/add',
+        json={
+            'name': 'Test trip',
+            'from_date': dates[0],
+            'till_date': dates[1],
+            'group1': '3',
+            'group2': '6'
+        },
+    )
+    assert response.status_code == 400
+
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').first()
+            assert not trip
+
+
+@pytest.mark.parametrize(
+    'groups',
+    [
+        {},
+        {'group1': '3', 'group2': '0'},
+        {'group1': '3', 'group2': '-6'},
+        {'group1': 'nan', 'group2': '4'},
+    ],
+)
+def test_trips_add_rejects_incorrect_groups(
+    org_logged_client: FlaskClient, groups: dict[str, str]
+):
+    data = {
+        'name': 'Test trip',
+        'from_date': '2019-09-10',
+        'till_date': '2019-09-12'
+    }
+    data.update(groups)
+    response = org_logged_client.post('/api/trips/add', json=data)
+    assert response.status_code == 400
+
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').first()
+            assert not trip

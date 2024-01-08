@@ -1,15 +1,97 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import hashlib
+import secrets
+from typing import Any, List, Optional
 from uuid import uuid4
-from typing import List, Optional, Final
 
-from flask import Blueprint, url_for, abort, g
+from flask import Blueprint, request, url_for, abort, g
+from sentry_sdk import capture_exception
 
 from organizer.auth import api_login_required_group
 from organizer.db import get_session
-from organizer.schema import Trip, AccessGroup, TripAccess, SharingLink
+from organizer.schema import Group, Trip, AccessGroup, TripAccess, SharingLink
+from organizer.strings import STRING_TABLE
 
 BP = Blueprint('trips', __name__, url_prefix='/trips')
+
+def get_magic(name: str) -> int:
+    return int(hashlib.sha1(name.encode()).hexdigest(), 16) % 8 + 1
+
+
+def get_trip(trip_uid: str):
+    with get_session() as session:
+        trip: Optional[Trip] = None
+        shared = False
+
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        if not trip:
+            abort(404)
+
+        if g.user.access_group != AccessGroup.Administrator:
+            if trip.created_by != g.user.id:
+                shared = True
+
+        return {
+            'uid': trip.uid,
+            'trip': {
+                'name': trip.name,
+                'from_date': trip.from_date.isoformat(),
+                'till_date': trip.till_date.isoformat(),
+                'days_count': (trip.till_date - trip.from_date).days + 1,
+                'created_by': trip.created_by,
+                'last_update': trip.last_update,
+                'archived': trip.archived,
+                'groups': [group.persons for group in trip.groups],
+                'user': trip.user.login,
+                'share_link': url_for('api.trips.share', trip_uid=trip.uid),
+                'archive_link': url_for('api.trips.archive', trip_uid=trip.uid),
+            },
+            'type': 'shared' if shared else 'user',
+            'attendees': sum(group.persons for group in trip.groups),
+            'cover_src': url_for('static', filename=f'img/trips/{get_magic(trip.name)}.png'),
+            'open_link': url_for('meals.days_view', trip_uid=trip.uid),
+            'edit_link': url_for('trips.edit', trip_uid=trip.uid),
+            'forget_link': url_for('trips.forget', trip_uid=trip.uid),
+            'packing_link': url_for('reports.packing', trip_uid=trip.uid),
+            'shopping_link': url_for('reports.shopping', trip_uid=trip.uid),
+            'download_link': url_for('trips.download', trip_uid=trip.uid),
+        }
+
+
+
+def validate_input_data(data: dict[str, Any]):
+    name = data['name']
+    if not name or len(name) > 50:
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect name'])
+
+    groups: list[int] = []
+    try:
+        i = 1
+        while True:
+            group_name = f'group{i}'
+            if group_name in data:
+                value = int(data[group_name])
+                if value < 1:
+                    raise ValueError
+                groups.append(data[group_name])
+                i += 1
+            else:
+                break
+        if not groups:
+            raise ValueError
+    except ValueError:
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect groups'])
+
+    from_date = data['from_date']
+    till_date = data['till_date']
+    try:
+        from_date = date.fromisoformat(from_date)
+        till_date = date.fromisoformat(till_date)
+        if till_date < from_date:
+            raise ValueError
+    except ValueError:
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect dates'])
+    return name, groups, from_date, till_date
 
 
 @BP.get('/get')
@@ -23,8 +105,12 @@ def get_trip_uids():
             user_trips = session.query(Trip)
         else:
             user_trips = session.query(Trip).filter(Trip.created_by == g.user.id)
-            shared_trips = session.query(Trip.uid).join(TripAccess).filter(TripAccess.user_id == g.user.id,
-                                                                           Trip.archived == False).all()
+            shared_trips = (
+                session.query(Trip.uid)
+                .join(TripAccess)
+                .filter(TripAccess.user_id == g.user.id, Trip.archived == False)
+                .all()
+            )
         user_trips = user_trips.filter(Trip.archived == False).all()
 
         trips = []
@@ -42,46 +128,7 @@ def get_trip_uids():
 @BP.get('/get/<trip_uid>')
 @api_login_required_group(AccessGroup.User)
 def get_info(trip_uid: str):
-    with get_session() as session:
-        trip: Optional[Trip] = None
-        shared = False
-
-        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
-        if not trip:
-            abort(404)
-
-        if g.user.access_group != AccessGroup.Administrator:
-            if trip.created_by != g.user.id:
-                shared = True
-
-        magic: Final = int(hashlib.sha1(
-            trip.name.encode()).hexdigest(), 16) % 8 + 1
-
-        return {
-            'uid': trip.uid,
-            'trip': {
-                'name': trip.name,
-                'from_date': trip.from_date,
-                'till_date': trip.till_date,
-                'days_count': (trip.till_date - trip.from_date).days + 1,
-                'created_by': trip.created_by,
-                'last_update': trip.last_update,
-                'archived': trip.archived,
-                'groups': [group.persons for group in trip.groups],
-                'user': trip.user.login,
-                'share_link': url_for('api.trips.share', trip_uid=trip.uid),
-                'archive_link': url_for('api.trips.archive', trip_uid=trip.uid),
-            },
-            'type': 'shared' if shared else 'user',
-            'attendees': sum(group.persons for group in trip.groups),
-            'cover_src': url_for('static', filename=f'img/trips/{magic}.png'),
-            'open_link': url_for('meals.days_view', trip_uid=trip.uid),
-            'edit_link': url_for('trips.edit', trip_uid=trip.uid),
-            'forget_link': url_for('trips.forget', trip_uid=trip.uid),
-            'packing_link': url_for('reports.packing', trip_uid=trip.uid),
-            'shopping_link': url_for('reports.shopping', trip_uid=trip.uid),
-            'download_link': url_for('trips.download', trip_uid=trip.uid),
-        }
+    return get_trip(trip_uid)
 
 
 @BP.get('/share/<trip_uid>')
@@ -93,12 +140,17 @@ def share(trip_uid: str):
             abort(404)
 
         # it could be shared only by a creator or admin
-        if trip.created_by != g.user.id and g.user.access_group != AccessGroup.Administrator:
+        if (
+            trip.created_by != g.user.id
+            and g.user.access_group != AccessGroup.Administrator
+        ):
             abort(403)
 
-        link: SharingLink = session.query(SharingLink).filter(
-            SharingLink.trip_id == trip.id,
-            SharingLink.user_id == g.user.id).first()
+        link: SharingLink = (
+            session.query(SharingLink)
+            .filter(SharingLink.trip_id == trip.id, SharingLink.user_id == g.user.id)
+            .first()
+        )
 
         if link:
             uuid = link.uuid
@@ -136,3 +188,38 @@ def archive(trip_uid: str):
         session.commit()
 
     return {'status': 'ok'}
+
+
+@BP.post('/add')
+@api_login_required_group(AccessGroup.User)
+def add():
+    try:
+        if not request.json:
+            raise RuntimeError('No JSON provided')
+        name, groups, from_date, till_date = validate_input_data(request.json)
+    except RuntimeError as exc:
+        capture_exception(exc)
+        return abort(400)
+
+    with get_session() as session:
+        while True:
+            new_uid = secrets.token_urlsafe(8)
+            existing = session.query(Trip).filter(Trip.uid == new_uid).first()
+            if not existing:
+                break
+
+        new_trip = Trip(
+            uid=new_uid,
+            name=name,
+            from_date=from_date,
+            till_date=till_date,
+            created_by=g.user.id,
+        )
+
+        for i, persons in enumerate(groups):
+            new_trip.groups.append(Group(group_number=i, persons=persons))
+
+        session.add(new_trip)
+        session.commit()
+
+    return get_trip(new_uid)
