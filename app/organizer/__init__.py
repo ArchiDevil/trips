@@ -107,7 +107,7 @@ def create_app(test_config=None):
             'AccessGroup': schema.AccessGroup,
             'string_table': strings.STRING_TABLE,
             'today_date': datetime.datetime.today().strftime('%d-%m-%Y'),
-            'environment': app.config['ENV']
+            'environment': app.config.get('ENV', 'production'),
         }
 
     return app
