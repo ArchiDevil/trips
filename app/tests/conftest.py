@@ -12,6 +12,7 @@ def app():
     db_fd, db_path = tempfile.mkstemp()
 
     application = create_app({
+        'ENV': 'production',
         'TESTING': True,
         'DATABASE': 'sqlite:///' + db_path,
         'VK_CLIENT_ID': 'test_vk_client_id'
