@@ -1,45 +1,42 @@
 <script setup lang="ts">
-import { PropType } from 'vue'
+import { PropType, computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   group: {
-    type: Object as PropType<{ name: string; number: number; count: number }>,
+    type: Object as PropType<{ id: number; count: number }>,
     required: true,
   },
-  validator: {
-    type: Function as PropType<(count: number) => boolean>,
-    required: true,
-  },
-  group_name_prefix: {
-    type: String,
-    required: true,
-  },
-  error_message: {
-    type: String,
-    required: true,
-  },
+})
+
+const isValid = (n: number) => {
+  return /^[0-9]+$/.test(n.toString()) && +n > 0
+}
+
+const name = computed(() => {
+  return `group${props.group.id + 1}`
 })
 </script>
 
 <template>
   <div class="row mt-3">
     <label
-      :for="group.name"
+      :for="name"
       class="col-4 form-label">
-      {{ group_name_prefix }} {{ group.number }}:
+      {{ $t('trips.editModal.groupNamePrefix') }} {{ group.id + 1 }}:
     </label>
     <div class="col-8">
       <input
         class="form-control"
-        :id="group.name"
-        :name="group.name"
+        :id="name"
         :class="{
-          'is-valid': validator(group.count),
-          'is-invalid': !validator(group.count),
+          'is-valid': isValid(group.count),
+          'is-invalid': !isValid(group.count),
         }"
         v-model="group.count"
         autocomplete="off" />
-      <div class="invalid-feedback">{{ error_message }}</div>
+      <div class="invalid-feedback">
+        {{ $t('trips.editModal.groupErrorMessage') }}
+      </div>
     </div>
   </div>
 </template>

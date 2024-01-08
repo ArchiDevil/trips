@@ -4,7 +4,7 @@ import { mande } from 'mande'
 
 import DatePicker from 'vue-datepicker-next'
 import 'vue-datepicker-next/index.css'
-import 'vue-datepicker-next/locale/ru'
+import 'vue-datepicker-next/locale/ru.es'
 
 import { useTripsStore } from '../../stores/trips'
 import UserGroup from './UserGroup.vue'
@@ -16,9 +16,7 @@ import { Trip } from '../../interfaces'
 const initialGroups = (groups: number[]) => {
   return groups.map((count, i) => {
     return {
-      id: i + 1,
-      number: i + 1,
-      name: `group${i + 1}`,
+      id: i,
       count: count,
     }
   })
@@ -69,17 +67,13 @@ const updateGroups = () => {
   while (newCount > groups.value.length) {
     groups.value.push({
       id: 0,
-      number: 0,
       count: 0,
-      name: '',
     })
   }
 
   // update values
   groups.value.map((group, idx) => {
-    group.id = idx + 1
-    group.number = idx + 1
-    group.name = `group${idx + 1}`
+    group.id = idx
   })
 }
 
@@ -100,7 +94,7 @@ const submit = async () => {
     setTimeout(() => (window.location.href = `/meals/${response.uid}`), 200)
   } catch (e: any) {
     console.error(e)
-    lastErrors.value.push(e.toString())
+    lastErrors.value = [e.toString()]
   }
 }
 
@@ -200,11 +194,7 @@ onMounted(() => updateGroups())
           </div>
           <UserGroup
             v-for="group in groups"
-            :key="group.id"
-            :group="group"
-            :validator="(n) => /^[0-9]+$/.test(n.toString()) && +n > 0"
-            :group_name_prefix="$t('trips.editModal.groupNamePrefix')"
-            :error_message="$t('trips.editModal.groupErrorMessage')" />
+            :group="group" />
         </div>
         <div class="modal-footer">
           <button
