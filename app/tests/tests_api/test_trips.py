@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Any
 
 from flask.testing import FlaskClient
 import pytest
@@ -242,8 +243,7 @@ def test_trips_can_add_trip(org_logged_client: FlaskClient):
             'name': 'Test trip',
             'from_date': '2019-09-10',
             'till_date': '2019-09-12',
-            'group1': '3',
-            'group2': '6',
+            'groups': [3, 6],
         },
     )
     assert response.json
@@ -261,8 +261,7 @@ def test_trips_add_rejects_incorrect_name(org_logged_client: FlaskClient, name: 
             'name': name,
             'from_date': '2019-09-10',
             'till_date': '2019-09-12',
-            'group1': '3',
-            'group2': '6',
+            'groups': [3, 6],
         },
     )
     assert response.status_code == 400
@@ -286,8 +285,7 @@ def test_trips_add_rejects_incorrect_dates(
             'name': 'Test trip',
             'from_date': dates[0],
             'till_date': dates[1],
-            'group1': '3',
-            'group2': '6'
+            'groups': [3, 6],
         },
     )
     assert response.status_code == 400
@@ -301,21 +299,21 @@ def test_trips_add_rejects_incorrect_dates(
 @pytest.mark.parametrize(
     'groups',
     [
-        {},
-        {'group1': '3', 'group2': '0'},
-        {'group1': '3', 'group2': '-6'},
-        {'group1': 'nan', 'group2': '4'},
+        [],
+        [3, 0],
+        [3, -6],
+        ['nan', 4],
     ],
 )
 def test_trips_add_rejects_incorrect_groups(
-    org_logged_client: FlaskClient, groups: dict[str, str]
+    org_logged_client: FlaskClient, groups: list[Any]
 ):
     data = {
         'name': 'Test trip',
         'from_date': '2019-09-10',
-        'till_date': '2019-09-12'
+        'till_date': '2019-09-12',
+        'groups': groups
     }
-    data.update(groups)
     response = org_logged_client.post('/api/trips/add', json=data)
     assert response.status_code == 400
 

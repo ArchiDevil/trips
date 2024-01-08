@@ -66,17 +66,11 @@ def validate_input_data(data: dict[str, Any]):
 
     groups: list[int] = []
     try:
-        i = 1
-        while True:
-            group_name = f'group{i}'
-            if group_name in data:
-                value = int(data[group_name])
-                if value < 1:
-                    raise ValueError
-                groups.append(data[group_name])
-                i += 1
-            else:
-                break
+        for group in data['groups']:
+            value = int(group)
+            if value < 1:
+                raise ValueError
+            groups.append(group)
         if not groups:
             raise ValueError
     except ValueError:
