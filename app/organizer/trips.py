@@ -2,7 +2,6 @@ import csv
 import io
 from datetime import datetime
 from typing import Any, List, Optional
-import secrets
 
 from flask import Blueprint, render_template, request, url_for, redirect, \
                   abort, g, flash, send_file
@@ -53,57 +52,6 @@ def validate_input_data():
     return name, groups, from_date, till_date
 
 
-@bp.route('/add', methods=['GET', 'POST'])
-@login_required_group(AccessGroup.User)
-def add():
-    template_file = 'trips/edit.html'
-    caption = STRING_TABLE['Trips add title']
-    submit_caption = STRING_TABLE['Trips add edit button']
-    add_url = url_for('.add')
-    end_url = '/trips/'
-
-    if request.method == 'POST':
-        try:
-            name, groups, from_date, till_date = validate_input_data()
-        except RuntimeError as exc:
-            capture_exception(exc)
-            flash(exc)
-            return render_template(template_file,
-                                   caption=caption,
-                                   submit_caption=submit_caption,
-                                   close_url=end_url,
-                                   submit_url=add_url)
-
-        with get_session() as session:
-            while True:
-                new_uid = secrets.token_urlsafe(8)
-                existing = session.query(Trip).filter(Trip.uid == new_uid).first()
-                if not existing:
-                    break
-
-            new_trip = Trip(
-                uid=new_uid,
-                name=name,
-                from_date=from_date,
-                till_date=till_date,
-                created_by=g.user.id)
-
-            for i, persons in enumerate(groups):
-                new_trip.groups.append(Group(group_number=i, persons=persons))
-
-            session.add(new_trip)
-            session.commit()
-
-            end_url = url_for('meals.days_view', trip_uid=new_trip.uid)
-        return redirect(end_url)
-
-    return render_template(template_file,
-                           caption=caption,
-                           submit_caption=submit_caption,
-                           close_url='/trips/',
-                           submit_url=add_url)
-
-
 @bp.route('/edit/<trip_uid>', methods=['GET', 'POST'])
 @login_required_group(AccessGroup.User)
 def edit(trip_uid: str):
@@ -137,7 +85,7 @@ def edit(trip_uid: str):
                     raise RuntimeError('No redirect field is provided')
             except RuntimeError as exc:
                 capture_exception(exc)
-                flash(exc)
+                flash(str(exc))
                 return render_template(template_file,
                                        caption=caption,
                                        trip=trip_info,
