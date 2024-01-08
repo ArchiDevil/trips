@@ -16,10 +16,10 @@ const emit = defineEmits(['archive'])
 const error = ref<string | undefined>(undefined)
 const archiveTrip = async () => {
   const api = mande(props.archiveLink)
-  const response = await api.post<{ status: string }>('')
-  if (response.status == 'ok') {
+  try {
+    await api.post('')
     emit('archive')
-  } else {
+  } catch (e) {
     error.value = t('trips.archiveModal.error')
   }
 }
