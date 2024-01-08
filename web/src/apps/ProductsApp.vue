@@ -74,20 +74,26 @@ const archiveProduct = async (link: string) => {
   await useProductsStore().archiveProduct(link)
 }
 
+const editModal = ref<Modal | null>(null)
 const showModal = (product: Product | undefined) => {
   editedProduct.value = product
   const modalElem = document.getElementById('edit-modal')
   if (!modalElem) {
     return
   }
-  const modal = new Modal(modalElem, {
+  editModal.value = new Modal(modalElem, {
     keyboard: false,
   })
-  modal.show()
+  editModal.value.show()
   setTimeout(() => {
     const target = document.getElementById('add-name-input')
     ;(target as HTMLInputElement)?.select()
   }, 500)
+}
+
+const onProductsUpdate = async () => {
+  editModal.value?.hide()
+  await fetchProducts()
 }
 
 onMounted(async () => {
@@ -288,5 +294,5 @@ watch(search, () => {
     :button-name="modalButtonTitle"
     :submit-link="modalAcceptLink"
     :product="editedProduct"
-    @update="fetchProducts" />
+    @update="onProductsUpdate" />
 </template>
