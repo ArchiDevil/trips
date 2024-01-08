@@ -1,17 +1,26 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { PropType, computed, onMounted, ref, watch } from 'vue'
 import { mande } from 'mande'
 
 import DatePicker from 'vue-datepicker-next'
 import 'vue-datepicker-next/index.css'
 import 'vue-datepicker-next/locale/ru.es'
 
-import { useTripsStore } from '../../stores/trips'
 import UserGroup from './UserGroup.vue'
 import { Trip } from '../../interfaces'
 
-// TODO: implement auto redirect after creating a new trip
-// don't do this on editing?
+const props = defineProps({
+  trip: {
+    type: Object as PropType<Trip>,
+  },
+})
+
+const tripName = ref(props.trip ? props.trip.trip.name : '')
+const tripDates = ref<Date[]>(
+  props.trip
+    ? [new Date(props.trip.trip.from_date), new Date(props.trip.trip.till_date)]
+    : [new Date(), new Date()]
+)
 
 const initialGroups = (groups: number[]) => {
   return groups.map((count, i) => {
@@ -21,35 +30,8 @@ const initialGroups = (groups: number[]) => {
     }
   })
 }
-
-const toISODate = (date: Date) => {
-  return date.toISOString().split('T')[0]
-}
-
-const props = defineProps({
-  editMode: {
-    type: Boolean,
-    required: true,
-  },
-})
-
-const store = useTripsStore()
-
-const tripName = ref(props.editMode ? store.currentTrip.trip.name : '')
-const tripDates = ref<Date[]>(
-  props.editMode
-    ? [
-        new Date(store.currentTrip.trip.from_date),
-        new Date(store.currentTrip.trip.till_date),
-      ]
-    : [new Date(), new Date()]
-)
-const groups = ref(
-  props.editMode ? initialGroups(store.currentTrip.trip.groups) : []
-)
-const selectedGroupsCount = ref(
-  groups.value.length > 0 ? groups.value.length : 1
-)
+const groups = ref(props.trip ? initialGroups(props.trip.trip.groups) : [])
+const selectedGroupsCount = ref(Math.max(groups.value.length, 1))
 const lastErrors = ref<string[]>([])
 const validation = computed(() => {
   return {
@@ -77,8 +59,12 @@ const updateGroups = () => {
   })
 }
 
+const toISODate = (date: Date) => {
+  return date.toISOString().split('T')[0]
+}
 const busy = ref(false)
 const submit = async () => {
+  // TODO: add editing of the trip
   const api = mande('/api/trips/add')
   try {
     const from = toISODate(tripDates.value[0])
@@ -98,6 +84,23 @@ const submit = async () => {
   }
 }
 
+watch(
+  () => props.trip,
+  async (newTrip: Trip | undefined) => {
+    if (newTrip) {
+      tripName.value = newTrip ? newTrip.trip.name : ''
+      tripDates.value = [
+        new Date(newTrip.trip.from_date),
+        new Date(newTrip.trip.till_date),
+      ]
+      groups.value = initialGroups(newTrip.trip.groups)
+    } else {
+      tripName.value = ''
+      tripDates.value = [new Date(), new Date()]
+      groups.value = []
+    }
+  }
+)
 onMounted(() => updateGroups())
 </script>
 
@@ -110,7 +113,7 @@ onMounted(() => updateGroups())
         <div class="modal-header">
           <h5 class="modal-title">
             {{
-              props.editMode
+              props.trip
                 ? $t('trips.editModal.editTitle')
                 : $t('trips.editModal.addTitle')
             }}
@@ -203,7 +206,7 @@ onMounted(() => updateGroups())
             @click="submit"
             :disabled="!validation.name">
             {{
-              props.editMode
+              props.trip
                 ? $t('trips.editModal.submitButtonEdit')
                 : $t('trips.editModal.submitButtonAdd')
             }}

@@ -5,7 +5,7 @@ export const useTripsStore = defineStore('trips', {
   state() {
     return {
       trips: [] as Trip[],
-      currentTrip: {} as Trip,
+      currentTrip: undefined as Trip | undefined,
     }
   },
 })

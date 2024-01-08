@@ -1,32 +1,76 @@
 <script setup lang="ts">
-import { PropType, computed, onMounted, ref } from 'vue'
-import { Trip } from '../../interfaces'
+import { computed, onMounted, ref } from 'vue'
 import { Dropdown } from 'bootstrap'
 
 const props = defineProps({
-  trip: {
+  uid: {
     required: true,
-    type: Object as PropType<Trip>,
+    type: String,
+  },
+  name: {
+    required: true,
+    type: String,
+  },
+  type: {
+    required: true,
+    type: String,
+  },
+  coverLink: {
+    required: true,
+    type: String,
+  },
+  attendeesCount: {
+    required: true,
+    type: Number,
+  },
+  fromDate: {
+    required: true,
+    type: String,
+  },
+  tillDate: {
+    required: true,
+    type: String,
+  },
+  openLink: {
+    required: true,
+    type: String,
+  },
+  editLink: {
+    required: true,
+    type: String,
+  },
+  shareLink: {
+    required: true,
+    type: String,
+  },
+  archiveLink: {
+    required: true,
+    type: String,
+  },
+  forgetLink: {
+    required: true,
+    type: String,
   },
 })
 
 defineEmits({
+  edit: (uid: string) => true,
   share: (shareLink: string) => true,
   archive: (archiveLink: string) => true,
 })
 
 const fromDate = computed(() => {
-  return new Date(props.trip.trip.from_date).toLocaleDateString()
+  return new Date(props.fromDate).toLocaleDateString()
 })
 
 const tillDate = computed(() => {
-  return new Date(props.trip.trip.till_date).toLocaleDateString()
+  return new Date(props.tillDate).toLocaleDateString()
 })
 
 const past = computed(() => {
   const now = new Date()
   now.setHours(0, 0, 0, 0) // to avoid rounding issues for the same day
-  return now > new Date(props.trip.trip.till_date)
+  return now > new Date(props.tillDate)
 })
 
 const dropdown = ref<Dropdown | null>(null)
@@ -41,12 +85,11 @@ onMounted(() => {
 <template>
   <div
     class="card shadow mb-3"
-    v-if="!trip.trip.archived"
     :class="{ 'bg-light': past }">
     <div class="row no-gutters">
       <div class="d-none d-md-block col-md-4 col-xl-3">
         <img
-          :src="trip.cover_src"
+          :src="coverLink"
           class="w-100 rounded-left"
           alt=""
           :class="{ 'fade-out': past }" />
@@ -57,8 +100,8 @@ onMounted(() => {
             <font-awesome-icon
               icon="fa-solid fa-share-alt"
               :title="$t('trips.sharedInfoTitle')"
-              v-if="trip.type == 'shared'" />
-            {{ trip.trip.name }}
+              v-if="type == 'shared'" />
+            {{ name }}
           </h4>
           <p class="card-text mb-2">
             <font-awesome-icon icon="fa-solid fa-calendar-day" />
@@ -66,13 +109,13 @@ onMounted(() => {
           </p>
           <p class="card-text">
             <font-awesome-icon icon="fa-solid fa-walking" />
-            {{ $t('trips.participantsCountTitle') }}: {{ trip.attendees }}
+            {{ $t('trips.participantsCountTitle') }}: {{ attendeesCount }}
           </p>
           <!-- <p class="card-text"><small class="text-muted">{{ $t('trips.lastUpdatePrefix') + " " + lastUpdate }}</small></p> -->
           <div class="row">
             <div class="col">
               <a
-                :href="trip.open_link"
+                :href="openLink"
                 class="btn w-100"
                 :class="{ 'btn-primary': !past, 'btn-secondary': past }">
                 {{ $t('trips.openButton') }}
@@ -88,10 +131,11 @@ onMounted(() => {
                 {{ $t('trips.optionsButton') }}
               </button>
               <ul class="dropdown-menu">
-                <li v-if="trip.type == 'user'">
+                <li v-if="type == 'user'">
                   <a
                     class="dropdown-item"
-                    :href="trip.edit_link">
+                    href="javascript:void(0)"
+                    @click="$emit('edit', uid)">
                     <font-awesome-icon icon="fa-solid fa-pen" />
                     {{ $t('trips.editButton') }}
                   </a>
@@ -99,17 +143,17 @@ onMounted(() => {
                 <li v-else>
                   <a
                     class="dropdown-item"
-                    :href="trip.forget_link">
+                    :href="forgetLink">
                     <font-awesome-icon icon="fa-solid fa-eye-slash" />
                     {{ $t('trips.hideButton') }}
                   </a>
                 </li>
-                <template v-if="trip.type === 'user'">
+                <template v-if="type === 'user'">
                   <li>
                     <a
                       class="dropdown-item"
                       href="javascript:void(0)"
-                      @click="$emit('share', trip.trip.share_link)">
+                      @click="$emit('share', shareLink)">
                       <font-awesome-icon icon="fa-solid fa-share-alt" />
                       {{ $t('trips.shareButton') }}
                     </a>
@@ -118,7 +162,7 @@ onMounted(() => {
                     <a
                       class="dropdown-item"
                       href="javascript:void(0)"
-                      @click="$emit('archive', trip.trip.archive_link)">
+                      @click="$emit('archive', archiveLink)">
                       <font-awesome-icon icon="fa-solid fa-archive" />
                       {{ $t('trips.archiveButton') }}
                     </a>

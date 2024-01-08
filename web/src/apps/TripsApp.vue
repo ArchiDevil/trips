@@ -23,6 +23,7 @@ const { t } = useI18n()
 const idsLoading = ref(true)
 const tripsLoading = ref(true)
 const tripUids = ref<number[]>([])
+const currentTrip = computed(() => useTripsStore().currentTrip)
 
 const addTripLink = '/trips/add'
 const sortedTrips = computed(() => {
@@ -45,6 +46,21 @@ const sortedTrips = computed(() => {
     ...pastTrips.sort((a, b) => sortingFunc(b, a)),
   ]
 })
+
+const editMode = ref(false)
+const showEditModal = (trip: Trip) => {
+  // TODO: this should be done inside a store actually
+  useTripsStore().currentTrip = trip
+  editMode.value = true
+  const modalElem = document.getElementById('edit-modal')
+  if (!modalElem) {
+    return
+  }
+  const modal = new Modal(modalElem, {
+    keyboard: false,
+  })
+  modal.show()
+}
 
 const linkText = ref(t('trips.shareModal.linkPlaceholder'))
 const copyStatus = ref<string | undefined>('')
@@ -108,6 +124,8 @@ const onTripArchived = async () => {
 }
 
 const showAddModal = () => {
+  useTripsStore().currentTrip = undefined
+  editMode.value = false
   const modalElem = document.getElementById('edit-modal')
   if (!modalElem) {
     return
@@ -199,6 +217,7 @@ onMounted(async () => {
         v-if="tripUids.length">
         <TripsList
           :trips="sortedTrips"
+          @edit="(trip) => showEditModal(trip)"
           @share="(shareLink) => showShareModal(shareLink)"
           @archive="(archiveLink) => showArchiveModal(archiveLink)" />
         <div
@@ -223,5 +242,5 @@ onMounted(async () => {
   <!-- TODO: FIX MODE -->
   <TripEditorModal
     id="edit-modal"
-    :edit-mode="false" />
+    :trip="currentTrip" />
 </template>
