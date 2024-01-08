@@ -23,6 +23,9 @@ export default defineConfig({
     {
       ...mockServer(),
       apply: 'serve',
-    }
-  ]
+    },
+  ],
+  test: {
+    environment: 'jsdom',
+  },
 })
