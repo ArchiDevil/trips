@@ -102,6 +102,11 @@ const showArchiveModal = (archiveLink_: string) => {
   archiveModal.value.show()
 }
 
+const onTripArchived = async () => {
+  archiveModal.value?.hide()
+  await fetchTrips()
+}
+
 const showAddModal = () => {
   const modalElem = document.getElementById('edit-modal')
   if (!modalElem) {
@@ -114,6 +119,7 @@ const showAddModal = () => {
 }
 
 const fetchTrips = async () => {
+  useTripsStore().trips = []
   const api = mande('/api/trips')
   const response = await api.get<{ trips: number[] }>('/get')
   try {
@@ -212,7 +218,7 @@ onMounted(async () => {
   <ArchiveTripDialog
     id="archive-modal"
     :archive-link="archiveLink"
-    @archive="fetchTrips()" />
+    @archive="onTripArchived" />
 
   <!-- TODO: FIX MODE -->
   <TripEditorModal
