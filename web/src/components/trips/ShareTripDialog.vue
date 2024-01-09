@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Icon from '../Icon.vue'
 import Modal from '../Modal.vue'
 
 defineEmits(['copyLink'])
@@ -44,7 +45,7 @@ defineProps({
             class="btn btn-outline-primary"
             type="button"
             @click="$emit('copyLink')">
-            <font-awesome-icon icon="fa-solid fa-copy" />
+            <Icon icon="fa-copy" />
           </button>
         </div>
       </div>

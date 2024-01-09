@@ -12,6 +12,7 @@ import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
+import Icon from '../components/Icon.vue'
 
 const search = ref('')
 const lastRequest = ref<number | undefined>(undefined)
@@ -136,7 +137,7 @@ watch(search, () => {
             type="button"
             class="btn btn-primary w-100"
             @click="showModal(undefined)">
-            <font-awesome-icon icon="fa-solid fa-plus" />
+            <Icon icon="fa-plus" />
             {{ $t('products.addNew') }}
           </button>
         </PageCard>
@@ -145,7 +146,7 @@ watch(search, () => {
       <div class="col">
         <div class="input-group mb-3">
           <span class="input-group-text">
-            <font-awesome-icon icon="fa-solid fa-search" />
+            <Icon icon="fa-search" />
           </span>
           <input
             :placeholder="$t('products.searchPlaceholder')"
@@ -228,8 +229,8 @@ watch(search, () => {
                   <a
                     @click="showModal(product)"
                     href="javascript:void(0);">
-                    <font-awesome-icon
-                      icon="fa-solid fa-pen"
+                    <Icon
+                      icon="fa-pen"
                       :title="$t('products.editButtonTitle')" />
                   </a>
                 </span>
@@ -238,9 +239,9 @@ watch(search, () => {
                     href="javascript:void(0);"
                     :title="$t('products.archiveButtonTitle')"
                     @click="archiveProduct(product.archive_link)">
-                    <font-awesome-icon
+                    <Icon
                       class="text-danger"
-                      icon="fa-solid fa-archive" />
+                      icon="fa-archive" />
                   </a>
                 </span>
               </td>
@@ -256,7 +257,7 @@ watch(search, () => {
               <a
                 class="page-link"
                 @click="prevPage">
-                <font-awesome-icon icon="fa-solid fa-arrow-left" />
+                <Icon icon="fa-arrow-left" />
               </a>
             </li>
 
@@ -266,7 +267,7 @@ watch(search, () => {
               <a
                 class="page-link"
                 @click="nextPage">
-                <font-awesome-icon icon="fa-solid fa-arrow-right" />
+                <Icon icon="fa-arrow-right" />
               </a>
             </li>
           </ul>

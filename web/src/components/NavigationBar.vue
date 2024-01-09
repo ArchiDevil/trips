@@ -5,6 +5,7 @@ import { useUserStore } from '../stores/user'
 import { useNavStore } from '../stores/nav'
 
 import globals from '../globals'
+import Icon from './Icon.vue'
 
 const admin = computed(
   () => useUserStore().info.access_group == 'Administrator'
@@ -61,7 +62,7 @@ const displayedName = computed(() => {
               class="nav-link"
               :href="tripsPage"
               :class="{ active: navLink == 'trips' }">
-              <font-awesome-icon icon="fa-solid fa-route" />
+              <Icon icon="fa-route" />
               {{ $t('navbar.tripsLink') }}
             </a>
           </li>
@@ -71,7 +72,7 @@ const displayedName = computed(() => {
               class="nav-link"
               :href="productsPage"
               :class="{ active: navLink == 'products' }">
-              <font-awesome-icon icon="fa-solid fa-pizza-slice" />
+              <Icon icon="fa-pizza-slice" />
               {{ $t('navbar.productsLink') }}
             </a>
           </li>
@@ -82,7 +83,7 @@ const displayedName = computed(() => {
               :href="usersPage"
               v-if="admin"
               :class="{ active: navLink == 'users' }">
-              <font-awesome-icon icon="fa-solid fa-users" />
+              <Icon icon="fa-users" />
               {{ $t('navbar.usersLink') }}
             </a>
           </li>
@@ -90,7 +91,7 @@ const displayedName = computed(() => {
             <a
               href="/tutorial.html"
               class="nav-link">
-              <font-awesome-icon icon="fa-solid fa-info" />
+              <Icon icon="fa-info" />
               {{ $t('docs.howToLink') }}
             </a>
           </li>
@@ -111,7 +112,7 @@ const displayedName = computed(() => {
             class="btn btn-outline-success my-2 my-sm-0"
             :href="logoutLink">
             {{ $t('navbar.logoutLink') }}
-            <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
+            <Icon icon="fa-sign-out-alt" />
           </a>
         </form>
       </div>

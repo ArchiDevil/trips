@@ -17,6 +17,7 @@ import ShareTripDialog from '../components/trips/ShareTripDialog.vue'
 import TripsList from '../components/trips/TripsList.vue'
 import TripEditorModal from '../components/trips/TripEditorModal.vue'
 import cardImg from '../assets/1.png'
+import Icon from '../components/Icon.vue'
 
 const { t } = useI18n()
 
@@ -206,7 +207,7 @@ onMounted(async () => {
             @click="showAddModal()"
             class="btn btn-primary w-100"
             role="button">
-            <font-awesome-icon icon="fa-solid fa-plus" />
+            <Icon icon="fa-plus" />
             {{ $t('trips.createButton') }}
           </button>
         </PageCard>

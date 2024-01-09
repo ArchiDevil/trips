@@ -2,6 +2,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { Dropdown } from 'bootstrap'
 
+import Icon from '../Icon.vue'
+
 const props = defineProps({
   uid: {
     required: true,
@@ -97,18 +99,18 @@ onMounted(() => {
       <div class="col-md-8 col-xl-9">
         <div class="card-body">
           <h4 class="card-title">
-            <font-awesome-icon
-              icon="fa-solid fa-share-alt"
+            <Icon
+              icon="fa-share-alt"
               :title="$t('trips.sharedInfoTitle')"
               v-if="type == 'shared'" />
             {{ name }}
           </h4>
           <p class="card-text mb-2">
-            <font-awesome-icon icon="fa-solid fa-calendar-day" />
+            <Icon icon="fa-calendar-day" />
             {{ fromDate }} - {{ tillDate }}
           </p>
           <p class="card-text">
-            <font-awesome-icon icon="fa-solid fa-walking" />
+            <Icon icon="fa-walking" />
             {{ $t('trips.participantsCountTitle') }}: {{ attendeesCount }}
           </p>
           <!-- <p class="card-text"><small class="text-muted">{{ $t('trips.lastUpdatePrefix') + " " + lastUpdate }}</small></p> -->
@@ -136,7 +138,7 @@ onMounted(() => {
                     class="dropdown-item"
                     href="javascript:void(0)"
                     @click="$emit('edit', uid)">
-                    <font-awesome-icon icon="fa-solid fa-pen" />
+                    <Icon icon="fa-pen" />
                     {{ $t('trips.editButton') }}
                   </a>
                 </li>
@@ -144,7 +146,7 @@ onMounted(() => {
                   <a
                     class="dropdown-item"
                     :href="forgetLink">
-                    <font-awesome-icon icon="fa-solid fa-eye-slash" />
+                    <Icon icon="fa-eye-slash" />
                     {{ $t('trips.hideButton') }}
                   </a>
                 </li>
@@ -154,7 +156,7 @@ onMounted(() => {
                       class="dropdown-item"
                       href="javascript:void(0)"
                       @click="$emit('share', shareLink)">
-                      <font-awesome-icon icon="fa-solid fa-share-alt" />
+                      <Icon icon="fa-share-alt" />
                       {{ $t('trips.shareButton') }}
                     </a>
                   </li>
@@ -163,7 +165,7 @@ onMounted(() => {
                       class="dropdown-item"
                       href="javascript:void(0)"
                       @click="$emit('archive', archiveLink)">
-                      <font-awesome-icon icon="fa-solid fa-archive" />
+                      <Icon icon="fa-archive" />
                       {{ $t('trips.archiveButton') }}
                     </a>
                   </li>
