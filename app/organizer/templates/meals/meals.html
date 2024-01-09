@@ -234,8 +234,7 @@
         <div class="col-auto d-none d-lg-block">
             <trip-handling-card v-if="!tripLoading" :from-date="fromDate" :till-date="tillDate"
                                 :editor="editor" :cover-src="tripInfo.cover_src" :attendees="tripInfo.attendees"
-                                :shopping-link="tripInfo.shopping_link" :packing-link="tripInfo.packing_link"
-                                :edit-link="tripInfo.edit_link"></trip-handling-card>
+                                :shopping-link="tripInfo.shopping_link" :packing-link="tripInfo.packing_link" />
             <span class="spinner-border spinner-border-lg ml-3" role="status" aria-hidden="true" v-else></span>
 
             <div class="sticky-top py-3 px-4" style="width: 18rem;" v-if="!mealsLoading">

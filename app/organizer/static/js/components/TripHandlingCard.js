@@ -12,9 +12,6 @@ export default {
                 <p class="card-text">
                     <i class="fas fa-walking"></i> {{ $t('meals.card.participants') }}: {{ attendees }}
                 </p>
-                <a class="btn btn-primary w-100 my-1" :href="editLink" v-if="editor">
-                    <i class="fas fa-pen"></i> {{ $t('meals.card.editButton') }}
-                </a>
                 <a class="btn btn-secondary w-100 my-1" :href="shoppingLink">
                     <i class="fas fa-shopping-cart"></i> {{ $t('meals.card.shoppingButton') }}
                 </a>
@@ -24,5 +21,5 @@ export default {
             </div>
         </div>
     `,
-    props: ['fromDate', 'tillDate', 'editor', 'coverSrc', 'attendees', 'shoppingLink', 'packingLink', 'editLink']
+    props: ['fromDate', 'tillDate', 'editor', 'coverSrc', 'attendees', 'shoppingLink', 'packingLink']
 }

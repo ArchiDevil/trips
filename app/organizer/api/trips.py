@@ -11,6 +11,7 @@ from organizer.auth import api_login_required_group
 from organizer.db import get_session
 from organizer.schema import Group, Trip, AccessGroup, TripAccess, SharingLink
 from organizer.strings import STRING_TABLE
+from organizer.utils.auth import user_has_trip_access
 
 BP = Blueprint('trips', __name__, url_prefix='/trips')
 
@@ -43,6 +44,7 @@ def get_trip(trip_uid: str):
                 'archived': trip.archived,
                 'groups': [group.persons for group in trip.groups],
                 'user': trip.user.login,
+                'edit_link': url_for('api.trips.edit', trip_uid=trip.uid),
                 'share_link': url_for('api.trips.share', trip_uid=trip.uid),
                 'archive_link': url_for('api.trips.archive', trip_uid=trip.uid),
             },
@@ -50,13 +52,11 @@ def get_trip(trip_uid: str):
             'attendees': sum(group.persons for group in trip.groups),
             'cover_src': url_for('static', filename=f'img/trips/{get_magic(trip.name)}.png'),
             'open_link': url_for('meals.days_view', trip_uid=trip.uid),
-            'edit_link': url_for('trips.edit', trip_uid=trip.uid),
             'forget_link': url_for('trips.forget', trip_uid=trip.uid),
             'packing_link': url_for('reports.packing', trip_uid=trip.uid),
             'shopping_link': url_for('reports.shopping', trip_uid=trip.uid),
             'download_link': url_for('trips.download', trip_uid=trip.uid),
         }
-
 
 
 def validate_input_data(data: dict[str, Any]):
@@ -217,3 +217,39 @@ def add():
         session.commit()
 
     return get_trip(new_uid)
+
+
+@BP.post('/edit/<trip_uid>')
+@api_login_required_group(AccessGroup.User)
+def edit(trip_uid: str):
+    try:
+        if not request.json:
+            raise RuntimeError('No JSON provided')
+        name, groups, from_date, till_date = validate_input_data(request.json)
+    except RuntimeError as exc:
+        capture_exception(exc)
+        return abort(400)
+
+    with get_session() as session:
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        if not trip:
+            abort(404)
+
+        if not user_has_trip_access(trip,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session):
+            abort(403)
+
+        trip.name = name
+        trip.from_date = from_date
+        trip.till_date = till_date
+
+        session.query(Group).filter(Group.trip_id == trip.id).delete()
+        for i, persons in enumerate(groups):
+            trip.groups.append(Group(group_number=i, persons=persons))
+
+        trip.last_update = datetime.utcnow()
+        session.commit()
+
+    return get_trip(trip_uid)

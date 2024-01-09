@@ -7,33 +7,6 @@ from organizer.db import get_session
 from organizer.strings import STRING_TABLE
 
 
-def test_trips_archive_rejects_not_logged_in(client: FlaskClient):
-    response = client.get('/trips/archive/uid1')
-    assert response.status_code == 302
-    assert 'auth/login' in response.location
-
-
-def test_trips_archive_rejects_non_user(org_logged_client: FlaskClient):
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            session.add(TripAccess(trip_id=3, user_id=2))
-            session.commit()
-
-    response = org_logged_client.get('/trips/archive/uid3')
-    assert response.status_code == 403
-
-
-def test_trips_can_archive(org_logged_client: FlaskClient, app):
-    response = org_logged_client.get('/trips/archive/uid1')
-    assert response.status_code == 302
-    assert '/' in response.location
-
-    with app.app_context():
-        with get_session() as session:
-            trip = session.query(Trip.id, Trip.archived).filter(Trip.id == 1).one()
-            assert trip.archived
-
-
 def test_trips_archive_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
     response = org_logged_client.get('/trips/archive/uid100')
     assert response.status_code == 404

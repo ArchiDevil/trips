@@ -43,6 +43,7 @@ export interface Trip {
     archived: false
     groups: number[]
     user: string
+    edit_link: string
     share_link: string
     archive_link: string
   }
@@ -50,7 +51,6 @@ export interface Trip {
   attendees: number
   cover_src: string
   open_link: string
-  edit_link: string
   forget_link: string
   packing_link: string
   shopping_link: string
