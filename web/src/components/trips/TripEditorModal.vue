@@ -31,15 +31,71 @@ const initialGroups = (groups: number[]) => {
     }
   })
 }
+
 const groups = ref(props.trip ? initialGroups(props.trip.trip.groups) : [])
 const selectedGroupsCount = ref(Math.max(groups.value.length, 1))
-const lastErrors = ref<string[]>([])
 const validation = computed(() => {
   return {
     name:
       tripName.value && tripName.value.length > 0 && tripName.value.length < 51,
   }
 })
+
+const error = ref<string | undefined>(undefined)
+const busy = ref(false)
+const submit = async () => {
+  const toISODate = (date: Date) => {
+    return date.toISOString().split('T')[0]
+  }
+
+  const data = {
+    name: tripName.value,
+    from_date: toISODate(tripDates.value[0]),
+    till_date: toISODate(tripDates.value[1]),
+    groups: groups.value.map((group) => group.count),
+  }
+
+  try {
+    if (!props.trip) {
+      // add mode
+      const api = mande('/api/trips/add')
+      busy.value = true
+      const response = await api.post<Trip>('', data)
+      busy.value = false
+      setTimeout(() => (window.location.href = `/meals/${response.uid}`), 200)
+    } else {
+      // edit mode
+      const api = mande(props.trip.trip.edit_link)
+      busy.value = true
+      const response = await api.post<Trip>('', data)
+      busy.value = false
+      setTimeout(() => (window.location.href = `/meals/${response.uid}`), 200)
+    }
+  } catch (e: any) {
+    console.error(e)
+    error.value = e.toString()
+  }
+}
+
+watch(
+  () => props.trip,
+  async (newTrip: Trip | undefined) => {
+    if (newTrip) {
+      tripName.value = newTrip ? newTrip.trip.name : ''
+      tripDates.value = [
+        new Date(newTrip.trip.from_date),
+        new Date(newTrip.trip.till_date),
+      ]
+      groups.value = initialGroups(newTrip.trip.groups)
+    } else {
+      tripName.value = ''
+      tripDates.value = [new Date(), new Date()]
+      groups.value = []
+    }
+    selectedGroupsCount.value = Math.max(groups.value.length, 1)
+    updateGroups()
+  }
+)
 
 const updateGroups = () => {
   const newCount = selectedGroupsCount.value
@@ -59,49 +115,6 @@ const updateGroups = () => {
     group.id = idx
   })
 }
-
-const toISODate = (date: Date) => {
-  return date.toISOString().split('T')[0]
-}
-const busy = ref(false)
-const submit = async () => {
-  // TODO: add editing of the trip
-  const api = mande('/api/trips/add')
-  try {
-    const from = toISODate(tripDates.value[0])
-    const till = toISODate(tripDates.value[1])
-    busy.value = true
-    const response = await api.post<Trip>('', {
-      name: tripName.value,
-      from_date: from,
-      till_date: till,
-      groups: groups.value.map((group) => group.count),
-    })
-    busy.value = false
-    setTimeout(() => (window.location.href = `/meals/${response.uid}`), 200)
-  } catch (e: any) {
-    console.error(e)
-    lastErrors.value = [e.toString()]
-  }
-}
-
-watch(
-  () => props.trip,
-  async (newTrip: Trip | undefined) => {
-    if (newTrip) {
-      tripName.value = newTrip ? newTrip.trip.name : ''
-      tripDates.value = [
-        new Date(newTrip.trip.from_date),
-        new Date(newTrip.trip.till_date),
-      ]
-      groups.value = initialGroups(newTrip.trip.groups)
-    } else {
-      tripName.value = ''
-      tripDates.value = [new Date(), new Date()]
-      groups.value = []
-    }
-  }
-)
 onMounted(() => updateGroups())
 </script>
 
@@ -119,9 +132,9 @@ onMounted(() => updateGroups())
 
     <template #body>
       <div
-        v-for="error in lastErrors"
         class="alert alert-danger"
-        role="alert">
+        role="alert"
+        v-if="error">
         {{ error }}
       </div>
 
@@ -203,7 +216,7 @@ onMounted(() => updateGroups())
         type="submit"
         class="btn btn-primary"
         @click="submit"
-        :disabled="!validation.name">
+        :disabled="!validation.name || busy">
         {{
           props.trip
             ? $t('trips.editModal.submitButtonEdit')
