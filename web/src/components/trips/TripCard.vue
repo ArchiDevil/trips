@@ -37,10 +37,6 @@ const props = defineProps({
     required: true,
     type: String,
   },
-  editLink: {
-    required: true,
-    type: String,
-  },
   shareLink: {
     required: true,
     type: String,

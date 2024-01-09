@@ -40,7 +40,6 @@ const onEdit = (uid: string) => {
     :from-date="trip.trip.from_date"
     :till-date="trip.trip.till_date"
     :open-link="trip.open_link"
-    :edit-link="trip.edit_link"
     :share-link="trip.trip.share_link"
     :archive-link="trip.trip.archive_link"
     :forget-link="trip.forget_link"
