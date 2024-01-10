@@ -80,22 +80,16 @@ onMounted(async () => {
       <div class="col">
         <table class="table table-hover table-sm">
           <thead>
-            <th
-              style="width: 3%"
-              class="d-print-none table-light">
-              #
-            </th>
-            <th
-              style="width: 30%"
-              class="table-light">
+            <th class="d-print-none table-light">#</th>
+            <th class="table-light">
               {{ $t('shopping.nameTitle') }}
             </th>
-            <th
-              class="text-right table-light"
-              style="width: 15%">
+            <th class="text-right table-light">
               {{ $t('shopping.massTitle') }}
             </th>
-            <th class="d-none d-print-table-cell text-right table-light">
+            <th
+              class="d-none d-print-table-cell text-right table-light"
+              style="width: 50%">
               {{ $t('shopping.notesTitle') }}
             </th>
           </thead>
