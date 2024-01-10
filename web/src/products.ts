@@ -47,10 +47,10 @@ const i18n = createI18n({
   messages,
 })
 
-const productsApp = createApp(ProductsApp)
-productsApp.use(pinia)
-productsApp.use(i18n)
-productsApp.component('font-awesome-icon', FontAwesomeIcon)
-productsApp.mount('#products-app')
+const app = createApp(ProductsApp)
+app.use(pinia)
+app.use(i18n)
+app.component('font-awesome-icon', FontAwesomeIcon)
+app.mount('#products-app')
 
 useUserStore().fetchUserData()

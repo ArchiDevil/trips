@@ -49,10 +49,10 @@ const i18n = createI18n({
   messages,
 })
 
-const tripsApp = createApp(TripsApp)
-tripsApp.use(pinia)
-tripsApp.use(i18n)
-tripsApp.component('font-awesome-icon', FontAwesomeIcon)
-tripsApp.mount('#trips-app')
+const app = createApp(TripsApp)
+app.use(pinia)
+app.use(i18n)
+app.component('font-awesome-icon', FontAwesomeIcon)
+app.mount('#trips-app')
 
 useUserStore().fetchUserData()

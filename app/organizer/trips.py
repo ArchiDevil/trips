@@ -3,16 +3,14 @@ import io
 from datetime import datetime
 from typing import Any, List, Optional
 
-from flask import Blueprint, render_template, request, url_for, redirect, \
-                  abort, g, flash, send_file
-from sentry_sdk import capture_exception
+from flask import Blueprint, render_template, url_for, redirect, abort, g, \
+                  send_file
 
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import SharingLink, Trip, AccessGroup, TripAccess, Group, \
+from organizer.schema import SharingLink, Trip, AccessGroup, TripAccess, \
                              Product, MealRecord
 from organizer.strings import STRING_TABLE
-from organizer.utils.auth import user_has_trip_access
 
 bp = Blueprint('trips', __name__, url_prefix='/trips')
 
