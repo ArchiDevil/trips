@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-from sqlalchemy.sql import func
 from flask import Blueprint, render_template, abort, redirect, url_for
 
 from organizer.auth import login_required_group
@@ -8,44 +7,6 @@ from organizer.db import get_session
 from organizer.schema import Trip, Product, MealRecord, AccessGroup, Group
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
-
-
-@bp.get('/shopping/<trip_uid>')
-@login_required_group(AccessGroup.User)
-def shopping(trip_uid: str):
-    with get_session() as session:
-        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
-        if not trip:
-            abort(404)
-
-        persons_count = session.query(
-            func.sum(Group.persons)).filter(Group.trip_id == trip.id).scalar()
-        meals = session.query(
-            MealRecord.mass,
-            Product.id,
-            Product.name,
-            Product.grams).join(Product).filter(MealRecord.trip_id == trip.id).all()
-
-    products = {}
-    for meal in meals:
-        if meal.id not in products:
-            products[meal.id] = {
-                'id': meal.id,
-                'name': meal.name,
-                'mass': 0
-            }
-            if meal.grams is not None:
-                products[meal.id]['pieces'] = 0
-
-        products[meal.id]['mass'] += meal.mass * persons_count
-
-        if meal.grams is not None:
-            products[meal.id]['pieces'] += meal.mass * persons_count / meal.grams
-
-    # sort products by name
-    products = list(products.values())
-    products.sort(key=lambda x: x['name'])
-    return render_template('reports/shopping.html', trip=trip, products=products)
 
 
 @bp.get('/packing/<trip_uid>')

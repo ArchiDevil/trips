@@ -54,7 +54,7 @@ def get_trip(trip_uid: str):
             'open_link': url_for('meals.days_view', trip_uid=trip.uid),
             'forget_link': url_for('trips.forget', trip_uid=trip.uid),
             'packing_link': url_for('reports.packing', trip_uid=trip.uid),
-            'shopping_link': url_for('reports.shopping', trip_uid=trip.uid),
+            'shopping_link': f'/reports/shopping/{trip.uid}',
             'download_link': url_for('trips.download', trip_uid=trip.uid),
         }
 

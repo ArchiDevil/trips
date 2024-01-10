@@ -6,25 +6,6 @@ from flask.testing import FlaskClient
 from organizer.strings import STRING_TABLE
 
 
-def test_shopping_rejects_not_logged_in(client: FlaskClient):
-    response = client.get('/reports/shopping/uid1')
-    assert response.status_code == 302
-    assert 'auth/login' in response.location
-
-
-def test_shopping_shows_non_shared_trip(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/reports/shopping/uid3')
-    assert response.status_code == 200
-
-
-def test_shopping_shows_report(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/reports/shopping/uid1')
-    assert response.status_code == 200
-    assert b'Taganay' in response.data
-    assert b'Mango' in response.data
-    assert (STRING_TABLE['Shopping report pieces suffix'] + ')').encode() in response.data
-
-
 def test_shopping_returns_404_on_invalid_trip_id(org_logged_client: FlaskClient):
     response = org_logged_client.get('/reports/shopping/uid100')
     assert response.status_code == 404
