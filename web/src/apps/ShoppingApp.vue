@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { mande } from 'mande'
+import { useRoute } from 'vue-router'
 
 import { Trip } from '../interfaces'
 
 import imgSrc from '../assets/4.png'
 import Icon from '../components/Icon.vue'
-import NavigationBar from '../components/NavigationBar.vue'
 import PageCard from '../components/PageCard.vue'
 
 interface ReportProduct {
@@ -16,8 +16,7 @@ interface ReportProduct {
   pieces?: number
 }
 
-// get trip uid from url like /reports/shopping/uid123
-const tripUid = window.location.pathname.split('/').pop()
+const tripUid = useRoute().params.uid as string
 
 const getTrip = async () => {
   const api = mande('/api/trips')
@@ -49,8 +48,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <NavigationBar class="d-print-none" />
-
   <div
     class="container"
     v-if="trip">
