@@ -14,6 +14,7 @@ export default defineConfig({
         trips: resolve(__dirname, 'trips.html'),
         tutorial: resolve(__dirname, 'tutorial.html'),
         products: resolve(__dirname, 'products.html'),
+        shopping: resolve(__dirname, 'shopping.html'),
         // auth: resolve(__dirname, 'auth.html'),
       },
     },
