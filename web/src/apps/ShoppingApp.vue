@@ -80,20 +80,22 @@ onMounted(async () => {
       <div class="col">
         <table class="table table-hover table-sm">
           <thead>
-            <th class="d-print-none table-light">#</th>
-            <th class="table-light">
-              {{ $t('shopping.nameTitle') }}
-            </th>
-            <th class="text-right table-light">
-              {{ $t('shopping.massTitle') }}
-            </th>
-            <th
-              class="d-none d-print-table-cell text-right table-light"
-              style="width: 50%">
-              {{ $t('shopping.notesTitle') }}
-            </th>
+            <tr>
+              <th class="d-print-none">#</th>
+              <th>
+                {{ $t('shopping.nameTitle') }}
+              </th>
+              <th class="text-right">
+                {{ $t('shopping.massTitle') }}
+              </th>
+              <th
+                class="d-none d-print-table-cell text-right"
+                style="width: 50%">
+                {{ $t('shopping.notesTitle') }}
+              </th>
+            </tr>
           </thead>
-          <tbody>
+          <tbody class="table-group-divider">
             <tr v-for="(product, idx) in sortedProducts">
               <th
                 scope="row"
