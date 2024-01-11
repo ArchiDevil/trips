@@ -1,49 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { mande } from 'mande'
-import { Trip } from '../interfaces'
+import { useReportsStore } from '../stores/reports'
+
 import Icon from '../components/Icon.vue'
 
-interface PackingProduct {
-  name: string
-  meal: 0 | 1 | 2 | 3 // this is so bad >_<
-  mass: number[]
-  grams?: number
-}
-
-interface PackingData {
-  products: Record<string, PackingProduct[]>
-}
-
 const tripUid = useRoute().params.uid as string
+const store = useReportsStore()
 
-const getTrip = async () => {
-  const api = mande('/api/trips')
-
-  try {
-    const response = await api.get<Trip>(`/get/${tripUid}`)
-    return response
-  } catch (e) {
-    console.error(e)
-  }
-}
-const trip = ref<Trip | undefined>()
-
-const getPackingData = async () => {
-  const api = mande(`/api/reports/packing/${tripUid}`)
-
-  try {
-    const response = await api.get<PackingData>()
-    return response
-  } catch (e) {
-    console.error(e)
-  }
-}
-const packingData = ref<PackingData | undefined>()
 const daysCount = computed(() => {
-  if (!packingData.value) return 0
-  return Object.keys(packingData.value.products).length
+  if (!store.packingData) {
+    return 0
+  }
+  return Object.keys(store.packingData.products).length
 })
 const colsCount = ref(3)
 const rowsClass = computed(() => [
@@ -52,19 +21,19 @@ const rowsClass = computed(() => [
 ])
 
 onMounted(async () => {
-  trip.value = await getTrip()
-  packingData.value = await getPackingData()
+  await store.fetchTrip(tripUid)
+  await store.fetchPackingData(tripUid)
 })
 </script>
 
 <template>
   <div
     class="container"
-    v-if="trip">
+    v-if="store.trip">
     <div class="row d-print-none">
       <div class="col">
         <h1 class="display-4 my-3">
-          {{ trip.trip.name }}: {{ $t('packing.title') }}
+          {{ store.trip.trip.name }}: {{ $t('packing.title') }}
         </h1>
       </div>
       <div class="col-auto d-flex align-items-end">
@@ -98,13 +67,13 @@ onMounted(async () => {
 
   <div
     class="container-fluid"
-    v-if="packingData && trip">
+    v-if="store.packingData && store.trip">
     <div
       class="row"
       :class="rowsClass">
       <div
         class="col p-1"
-        v-for="day in Object.keys(packingData.products)">
+        v-for="day in Object.keys(store.packingData.products)">
         <h5>{{ $t('packing.dayPrefix') }} {{ day }}</h5>
         <table class="table table-sm">
           <thead>
@@ -113,7 +82,7 @@ onMounted(async () => {
               <th>{{ $t('packing.productColumn') }}</th>
               <th
                 class="text-right"
-                v-for="person_group in trip.trip.groups">
+                v-for="person_group in store.trip.trip.groups">
                 {{ person_group }}
                 {{ $t('packing.personsSuffix') }}
               </th>
@@ -121,7 +90,7 @@ onMounted(async () => {
           </thead>
           <tbody>
             <tr
-              v-for="product in packingData.products[day]"
+              v-for="product in store.packingData.products[day]"
               :class="{
                 'table-success': product.meal == 0,
                 'table-warning': product.meal == 1,
@@ -143,7 +112,7 @@ onMounted(async () => {
                   v-if="product.meal == 3" />
               </td>
               <td>{{ product.name }}</td>
-              <td v-for="(_, idx) in trip.trip.groups">
+              <td v-for="(_, idx) in store.trip.trip.groups">
                 <template v-if="product.grams">
                   {{ Math.ceil(product.mass[idx] / product.grams) }}
                   {{ $t('packing.piecesSuffix') }}

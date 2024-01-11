@@ -1,60 +1,35 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { mande } from 'mande'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-
-import { Trip } from '../interfaces'
+import { useReportsStore } from '../stores/reports'
 
 import imgSrc from '../assets/4.png'
 import Icon from '../components/Icon.vue'
 import PageCard from '../components/PageCard.vue'
 
-interface ReportProduct {
-  id: number
-  name: string
-  mass: number
-  pieces?: number
-}
-
 const tripUid = useRoute().params.uid as string
+const store = useReportsStore()
 
-const getTrip = async () => {
-  const api = mande('/api/trips')
-
-  // TODO: add error handling
-  const response = await api.get<Trip>(`/get/${tripUid}`)
-  return response
-}
-const trip = ref<Trip | undefined>()
-
-const getProducts = async () => {
-  const api = mande(`/api/reports/shopping/${tripUid}`)
-
-  // TODO: add error handling
-  const products = await api.get<ReportProduct[]>()
-  return products
-}
-const products = ref<ReportProduct[]>([])
 const sortedProducts = computed(() => {
-  return products.value.sort((a, b) => {
+  return store.shoppingData.sort((a, b) => {
     return a.name.localeCompare(b.name)
   })
 })
 
 onMounted(async () => {
-  trip.value = await getTrip()
-  products.value = await getProducts()
+  await store.fetchTrip(tripUid)
+  await store.fetchShoppingData(tripUid)
 })
 </script>
 
 <template>
   <div
     class="container"
-    v-if="trip">
+    v-if="store.trip">
     <div class="row my-3 d-print-none">
       <div class="col">
         <h1 class="display-4">
-          {{ trip.trip.name }}: {{ $t('shopping.title') }}
+          {{ store.trip.trip.name }}: {{ $t('shopping.title') }}
         </h1>
       </div>
     </div>
