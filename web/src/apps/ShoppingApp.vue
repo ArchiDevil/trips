@@ -97,7 +97,7 @@ onMounted(async () => {
               <th
                 scope="row"
                 class="d-print-none">
-                {{ idx }}
+                {{ idx + 1 }}
               </th>
               <td>{{ product.name }}</td>
               <td class="text-right">

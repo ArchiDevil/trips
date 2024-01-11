@@ -46,13 +46,13 @@ export interface Trip {
     edit_link: string
     share_link: string
     archive_link: string
+    packing_link: string
+    shopping_link: string
   }
   type: 'user' | 'shared'
   attendees: number
   cover_src: string
   open_link: string
   forget_link: string
-  packing_link: string
-  shopping_link: string
   download_link: string
 }
