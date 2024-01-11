@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { mande } from 'mande'
 import { useI18n } from 'vue-i18n'
 import { Modal } from 'bootstrap'
 
@@ -8,6 +7,7 @@ import { Trip } from '../interfaces'
 import { useNavStore } from '../stores/nav'
 import { useTripsStore } from '../stores/trips'
 
+import cardImg from '../assets/1.png'
 import Jumbotron from '../components/trips/Jumbotron.vue'
 import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
@@ -16,15 +16,12 @@ import ArchiveTripDialog from '../components/trips/ArchiveTripDialog.vue'
 import ShareTripDialog from '../components/trips/ShareTripDialog.vue'
 import TripsList from '../components/trips/TripsList.vue'
 import TripEditorModal from '../components/trips/TripEditorModal.vue'
-import cardImg from '../assets/1.png'
 import Icon from '../components/Icon.vue'
 
 const { t } = useI18n()
 
-const idsLoading = ref(true)
-const tripsLoading = ref(true)
-const tripUids = ref<number[]>([])
 const currentTrip = computed(() => useTripsStore().currentTrip)
+const tripsStore = useTripsStore()
 
 const addTripLink = '/trips/add'
 const sortedTrips = computed(() => {
@@ -51,7 +48,7 @@ const sortedTrips = computed(() => {
 const editMode = ref(false)
 const showEditModal = (trip: Trip) => {
   // TODO: this should be done inside a store actually
-  useTripsStore().currentTrip = trip
+  tripsStore.currentTrip = trip
   editMode.value = true
   const modalElem = document.getElementById('edit-modal')
   if (!modalElem) {
@@ -121,11 +118,11 @@ const showArchiveModal = (archiveLink_: string) => {
 
 const onTripArchived = async () => {
   archiveModal.value?.hide()
-  await fetchTrips()
+  await tripsStore.fetchTrips()
 }
 
 const showAddModal = () => {
-  useTripsStore().currentTrip = undefined
+  tripsStore.currentTrip = undefined
   editMode.value = false
   const modalElem = document.getElementById('edit-modal')
   if (!modalElem) {
@@ -137,28 +134,9 @@ const showAddModal = () => {
   modal.show()
 }
 
-const fetchTrips = async () => {
-  useTripsStore().trips = []
-  const api = mande('/api/trips')
-  const response = await api.get<{ trips: number[] }>('/get')
-  try {
-    tripUids.value = response.trips
-    idsLoading.value = false
-    await Promise.all(
-      tripUids.value.map(async (e) => {
-        const response = await api.get<Trip>(`/get/${e}`)
-        useTripsStore().trips.push(response)
-      })
-    )
-    tripsLoading.value = false
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 onMounted(async () => {
   useNavStore().link = 'trips'
-  await fetchTrips()
+  await tripsStore.fetchTrips()
 })
 </script>
 
@@ -168,15 +146,15 @@ onMounted(async () => {
   <div class="container">
     <div
       class="row my-3"
-      v-if="tripUids.length">
+      v-if="tripsStore.tripUids.length">
       <div class="col-6">
         <LoadingTitle
           :title="$t('trips.title')"
-          :loading="idsLoading" />
+          :loading="tripsStore.idsLoading" />
       </div>
       <div
         class="col-6 d-flex flex-row-reverse align-items-end"
-        v-if="!idsLoading">
+        v-if="!tripsStore.idsLoading">
         <a
           class="btn btn-primary d-block d-lg-none"
           type="button"
@@ -188,17 +166,17 @@ onMounted(async () => {
 
     <div
       class="row my-3"
-      :class="{ 'mt-5': !tripUids.length }"
-      v-if="!idsLoading">
+      :class="{ 'mt-5': !tripsStore.tripUids.length }"
+      v-if="!tripsStore.idsLoading">
       <div
         class="col"
-        v-if="!tripUids.length">
+        v-if="!tripsStore.tripUids.length">
         <Jumbotron :add-trip-link="addTripLink" />
       </div>
 
       <div
         class="col-auto d-none d-lg-block"
-        v-if="tripUids.length">
+        v-if="tripsStore.tripUids.length">
         <PageCard
           :image="cardImg"
           :header-text="$t('trips.cardTitle')"
@@ -215,7 +193,7 @@ onMounted(async () => {
 
       <div
         class="col"
-        v-if="tripUids.length">
+        v-if="tripsStore.tripUids.length">
         <TripsList
           :trips="sortedTrips"
           @edit="(trip) => showEditModal(trip)"
@@ -224,7 +202,7 @@ onMounted(async () => {
         <div
           class="spinner-border"
           role="status"
-          v-if="tripsLoading"></div>
+          v-if="tripsStore.tripsLoading"></div>
       </div>
     </div>
   </div>
