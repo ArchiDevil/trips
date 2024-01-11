@@ -235,6 +235,22 @@ export const messages = {
       notesTitle: 'Заметки',
       gramsSuffix: 'г',
       piecesSuffix: 'шт',
+    },
+    packing: {
+      title: 'фасовка',
+      selector: {
+        one: '1 день в ряд',
+        two: '2 дня в ряд',
+        three: '3 дня в ряд',
+        four: '4 дня в ряд',
+        five: '5 дней в ряд',
+        six: '6 дней в ряд',
+      },
+      dayPrefix: 'День',
+      productColumn: 'Продукт',
+      personsSuffix: 'чел',
+      piecesSuffix: 'шт',
+      gramsSuffix: 'г',
     }
   },
   en: {

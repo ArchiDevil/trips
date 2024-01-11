@@ -14,13 +14,26 @@ import {
   faInfo,
   faSignOutAlt,
   faPrint,
+  faCarrot,
+  faFish,
+  faCandyCane,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
 import ReportsApp from './apps/ReportsApp.vue'
 
-library.add(faRoute, faPizzaSlice, faUsers, faInfo, faSignOutAlt, faPrint)
+library.add(
+  faRoute,
+  faPizzaSlice,
+  faUsers,
+  faInfo,
+  faSignOutAlt,
+  faPrint,
+  faCarrot,
+  faFish,
+  faCandyCane
+)
 
 const pinia = createPinia()
 
