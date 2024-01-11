@@ -7,26 +7,25 @@ import { useNavStore } from '../stores/nav'
 import globals from '../globals'
 import Icon from './Icon.vue'
 
-const admin = computed(
-  () => useUserStore().info.access_group == 'Administrator'
-)
+const navStore = useNavStore()
+const userStore = useUserStore()
+
+const admin = computed(() => userStore.info.access_group == 'Administrator')
 const logoutLink = computed(() => globals.urls.logout)
 const mainPage = computed(() => globals.urls.mainPage)
 const tripsPage = computed(() => globals.urls.tripsPage)
 const productsPage = computed(() => globals.urls.productsPage)
 const usersPage = computed(() => globals.urls.usersPage)
-const navLink = computed(() => useNavStore().link)
-const userLoading = computed(() => useUserStore().isLoading)
-const userPhotoUrl = computed(() => useUserStore().info.photo_url)
+const userLoading = computed(() => userStore.isLoading)
+const userPhotoUrl = computed(() => userStore.info.photo_url)
 const displayedName = computed(() => {
-  const store = useUserStore()
-  if (store.isLoading) {
+  if (userStore.isLoading) {
     return ''
   }
 
-  return store.info.displayed_name
-    ? store.info.displayed_name
-    : store.info.login
+  return userStore.info.displayed_name
+    ? userStore.info.displayed_name
+    : userStore.info.login
 })
 </script>
 
@@ -61,7 +60,7 @@ const displayedName = computed(() => {
               id="trips-link"
               class="nav-link"
               :href="tripsPage"
-              :class="{ active: navLink == 'trips' }">
+              :class="{ active: navStore.link == 'trips' }">
               <Icon icon="fa-route" />
               {{ $t('navbar.tripsLink') }}
             </a>
@@ -71,7 +70,7 @@ const displayedName = computed(() => {
               id="products-link"
               class="nav-link"
               :href="productsPage"
-              :class="{ active: navLink == 'products' }">
+              :class="{ active: navStore.link == 'products' }">
               <Icon icon="fa-pizza-slice" />
               {{ $t('navbar.productsLink') }}
             </a>
@@ -82,7 +81,7 @@ const displayedName = computed(() => {
               class="nav-link"
               :href="usersPage"
               v-if="admin"
-              :class="{ active: navLink == 'users' }">
+              :class="{ active: navStore.link == 'users' }">
               <Icon icon="fa-users" />
               {{ $t('navbar.usersLink') }}
             </a>
