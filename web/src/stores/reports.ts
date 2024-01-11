@@ -30,9 +30,9 @@ export const useReportsStore = defineStore('reports', {
   },
   actions: {
     async fetchTrip(uid: string) {
-      const api = mande('/api/trips')
+      const api = mande(`/api/trips/get/${uid}`)
       try {
-        const response = await api.get<Trip>(`/get/${uid}`)
+        const response = await api.get<Trip>()
         return response
       } catch (e) {
         console.error(e)
