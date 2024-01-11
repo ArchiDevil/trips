@@ -58,8 +58,6 @@ def test_trips_org_can_get_trip(org_logged_client: FlaskClient):
     assert response.json['cover_src'] == '/static/img/trips/7.png'
     assert response.json['open_link'] == '/meals/uid1'
     assert response.json['forget_link'] == '/trips/forget/uid1'
-    assert response.json['packing_link'] == '/reports/packing/uid1'
-    assert response.json['shopping_link'] == '/reports/shopping/uid1'
     assert response.json['download_link'] == '/trips/download/uid1'
 
     assert response.json['trip']['name'] == 'Taganay trip'
@@ -73,6 +71,8 @@ def test_trips_org_can_get_trip(org_logged_client: FlaskClient):
     assert response.json['trip']['edit_link'] == '/api/trips/edit/uid1'
     assert response.json['trip']['share_link'] == '/api/trips/share/uid1'
     assert response.json['trip']['archive_link'] == '/api/trips/archive/uid1'
+    assert response.json['trip']['packing_link'] == '/reports/packing/uid1'
+    assert response.json['trip']['shopping_link'] == '/reports/shopping/uid1'
 
 
 def test_trips_org_can_access_shared_trip(org_logged_client: FlaskClient):

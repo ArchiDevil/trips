@@ -1,4 +1,6 @@
+from collections import defaultdict
 from typing import Any, Optional
+
 from flask import Blueprint, abort
 from sqlalchemy.sql import func
 
@@ -41,3 +43,52 @@ def shopping(trip_uid: str):
             products[meal.id]["pieces"] += meal.mass * persons_count / meal.grams
 
     return list(products.values())
+
+
+@BP.get("/packing/<trip_uid>")
+@api_login_required_group(AccessGroup.User)
+def packing(trip_uid: str):
+    with get_session() as session:
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        if not trip:
+            abort(404)
+
+        meals = (
+            session.query(
+                MealRecord.day_number,
+                MealRecord.meal_number,
+                MealRecord.mass,
+                Product.name,
+                Product.grams,
+            )
+            .join(Product)
+            .filter(MealRecord.trip_id == trip.id)
+            .order_by(MealRecord.day_number)
+            .all()
+        )
+
+        person_groups: list[int] = [
+            group.persons
+            for group in session.query(Group.persons)
+            .filter(Group.trip_id == trip.id)
+            .all()
+        ]
+
+    products: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    for meal in meals:
+        day: int = meal.day_number
+        products[day].append(
+            {
+                "name": meal.name,
+                "meal": meal.meal_number,
+                "mass": [meal.mass * persons for persons in person_groups],
+            }
+        )
+
+        if meal.grams is not None:
+            products[day][-1]["grams"] = meal.grams
+
+    for arr in products.values():
+        arr.sort(key=lambda x: x["meal"])
+
+    return {"products": products}

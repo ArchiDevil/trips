@@ -47,14 +47,14 @@ def get_trip(trip_uid: str):
                 'edit_link': url_for('api.trips.edit', trip_uid=trip.uid),
                 'share_link': url_for('api.trips.share', trip_uid=trip.uid),
                 'archive_link': url_for('api.trips.archive', trip_uid=trip.uid),
+                'packing_link': f'/reports/packing/{trip.uid}',
+                'shopping_link': f'/reports/shopping/{trip.uid}',
             },
             'type': 'shared' if shared else 'user',
             'attendees': sum(group.persons for group in trip.groups),
             'cover_src': url_for('static', filename=f'img/trips/{get_magic(trip.name)}.png'),
             'open_link': url_for('meals.days_view', trip_uid=trip.uid),
             'forget_link': url_for('trips.forget', trip_uid=trip.uid),
-            'packing_link': url_for('reports.packing', trip_uid=trip.uid),
-            'shopping_link': f'/reports/shopping/{trip.uid}',
             'download_link': url_for('trips.download', trip_uid=trip.uid),
         }
 

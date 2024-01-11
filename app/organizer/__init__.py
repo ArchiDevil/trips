@@ -93,9 +93,6 @@ def create_app(test_config=None):
     from . import api
     app.register_blueprint(api.BP)
 
-    from . import reports
-    app.register_blueprint(reports.bp)
-
     from . import users
     app.register_blueprint(users.bp)
 
