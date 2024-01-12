@@ -11,10 +11,8 @@ const reloadWindow = () => window.location.reload()
         {{ $t('meals.errorModal.title') }}
       </h5>
       <button
-        class="close"
-        data-bs-dismiss="modal">
-        <span aria-hidden="true">&times;</span>
-      </button>
+        class="btn-close"
+        data-bs-dismiss="modal"></button>
     </template>
     <template #body>
       {{ $t('meals.errorModal.text') }}
