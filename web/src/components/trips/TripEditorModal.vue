@@ -44,14 +44,17 @@ const validation = computed(() => {
 const error = ref<string | undefined>(undefined)
 const busy = ref(false)
 const submit = async () => {
-  const toISODate = (date: Date) => {
-    return date.toISOString().split('T')[0]
+  const toCustomIsoDate = (date: Date) => {
+    const year = date.getFullYear().toString()
+    const month = (date.getMonth() + 1).toString()
+    const day = date.getDate().toString()
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
   }
 
   const data = {
     name: tripName.value,
-    from_date: toISODate(tripDates.value[0]),
-    till_date: toISODate(tripDates.value[1]),
+    from_date: toCustomIsoDate(tripDates.value[0]),
+    till_date: toCustomIsoDate(tripDates.value[1]),
     groups: groups.value.map((group) => group.count),
   }
 
