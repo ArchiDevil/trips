@@ -13,15 +13,19 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['archive'])
+const busy = ref(false)
 
 const error = ref<string | undefined>(undefined)
 const archiveTrip = async () => {
   const api = mande(props.archiveLink)
   try {
+    busy.value = true
     await api.post('')
     emit('archive')
   } catch (e) {
     error.value = t('trips.archiveModal.error')
+  } finally {
+    busy.value = false
   }
 }
 </script>
@@ -56,6 +60,11 @@ const archiveTrip = async () => {
         type="button"
         class="btn btn-secondary"
         data-bs-dismiss="modal">
+        <span
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+          v-if="busy"></span>
         {{ $t('trips.archiveModal.closeButton') }}
       </button>
     </template>

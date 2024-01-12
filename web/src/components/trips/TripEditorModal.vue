@@ -217,6 +217,11 @@ onMounted(() => updateGroups())
         class="btn btn-primary"
         @click="submit"
         :disabled="!validation.name || busy">
+        <span
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+          v-if="busy"></span>
         {{
           props.trip
             ? $t('trips.editModal.submitButtonEdit')
