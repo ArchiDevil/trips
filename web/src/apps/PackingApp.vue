@@ -81,7 +81,7 @@ onMounted(async () => {
               <th class="d-none d-print-table-cell">T</th>
               <th>{{ $t('packing.productColumn') }}</th>
               <th
-                class="text-right"
+                class="text-end"
                 v-for="person_group in store.trip.trip.groups">
                 {{ person_group }}
                 {{ $t('packing.personsSuffix') }}

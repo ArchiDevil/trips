@@ -57,11 +57,11 @@ onMounted(async () => {
               <th>
                 {{ $t('shopping.nameTitle') }}
               </th>
-              <th class="text-right">
+              <th class="text-end">
                 {{ $t('shopping.massTitle') }}
               </th>
               <th
-                class="d-none d-print-table-cell text-right"
+                class="d-none d-print-table-cell text-end"
                 style="width: 50%">
                 {{ $t('shopping.notesTitle') }}
               </th>
@@ -75,7 +75,7 @@ onMounted(async () => {
                 {{ idx + 1 }}
               </th>
               <td>{{ product.name }}</td>
-              <td class="text-right">
+              <td class="text-end">
                 {{ product.mass }}
                 {{ $t('shopping.gramsSuffix') }}
                 <template v-if="product.pieces">
