@@ -9,10 +9,10 @@ import DayCard from '../components/DayCard.vue'
 import TripHandlingCard from '../components/TripHandlingCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import Icon from '../components/Icon.vue'
+import CycleDaysModal from '../components/CycleDaysModal.vue'
 import FatalErrorModal from '../components/FatalErrorModal.vue'
 
 // import AddProductModal from '../components/AddProductModal.vue'
-// import CycleDaysModal from '../components/CycleDaysModal.vue'
 
 const days = ref<Day[]>([])
 const trip = ref<Trip | undefined>()
@@ -49,7 +49,7 @@ const averageMass = computed(() => {
 
 const fromDate = computed(() => {
   if (!trip.value) {
-    return ''
+    return undefined
   }
   const date = new Date(trip.value.trip.from_date)
   return date.toLocaleDateString()
@@ -57,15 +57,13 @@ const fromDate = computed(() => {
 
 const tillDate = computed(() => {
   if (!trip.value) {
-    return ''
+    return undefined
   }
   const date = new Date(trip.value.trip.till_date)
   return date.toLocaleDateString()
 })
 
 const reload = (day: Day) => {
-  // const api = mande(day.reload_link)
-
   fetch(day.reload_link)
     .then((response) => response.json())
     .then((data) => {
@@ -141,7 +139,15 @@ const showFatalErrorModal = () => {
 }
 
 const showCycleDaysModal = () => {
-  // TODO: implement
+  const modalElem = document.getElementById('cycle-days-modal')
+  if (!modalElem) {
+    return
+  }
+
+  const modal = new Modal(modalElem, {
+    keyboard: false,
+  })
+  modal.show()
 }
 
 onMounted(async () => {
@@ -153,14 +159,17 @@ onMounted(async () => {
 <template>
   <NavigationBar />
 
-  <!-- <AddProductModal />
-    <CycleDaysModal /> -->
+  <!-- <AddProductModal />-->
+
+  <CycleDaysModal
+    id="cycle-days-modal"
+    v-if="trip"
+    :trip="trip" />
 
   <FatalErrorModal id="fatal-error-modal" />
 
   <div
     class="container"
-    id="meals-app"
     v-if="trip">
     <div class="row my-3">
       <div class="col">
@@ -207,8 +216,8 @@ onMounted(async () => {
       <div class="col-auto d-none d-lg-block">
         <TripHandlingCard
           v-if="!tripLoading"
-          :from-date="fromDate"
-          :till-date="tillDate"
+          :from-date="fromDate ?? ''"
+          :till-date="tillDate ?? ''"
           :cover-src="trip.cover_src"
           :attendees="trip.attendees"
           :shopping-link="trip.trip.shopping_link"
@@ -256,9 +265,7 @@ onMounted(async () => {
             </a>
             <button
               class="btn btn-sm btn-light float-end mx-1"
-              type="button"
-              data-bs-toggle="modal"
-              data-bs-target="#cycle-days-modal"
+              @click="showCycleDaysModal()"
               v-if="editor">
               <Icon icon="fa-spinner" />
             </button>
