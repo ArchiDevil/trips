@@ -48,6 +48,7 @@ export interface Trip {
     archive_link: string
     packing_link: string
     shopping_link: string
+    cycle_link: string
   }
   type: 'user' | 'shared'
   attendees: number
@@ -55,4 +56,21 @@ export interface Trip {
   open_link: string
   forget_link: string
   download_link: string
+}
+
+export interface Meal {
+  id: number
+  name: string
+  mass: number
+  calories: number
+  proteins: number
+  fats: number
+  carbs: number
+}
+
+export interface Day {
+  number: number
+  date: string
+  meals: Record<string, Meal[]>
+  reload_link: string
 }

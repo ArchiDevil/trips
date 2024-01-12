@@ -44,7 +44,7 @@ export const messages = {
         resultsTitle: 'Сумма за день',
         tableDeleteRecord: 'Удалить',
         tableTotalRecord: 'Итого',
-        clearDayButton: 'Очистить',
+        clearDayButton: 'Очистить день',
       },
       units: {
         grams: 'г',
@@ -298,7 +298,7 @@ export const messages = {
         resultsTitle: 'Day total',
         tableDeleteRecord: 'Remove',
         tableTotalRecord: 'Total',
-        clearDayButton: 'Clear',
+        clearDayButton: 'Clear day',
       },
       units: {
         grams: 'g',
