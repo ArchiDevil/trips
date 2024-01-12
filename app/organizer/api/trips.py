@@ -49,6 +49,7 @@ def get_trip(trip_uid: str):
                 'archive_link': url_for('api.trips.archive', trip_uid=trip.uid),
                 'packing_link': f'/reports/packing/{trip.uid}',
                 'shopping_link': f'/reports/shopping/{trip.uid}',
+                'cycle_link': url_for('api.meals.cycle', trip_uid=trip.uid)
             },
             'type': 'shared' if shared else 'user',
             'attendees': sum(group.persons for group in trip.groups),

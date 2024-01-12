@@ -1,3 +1,4 @@
+from collections import defaultdict
 import datetime
 from typing import Optional, Dict, Any
 
@@ -240,9 +241,100 @@ def get_day_meals(trip_uid: str, day_number: int):
         if day_number > days_count or day_number < 1:
             abort(404)
 
-        return {'day': {
-            'number': day_number,
-            'date': format_date(trip.from_date, day_number),
-            'meals': extract_meals(trip.id, day_number),
-            'reload_link': url_for('api.meals.get_day_meals', trip_uid=trip.uid, day_number=day_number)
-        }}
+        return {
+            'day': {
+                'number': day_number,
+                'date': format_date(trip.from_date, day_number),
+                'meals': extract_meals(trip.id, day_number),
+                'reload_link': url_for('api.meals.get_day_meals', trip_uid=trip.uid, day_number=day_number)
+            }
+        }
+
+
+@BP.post('/<trip_uid>/cycle')
+@api_login_required_group(AccessGroup.User)
+def cycle(trip_uid: str):
+    with get_session() as session:
+        trip_info: Optional[Trip] = None
+        trip_info = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        if not trip_info:
+            return abort(404)
+
+        if not user_has_trip_access(trip_info,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session):
+            return abort(403)
+
+    data = request.json
+    if not data:
+        return abort(400)
+
+    if not 'src-start' in data or not 'src-end' in data:
+        return abort(400)
+
+    if not 'dst-start' in data or not 'dst-end' in data:
+        return abort(400)
+
+    try:
+        src_start = int(data['src-start'])
+        src_end = int(data['src-end'])
+        dst_start = int(data['dst-start'])
+        dst_end = int(data['dst-end'])
+    except ValueError:
+        return abort(400)
+
+    if src_start <= 0 or src_end <= 0 or dst_start <= 0 or dst_end <= 0:
+        return abort(400)
+
+    if src_start > src_end or dst_start > dst_end:
+        return abort(400)
+
+    # ranges are touching each other
+    if src_start == dst_start or src_start == dst_end or src_end == dst_start or src_end == dst_end:
+        return abort(400)
+
+    if dst_start > src_start and dst_start < src_end:
+        return abort(400)
+
+    if dst_end > src_start and dst_end < src_end:
+        return abort(400)
+
+    src_days_count = src_end - src_start + 1
+
+    with get_session() as session:
+        if 'overwrite' in data and data['overwrite'] is True:
+            session.query(MealRecord).filter(MealRecord.trip_id == trip_info.id,
+                                             MealRecord.day_number >= dst_start,
+                                             MealRecord.day_number <= dst_end).delete()
+            session.commit()
+
+        meals_info = session.query(MealRecord).filter(
+            MealRecord.trip_id == trip_info.id,
+            MealRecord.day_number >= src_start,
+            MealRecord.day_number <= src_start + src_days_count).order_by(
+                MealRecord.day_number).all()
+
+        meals_per_day = defaultdict(list)
+        for meal in meals_info:
+            meals_per_day[meal.day_number - src_start].append(meal)
+
+        trip_duration = (trip_info.till_date - trip_info.from_date).days + 1
+
+        if src_end > trip_duration or dst_end > trip_duration:
+            return abort(400)
+
+        for day_number in range(dst_start, dst_end + 1):
+            idx = (day_number - dst_start) % src_days_count
+            for meal in meals_per_day[idx]:
+                new_record = MealRecord(trip_id=trip_info.id,
+                                        product_id=meal.product_id,
+                                        day_number=day_number,
+                                        meal_number=meal.meal_number,
+                                        mass=meal.mass)
+                session.add(new_record)
+        session.commit()
+
+    return {
+        'result': 'ok'
+    }
