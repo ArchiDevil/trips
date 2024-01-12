@@ -15,6 +15,7 @@ export default defineConfig({
         tutorial: resolve(__dirname, 'tutorial.html'),
         products: resolve(__dirname, 'products.html'),
         reports: resolve(__dirname, 'reports.html'),
+        meals: resolve(__dirname, 'meals.html'),
         // auth: resolve(__dirname, 'auth.html'),
       },
     },

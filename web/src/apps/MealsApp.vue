@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { mande } from 'mande'
+import { Modal } from 'bootstrap'
 
 import { Trip, Day } from '../interfaces'
 
@@ -8,7 +9,8 @@ import DayCard from '../components/DayCard.vue'
 import TripHandlingCard from '../components/TripHandlingCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import Icon from '../components/Icon.vue'
-// import FatalErrorModal from '../components/FatalErrorModal.vue'
+import FatalErrorModal from '../components/FatalErrorModal.vue'
+
 // import AddProductModal from '../components/AddProductModal.vue'
 // import CycleDaysModal from '../components/CycleDaysModal.vue'
 
@@ -70,15 +72,8 @@ const reload = (day: Day) => {
       days.value[data.day.number - 1] = data.day
     })
     .catch((error) => {
-      onNetworkError()
+      showFatalErrorModal()
     })
-}
-
-const onNetworkError = () => {
-  // TODO: make it properly
-  // $('#fatal-error-modal').modal({
-  //   backdrop: 'static',
-  // })
 }
 
 const fetchTripInfo = async () => {
@@ -93,7 +88,7 @@ const fetchTripInfo = async () => {
     trip.value = await api.get<Trip>(`/${currentTripUid}`)
     tripLoading.value = false
   } catch (error) {
-    onNetworkError()
+    showFatalErrorModal()
   }
 }
 
@@ -107,8 +102,46 @@ const fetchMealsInfo = async () => {
     days.value = (await api.get<{ days: Day[] }>()).days
     mealsLoading.value = false
   } catch (error) {
-    onNetworkError()
+    showFatalErrorModal()
   }
+}
+
+const showAddProductModal = () => {
+  // TODO: do things + integrate this code
+  // let button = $(event.relatedTarget)
+  // let day = button.data('day')
+  // let mealType = button.data('mealtype')
+  // let reloadLink = button.data('reloadlink')
+  // mountedAddProdApp.day = {
+  //   number: day,
+  //   reload_link: reloadLink,
+  // }
+  // mountedAddProdApp.mealName = mealType
+  // mountedAddProdApp.currentProductId = 0
+  // mountedAddProdApp.currentProductName = ''
+  // mountedAddProdApp.mass = ''
+  // mountedAddProdApp.units = []
+  // mountedAddProdApp.unit = undefined
+  // setTimeout(() => {
+  //   document.getElementById('search-product-input').focus()
+  // }, 500)
+}
+
+const showFatalErrorModal = () => {
+  const modalElem = document.getElementById('share-modal')
+  if (!modalElem) {
+    return
+  }
+
+  const modal = new Modal(modalElem, {
+    backdrop: 'static',
+    keyboard: false,
+  })
+  modal.show()
+}
+
+const showCycleDaysModal = () => {
+  // TODO: implement
 }
 
 onMounted(async () => {
@@ -121,10 +154,9 @@ onMounted(async () => {
   <NavigationBar />
 
   <!-- <AddProductModal />
+    <CycleDaysModal /> -->
 
   <FatalErrorModal id="fatal-error-modal" />
-
-  <CycleDaysModal /> -->
 
   <div
     class="container"
@@ -257,7 +289,7 @@ onMounted(async () => {
           :editor="editor"
           :trip="trip"
           @reload="reload(day)"
-          @error="onNetworkError()" />
+          @error="showFatalErrorModal()" />
       </div>
       <span
         class="spinner-border spinner-border-lg ms-3"
