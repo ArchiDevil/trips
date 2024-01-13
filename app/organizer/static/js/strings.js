@@ -5,7 +5,6 @@ export const messages = {
             tripsLink: 'Походы',
             productsLink: 'Продукты',
             usersLink: 'Пользователи',
-            infoLink: 'Информация',
             logoutLink: 'Выйти',
         },
         signup: {
@@ -58,7 +57,6 @@ export const messages = {
             tripsLink: 'Trips',
             productsLink: 'Products',
             usersLink: 'Users',
-            infoLink: 'Info',
             logoutLink: 'Logout',
         },
         signup: {

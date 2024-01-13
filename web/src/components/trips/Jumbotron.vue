@@ -1,7 +1,7 @@
 <script setup lang="ts">
-defineProps({
-  addTripLink: String,
-})
+defineEmits<{
+  (e: 'create'): void
+}>()
 </script>
 
 <template>
@@ -12,7 +12,8 @@ defineProps({
     <p>{{ $t('trips.jumbotronText2') }}</p>
     <a
       class="btn btn-primary btn-lg"
-      :href="addTripLink"
+      href="javascript:void(0)"
+      @click="$emit('create')"
       role="button">
       {{ $t('trips.jumbotronCreateButton') }}
     </a>

@@ -23,7 +23,6 @@ const { t } = useI18n()
 const currentTrip = computed(() => useTripsStore().currentTrip)
 const tripsStore = useTripsStore()
 
-const addTripLink = '/trips/add'
 const sortedTrips = computed(() => {
   const sortingFunc = (a: Trip, b: Trip) => {
     return (
@@ -158,7 +157,8 @@ onMounted(async () => {
         <a
           class="btn btn-primary d-block d-lg-none"
           type="button"
-          :href="addTripLink">
+          href="javascript:void(0)"
+          @click="showAddModal()">
           {{ $t('trips.createShortButton') }}
         </a>
       </div>
@@ -171,7 +171,7 @@ onMounted(async () => {
       <div
         class="col"
         v-if="!tripsStore.tripUids.length">
-        <Jumbotron :add-trip-link="addTripLink" />
+        <Jumbotron @create="showAddModal()" />
       </div>
 
       <div
