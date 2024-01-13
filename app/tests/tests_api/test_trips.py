@@ -3,6 +3,7 @@ from typing import Any
 
 from flask.testing import FlaskClient
 import pytest
+from app.organizer.strings import STRING_TABLE
 
 from organizer.db import get_session
 from organizer.schema import SharingLink, Trip, TripAccess
@@ -499,3 +500,84 @@ def test_trips_edit_rejects_empty_groups(
             assert trip.till_date != date(2019, 10, 12)
             assert trip.groups[0].persons == 2
             assert trip.groups[1].persons == 3
+
+
+def test_trips_download_rejects_not_logged_in(client: FlaskClient):
+    response = client.get('/api/trips/download/uid1')
+    assert response.status_code == 401
+
+
+def test_trips_download_allows_non_shared_trip(org_logged_client: FlaskClient):
+    response = org_logged_client.get('/api/trips/download/uid3')
+    assert response.status_code == 200
+
+
+def test_trips_download_returns_csv(org_logged_client: FlaskClient):
+    response = org_logged_client.get('/api/trips/download/uid1')
+    assert response.status_code == 200
+    assert response.data
+
+    # BOM
+    assert response.data[0] == 0xEF
+    assert response.data[1] == 0xBB
+    assert response.data[2] == 0xBF
+
+    data: str = response.data[3:].decode(encoding='utf-8')
+    lines = data.splitlines()
+    assert lines
+    assert len(lines) == 39
+    assert lines[0] == ','.join([
+        STRING_TABLE['CSV name'],
+        STRING_TABLE['CSV day'],
+        STRING_TABLE['CSV meal'],
+        STRING_TABLE['CSV mass'],
+        STRING_TABLE['CSV cals']
+    ])
+    assert ','.join([
+        'Multigrain cereal', '3', STRING_TABLE['Meals breakfast title'], '60', '362.0'
+    ]) in lines
+
+
+def test_trips_can_download_shared_trip(org_logged_client: FlaskClient):
+    response = org_logged_client.get('/api/trips/download/uid3')
+    assert response.status_code == 200
+    assert response.data
+
+    data: str = response.data[3:].decode(encoding='utf-8')
+    lines = data.splitlines()
+    assert lines
+    assert len(lines) == 2
+    assert lines[0] == ','.join([
+        STRING_TABLE['CSV name'],
+        STRING_TABLE['CSV day'],
+        STRING_TABLE['CSV meal'],
+        STRING_TABLE['CSV mass'],
+        STRING_TABLE['CSV cals']
+    ])
+    assert ','.join([
+        'Multigrain cereal', '1', STRING_TABLE['Meals breakfast title'], '60', '362.0'
+    ]) in lines
+
+
+def test_trips_download_returns_empty_csv(admin_logged_client: FlaskClient):
+    response = admin_logged_client.get('/api/trips/download/uid3')
+    assert response.status_code == 200
+    assert response.data
+
+    # skip BOM
+    data: str = response.data[3:].decode(encoding='utf-8')
+    lines = data.splitlines()
+    assert lines
+    assert len(lines) == 2
+    assert lines[0] == ','.join([
+        STRING_TABLE['CSV name'],
+        STRING_TABLE['CSV day'],
+        STRING_TABLE['CSV meal'],
+        STRING_TABLE['CSV mass'],
+        STRING_TABLE['CSV cals']
+    ])
+
+
+def test_trips_download_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
+    response = org_logged_client.get('/api/trips/download/uid42')
+    assert response.status_code == 404

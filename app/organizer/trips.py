@@ -1,16 +1,10 @@
-import csv
-import io
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Optional
 
-from flask import Blueprint, render_template, url_for, redirect, abort, g, \
-                  send_file
-
+from flask import Blueprint, render_template, url_for, redirect, abort, g
 from organizer.auth import login_required_group
 from organizer.db import get_session
-from organizer.schema import SharingLink, Trip, AccessGroup, TripAccess, \
-                             Product, MealRecord
-from organizer.strings import STRING_TABLE
+from organizer.schema import SharingLink, Trip, AccessGroup, TripAccess
 
 bp = Blueprint('trips', __name__, url_prefix='/trips')
 
@@ -34,61 +28,6 @@ def forget(trip_uid: str):
         session.commit()
 
     return redirect('/trips/')
-
-
-def send_csv_file(rows: List[List[Any]]):
-    file = io.StringIO()
-    writer = csv.writer(file, dialect='excel')
-    writer.writerows(rows)
-    file.seek(0, 0)
-
-    file_to_send = io.BytesIO()
-    data = file.read()
-    file_to_send.write(bytes([0xEF, 0xBB, 0xBF])) # write BOM for Excel
-    file_to_send.write(data.encode(encoding='utf-8'))
-    file_to_send.seek(0, 0)
-
-    return send_file(file_to_send, mimetype='text/plain',
-                     as_attachment=True, download_name='data.csv')
-
-
-@bp.get('/download/<trip_uid>')
-@login_required_group(AccessGroup.User)
-def download(trip_uid: str):
-    csv_content = [[
-        STRING_TABLE['CSV name'],
-        STRING_TABLE['CSV day'],
-        STRING_TABLE['CSV meal'],
-        STRING_TABLE['CSV mass'],
-        STRING_TABLE['CSV cals']
-    ]]
-
-    meals_table = {
-        0: STRING_TABLE['Meals breakfast title'],
-        1: STRING_TABLE['Meals lunch title'],
-        2: STRING_TABLE['Meals dinner title'],
-        3: STRING_TABLE['Meals snacks title']
-    }
-
-    with get_session() as session:
-        trip: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
-        if not trip:
-            abort(404)
-
-        data = session.query(MealRecord.mass,
-                             MealRecord.day_number,
-                             MealRecord.meal_number,
-                             Product.name,
-                             Product.calories).join(Product).order_by(MealRecord.day_number,
-                                                                      MealRecord.meal_number).filter(MealRecord.trip_id == trip.id).all()
-        for record in data:
-            csv_content.append([record.name,
-                                record.day_number,
-                                meals_table[record.meal_number],
-                                record.mass,
-                                record.calories])
-
-    return send_csv_file(csv_content)
 
 
 @bp.get('/access/<uuid>')

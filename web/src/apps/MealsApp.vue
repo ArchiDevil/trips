@@ -268,7 +268,7 @@ onMounted(async () => {
             {{ $t('meals.tools.header') }}
             <a
               class="btn btn-sm btn-light float-end ms-1"
-              :href="trip.download_link">
+              :href="trip.trip.download_link">
               <Icon icon="fa-table" />
             </a>
             <button

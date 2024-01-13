@@ -49,13 +49,13 @@ export interface Trip {
     packing_link: string
     shopping_link: string
     cycle_link: string
+    download_link: string
   }
   type: 'user' | 'shared'
   attendees: number
   cover_src: string
   open_link: string
   forget_link: string
-  download_link: string
 }
 
 export interface Meal {
