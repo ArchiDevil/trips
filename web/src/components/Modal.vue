@@ -1,3 +1,9 @@
+<script setup lang="ts">
+defineProps({
+  large: Boolean,
+})
+</script>
+
 <template>
   <div
     class="modal fade"
@@ -6,6 +12,7 @@
     aria-hidden="true">
     <div
       class="modal-dialog modal-dialog-centered"
+      :class="{ 'modal-lg': large }"
       role="document">
       <div class="modal-content">
         <div class="modal-header">
