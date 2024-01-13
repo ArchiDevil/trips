@@ -3,8 +3,7 @@ from enum import Enum as PyEnum
 
 from sqlalchemy import Column, Integer, String, Float, Date, \
                        DateTime, Boolean, Enum as AlchemyEnum, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 
 
 BASE = declarative_base()

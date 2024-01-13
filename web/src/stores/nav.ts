@@ -3,8 +3,7 @@ import { defineStore } from 'pinia'
 export const useNavStore = defineStore('nav', {
   state() {
     return {
-      page: '',
-      link: '',
+      link: '' as 'trips' | 'users' | 'products',
     }
   },
 })

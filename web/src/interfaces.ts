@@ -43,15 +43,34 @@ export interface Trip {
     archived: false
     groups: number[]
     user: string
+    edit_link: string
     share_link: string
+    archive_link: string
+    packing_link: string
+    shopping_link: string
+    cycle_link: string
+    download_link: string
   }
   type: 'user' | 'shared'
   attendees: number
   cover_src: string
   open_link: string
-  edit_link: string
   forget_link: string
-  packing_link: string
-  shopping_link: string
-  download_link: string
+}
+
+export interface Meal {
+  id: number
+  name: string
+  mass: number
+  calories: number
+  proteins: number
+  fats: number
+  carbs: number
+}
+
+export interface Day {
+  number: number
+  date: string
+  meals: Record<string, Meal[]>
+  reload_link: string
 }

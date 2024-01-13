@@ -44,7 +44,7 @@ export const messages = {
         resultsTitle: 'Сумма за день',
         tableDeleteRecord: 'Удалить',
         tableTotalRecord: 'Итого',
-        clearDayButton: 'Очистить',
+        clearDayButton: 'Очистить день',
       },
       units: {
         grams: 'г',
@@ -54,6 +54,7 @@ export const messages = {
         unableToAddMeal: 'Невозможно добавить продукт'
       },
       addModal: {
+        intro: 'Количество продуктов указывается на одного человека в группе. Общее количество будет вычислено автоматически.',
         title: 'Добавить продукт',
         idTitle: '#',
         nameTitle: 'Название',
@@ -132,6 +133,7 @@ export const messages = {
       jumbotronCreateButton: 'Создать поход',
       lastUpdatePrefix: 'Последнее обновление',
       optionsButton: 'Дополнительно',
+      archiveButton: 'Архивировать',
       shareButton: 'Поделиться',
       shareModal: {
         title: 'Поделиться походом',
@@ -141,6 +143,36 @@ export const messages = {
         linkLoading: 'Загрузка...',
         additionalInfo: 'Дайте эту ссылку другим туристам, чтобы они смогли посмотреть или изменить ваш поход. Ссылка действительна в течение 3-х суток с момента создания.',
         copiedStatus: 'Ссылка скопирована в буфер обмена',
+      },
+      editModal: {
+        addTitle: 'Создать поход',
+        editTitle: 'Редактировать поход',
+        closeButton: 'Закрыть',
+        submitButtonEdit: 'Применить',
+        submitButtonAdd: 'Создать',
+        nameTitle: 'Название',
+        namePlaceholder: 'Введите название',
+        nameInvalidFeedback: 'Название похода должно быть не пустым и не длиннее 50 символов.',
+        datesTitle: 'Даты похода',
+        groupConfigTitle: 'Сколько групп участвует?',
+        groupConfigSubhelp: 'Группа людей это одна группа, где все едят из одного котелка.',
+        groupOptions: {
+          one: '1 группа',
+          two: '2 группы',
+          three: '3 группы',
+          four: '4 группы',
+          five: '5 групп',
+        },
+        groupNamePrefix: 'Группа',
+        groupErrorMessage: 'Введите целое число больше 0',
+        archiveButtonTitle: 'Архивировать',
+      },
+      archiveModal: {
+        title: 'Архивировать поход',
+        text: 'Вы действительно хотите поместить этот поход в архив?',
+        archiveButton: 'Архивировать',
+        closeButton: 'Закрыть',
+        error: 'Произошла ошибка при архивировании похода. Попробуйте перезагрузить страницу.',
       }
     },
     navbar: {
@@ -148,8 +180,6 @@ export const messages = {
       tripsLink: 'Походы',
       productsLink: 'Продукты',
       usersLink: 'Пользователи',
-      adminLink: 'Администрирование',
-      infoLink: 'Информация',
       logoutLink: 'Выйти',
     },
     signup: {
@@ -194,6 +224,33 @@ export const messages = {
     },
     docs: {
       howToLink: 'Как пользоваться сервисом'
+    },
+    shopping: {
+      title: 'список покупок',
+      cardHeader: 'Что дальше?',
+      cardBody: 'Лучший способ работы с этим отчетом это распечатать его.\nРаспечатайте список и возьмите с собой в магазин. Так вы ничего не забудете.\nПри печати мы оставили вам поля для заметок, если вдруг что-то пойдет не по плану.',
+      printButton: 'Напечатать',
+      nameTitle: 'Продукт',
+      massTitle: 'Масса',
+      notesTitle: 'Заметки',
+      gramsSuffix: 'г',
+      piecesSuffix: 'шт',
+    },
+    packing: {
+      title: 'фасовка',
+      selector: {
+        one: '1 день в ряд',
+        two: '2 дня в ряд',
+        three: '3 дня в ряд',
+        four: '4 дня в ряд',
+        five: '5 дней в ряд',
+        six: '6 дней в ряд',
+      },
+      dayPrefix: 'День',
+      productColumn: 'Продукт',
+      personsSuffix: 'чел',
+      piecesSuffix: 'шт',
+      gramsSuffix: 'г',
     }
   },
   en: {
@@ -241,7 +298,7 @@ export const messages = {
         resultsTitle: 'Day total',
         tableDeleteRecord: 'Remove',
         tableTotalRecord: 'Total',
-        clearDayButton: 'Clear',
+        clearDayButton: 'Clear day',
       },
       units: {
         grams: 'g',
@@ -251,6 +308,7 @@ export const messages = {
         unableToAddMeal: 'Unable to add a product'
       },
       addModal: {
+        intro: 'Amount of products is specified per one person in a group. Total amount will be calculated automatically.',
         title: 'Add product',
         idTitle: '#',
         nameTitle: 'Name',
@@ -329,6 +387,7 @@ export const messages = {
       jumbotronCreateButton: 'Create a trip',
       lastUpdatePrefix: 'Last updated',
       optionsButton: 'More...',
+      archiveButton: 'Archive',
       shareButton: 'Share',
       shareModal: {
         title: 'Share a trip',
@@ -338,6 +397,36 @@ export const messages = {
         linkLoading: 'Loading...',
         additionalInfo: 'Share the link with other tourists to let them view or edit your trip. The link is valid for 3 days from the moment of creation.',
         copiedStatus: 'Link copied to the clipboard',
+      },
+      editModal: {
+        addTitle: 'Create a trip',
+        editTitle: 'Edit a trip',
+        closeButton: 'Close',
+        submitButtonEdit: 'Apply',
+        submitButtonAdd: 'Create',
+        nameTitle: 'Name',
+        namePlaceholder: 'Enter a name',
+        nameInvalidFeedback: 'Trip name must not be empty and not longer than 50 characters.',
+        datesTitle: 'Trip dates',
+        groupConfigTitle: 'How many groups are there?',
+        groupConfigSubhelp: 'Group is a amount of people who eat from one cooking pot',
+        groupOptions: {
+          one: '1 group',
+          two: '2 groups',
+          three: '3 groups',
+          four: '4 groups',
+          five: '5 groups',
+        },
+        groupNamePrefix: 'Group',
+        groupErrorMessage: 'Enter a positive number higher than 0',
+        archiveButtonTitle: 'Archive',
+      },
+      archiveModal: {
+        title: 'Archive a trip',
+        text: 'Are you sure you want to archive this trip?',
+        archiveButton: 'Archive',
+        closeButton: 'Close',
+        error: 'Something went wrong. Try to reload a page.',
       }
     },
     navbar: {
@@ -345,8 +434,6 @@ export const messages = {
       tripsLink: 'Trips',
       productsLink: 'Products',
       usersLink: 'Users',
-      adminLink: 'Admin',
-      infoLink: 'Info',
       logoutLink: 'Logout',
     },
     signup: {
@@ -391,6 +478,33 @@ export const messages = {
     },
     docs: {
       howToLink: 'How to use'
+    },
+    shopping: {
+      title: 'Shopping list',
+      cardHeader: 'What\'s next?',
+      cardBody: 'The best way to use this report is to print it.\nPrint the list and take it with you to the store. This way you won\'t forget anything.\nWe left you some space for notes in case something goes wrong.',
+      printButton: 'Print',
+      nameTitle: 'Product',
+      massTitle: 'Mass',
+      notesTitle: 'Notes',
+      gramsSuffix: 'g',
+      piecesSuffix: 'pcs',
+    },
+    packing: {
+      title: 'Packing list',
+      selector: {
+        one: '1 day in a row',
+        two: '2 days in a row',
+        three: '3 days in a row',
+        four: '4 days in a row',
+        five: '5 days in a row',
+        six: '6 days in a row',
+      },
+      dayPrefix: 'Day',
+      productColumn: 'Product',
+      personsSuffix: 'persons',
+      piecesSuffix: 'pcs',
+      gramsSuffix: 'g',
     }
   }
 }

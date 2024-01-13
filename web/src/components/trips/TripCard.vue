@@ -1,80 +1,119 @@
-<script lang="ts">
-import { PropType, defineComponent } from 'vue'
-import { Trip } from '../../interfaces'
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import { Dropdown } from 'bootstrap'
 
-export default defineComponent({
-  props: {
-    trip: {
-      required: true,
-      type: Object as PropType<Trip>,
-    },
+import Icon from '../Icon.vue'
+
+const props = defineProps({
+  uid: {
+    required: true,
+    type: String,
   },
-  emits: {
-    share(shareLink: string) {
-      return true
-    },
+  name: {
+    required: true,
+    type: String,
   },
-  computed: {
-    fromDate(): string {
-      return new Date(this.trip.trip.from_date).toLocaleDateString()
-    },
-    tillDate(): string {
-      return new Date(this.trip.trip.till_date).toLocaleDateString()
-    },
-    past(): boolean {
-      const now = new Date()
-      now.setHours(0, 0, 0, 0) // to avoid rounding issues for the same day
-      return now > new Date(this.trip.trip.till_date)
-    },
+  type: {
+    required: true,
+    type: String,
   },
-  data() {
-    return {
-      dropdown: null as Dropdown | null,
-    }
+  coverLink: {
+    required: true,
+    type: String,
   },
-  mounted() {
-    const toggle = this.$refs.dropdownToggle as HTMLElement
-    this.dropdown = new Dropdown(toggle)
+  attendeesCount: {
+    required: true,
+    type: Number,
   },
+  fromDate: {
+    required: true,
+    type: String,
+  },
+  tillDate: {
+    required: true,
+    type: String,
+  },
+  openLink: {
+    required: true,
+    type: String,
+  },
+  shareLink: {
+    required: true,
+    type: String,
+  },
+  archiveLink: {
+    required: true,
+    type: String,
+  },
+  forgetLink: {
+    required: true,
+    type: String,
+  },
+})
+
+defineEmits<{
+  (e: 'edit', uid: string): void
+  (e: 'share', shareLink: string): void
+  (e: 'archive', archiveLink: string): void
+}>()
+
+const fromDate = computed(() => {
+  return new Date(props.fromDate).toLocaleDateString()
+})
+
+const tillDate = computed(() => {
+  return new Date(props.tillDate).toLocaleDateString()
+})
+
+const past = computed(() => {
+  const now = new Date()
+  now.setHours(0, 0, 0, 0) // to avoid rounding issues for the same day
+  return now > new Date(props.tillDate)
+})
+
+const dropdown = ref<Dropdown | null>(null)
+const dropdownToggle = ref<HTMLButtonElement | null>(null)
+
+onMounted(() => {
+  const toggle = dropdownToggle.value as HTMLButtonElement
+  dropdown.value = new Dropdown(toggle)
 })
 </script>
 
 <template>
   <div
     class="card shadow mb-3"
-    v-if="!trip.trip.archived"
     :class="{ 'bg-light': past }">
     <div class="row no-gutters">
       <div class="d-none d-md-block col-md-4 col-xl-3">
         <img
-          :src="trip.cover_src"
-          class="w-100 rounded-left"
+          :src="coverLink"
+          class="w-100 rounded-start"
           alt=""
           :class="{ 'fade-out': past }" />
       </div>
       <div class="col-md-8 col-xl-9">
         <div class="card-body">
           <h4 class="card-title">
-            <font-awesome-icon
-              icon="fa-solid fa-share-alt"
+            <Icon
+              icon="fa-share-alt"
               :title="$t('trips.sharedInfoTitle')"
-              v-if="trip.type == 'shared'" />
-            {{ trip.trip.name }}
+              v-if="type == 'shared'" />
+            {{ name }}
           </h4>
           <p class="card-text mb-2">
-            <font-awesome-icon icon="fa-solid fa-calendar-day" />
+            <Icon icon="fa-calendar-day" />
             {{ fromDate }} - {{ tillDate }}
           </p>
           <p class="card-text">
-            <font-awesome-icon icon="fa-solid fa-walking" />
-            {{ $t('trips.participantsCountTitle') }}: {{ trip.attendees }}
+            <Icon icon="fa-walking" />
+            {{ $t('trips.participantsCountTitle') }}: {{ attendeesCount }}
           </p>
           <!-- <p class="card-text"><small class="text-muted">{{ $t('trips.lastUpdatePrefix') + " " + lastUpdate }}</small></p> -->
           <div class="row">
             <div class="col">
               <a
-                :href="trip.open_link"
+                :href="openLink"
                 class="btn w-100"
                 :class="{ 'btn-primary': !past, 'btn-secondary': past }">
                 {{ $t('trips.openButton') }}
@@ -90,31 +129,43 @@ export default defineComponent({
                 {{ $t('trips.optionsButton') }}
               </button>
               <ul class="dropdown-menu">
-                <li v-if="trip.type == 'user'">
+                <li v-if="type == 'user'">
                   <a
                     class="dropdown-item"
-                    :href="trip.edit_link">
-                    <font-awesome-icon icon="fa-solid fa-pen" />
+                    href="javascript:void(0)"
+                    @click="$emit('edit', uid)">
+                    <Icon icon="fa-pen" />
                     {{ $t('trips.editButton') }}
                   </a>
                 </li>
                 <li v-else>
                   <a
                     class="dropdown-item"
-                    :href="trip.forget_link">
-                    <font-awesome-icon icon="fa-solid fa-eye-slash" />
+                    :href="forgetLink">
+                    <Icon icon="fa-eye-slash" />
                     {{ $t('trips.hideButton') }}
                   </a>
                 </li>
-                <li v-if="trip.type === 'user'">
-                  <a
-                    class="dropdown-item"
-                    href="javascript:void(0)"
-                    @click="$emit('share', trip.trip.share_link)">
-                    <font-awesome-icon icon="fa-solid fa-share-alt" />
-                    {{ $t('trips.shareButton') }}
-                  </a>
-                </li>
+                <template v-if="type === 'user'">
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="javascript:void(0)"
+                      @click="$emit('share', shareLink)">
+                      <Icon icon="fa-share-alt" />
+                      {{ $t('trips.shareButton') }}
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="javascript:void(0)"
+                      @click="$emit('archive', archiveLink)">
+                      <Icon icon="fa-archive" />
+                      {{ $t('trips.archiveButton') }}
+                    </a>
+                  </li>
+                </template>
               </ul>
             </div>
           </div>

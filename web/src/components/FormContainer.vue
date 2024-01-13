@@ -1,8 +1,6 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  props: ['title'],
+<script setup lang="ts">
+defineProps({
+  title: String,
 })
 </script>
 

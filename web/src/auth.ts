@@ -15,10 +15,14 @@ interface AuthWindow extends Window {
   onCaptchaLoad: any
 }
 
-const i18n = createI18n({
+const i18n = createI18n<[typeof messages.ru], 'ru' | 'en'>({
+  legacy: false,
   locale: 'ru',
   fallbackLocale: 'en',
-  messages,
+  messages: {
+    ru: messages.ru,
+    en: messages.en,
+  },
 })
 
 const routes = [

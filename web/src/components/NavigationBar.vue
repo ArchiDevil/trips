@@ -1,40 +1,38 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 
 import { useUserStore } from '../stores/user'
 import { useNavStore } from '../stores/nav'
 
 import globals from '../globals'
+import Icon from './Icon.vue'
 
-export default defineComponent({
-  computed: {
-    admin: () => useUserStore().info.access_group == 'Administrator',
-    logoutLink: () => globals.urls.logout,
-    mainPage: () => globals.urls.mainPage,
-    tripsPage: () => globals.urls.tripsPage,
-    productsPage: () => globals.urls.productsPage,
-    usersPage: () => globals.urls.usersPage,
-    adminPage: () => globals.urls.adminPage,
-    navLink: () => useNavStore().link,
-    userLoading: () => useUserStore().isLoading,
-    userPhotoUrl: () => useUserStore().info.photo_url,
-    displayedName() {
-      const store = useUserStore()
-      if (store.isLoading) return ''
+const navStore = useNavStore()
+const userStore = useUserStore()
 
-      return store.info.displayed_name
-        ? store.info.displayed_name
-        : store.info.login
-    },
-  },
+const admin = computed(() => userStore.info.access_group == 'Administrator')
+const logoutLink = computed(() => globals.urls.logout)
+const mainPage = computed(() => globals.urls.mainPage)
+const tripsPage = computed(() => globals.urls.tripsPage)
+const productsPage = computed(() => globals.urls.productsPage)
+const usersPage = computed(() => globals.urls.usersPage)
+const userLoading = computed(() => userStore.isLoading)
+const userPhotoUrl = computed(() => userStore.info.photo_url)
+const displayedName = computed(() => {
+  if (userStore.isLoading) {
+    return ''
+  }
+
+  return userStore.info.displayed_name
+    ? userStore.info.displayed_name
+    : userStore.info.login
 })
 </script>
 
 <template>
   <nav
     class="navbar navbar-expand-lg navbar-light bg-light shadow"
-    id="nav-app"
-    v-cloak>
+    id="nav-app">
     <div class="container-fluid">
       <a
         class="navbar-brand"
@@ -62,8 +60,8 @@ export default defineComponent({
               id="trips-link"
               class="nav-link"
               :href="tripsPage"
-              :class="{ active: navLink == 'trips' }">
-              <font-awesome-icon icon="fa-solid fa-route" />
+              :class="{ active: navStore.link == 'trips' }">
+              <Icon icon="fa-route" />
               {{ $t('navbar.tripsLink') }}
             </a>
           </li>
@@ -72,8 +70,8 @@ export default defineComponent({
               id="products-link"
               class="nav-link"
               :href="productsPage"
-              :class="{ active: navLink == 'products' }">
-              <font-awesome-icon icon="fa-solid fa-pizza-slice" />
+              :class="{ active: navStore.link == 'products' }">
+              <Icon icon="fa-pizza-slice" />
               {{ $t('navbar.productsLink') }}
             </a>
           </li>
@@ -83,27 +81,16 @@ export default defineComponent({
               class="nav-link"
               :href="usersPage"
               v-if="admin"
-              :class="{ active: navLink == 'users' }">
-              <font-awesome-icon icon="fa-solid fa-users" />
+              :class="{ active: navStore.link == 'users' }">
+              <Icon icon="fa-users" />
               {{ $t('navbar.usersLink') }}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              id="developer-console-link"
-              class="nav-link"
-              :href="adminPage"
-              v-if="admin"
-              :class="{ active: navLink == 'admin' }">
-              <font-awesome-icon icon="fa-solid fa-terminal" />
-              {{ $t('navbar.adminLink') }}
             </a>
           </li>
           <li class="nav-item">
             <a
               href="/tutorial.html"
               class="nav-link">
-              <font-awesome-icon icon="fa-solid fa-info" />
+              <Icon icon="fa-info" />
               {{ $t('docs.howToLink') }}
             </a>
           </li>
@@ -124,7 +111,7 @@ export default defineComponent({
             class="btn btn-outline-success my-2 my-sm-0"
             :href="logoutLink">
             {{ $t('navbar.logoutLink') }}
-            <font-awesome-icon icon="fa-solid fa-sign-out-alt" />
+            <Icon icon="fa-sign-out-alt" />
           </a>
         </form>
       </div>

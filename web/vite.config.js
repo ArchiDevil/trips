@@ -14,6 +14,9 @@ export default defineConfig({
         trips: resolve(__dirname, 'trips.html'),
         tutorial: resolve(__dirname, 'tutorial.html'),
         products: resolve(__dirname, 'products.html'),
+        reports: resolve(__dirname, 'reports.html'),
+        meals: resolve(__dirname, 'meals.html'),
+        incorrect: resolve(__dirname, 'incorrect.html'),
         // auth: resolve(__dirname, 'auth.html'),
       },
     },
@@ -23,6 +26,9 @@ export default defineConfig({
     {
       ...mockServer(),
       apply: 'serve',
-    }
-  ]
+    },
+  ],
+  test: {
+    environment: 'jsdom',
+  },
 })

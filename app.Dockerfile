@@ -1,4 +1,4 @@
-FROM python:3.10 AS application
+FROM python:3.11 AS application
 
 RUN apt update && apt install -y dos2unix
 

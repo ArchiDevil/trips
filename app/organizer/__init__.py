@@ -87,20 +87,11 @@ def create_app(test_config=None):
     from . import trips
     app.register_blueprint(trips.bp)
 
-    from . import meals
-    app.register_blueprint(meals.bp)
-
     from . import api
     app.register_blueprint(api.BP)
 
-    from . import reports
-    app.register_blueprint(reports.bp)
-
     from . import users
     app.register_blueprint(users.bp)
-
-    from . import developer
-    app.register_blueprint(developer.bp)
 
     @app.context_processor
     def inject_props():
@@ -110,7 +101,7 @@ def create_app(test_config=None):
             'AccessGroup': schema.AccessGroup,
             'string_table': strings.STRING_TABLE,
             'today_date': datetime.datetime.today().strftime('%d-%m-%Y'),
-            'environment': app.config['ENV']
+            'environment': app.config.get('ENV', 'production'),
         }
 
     return app

@@ -10,7 +10,6 @@ import {
   faRoute,
   faPizzaSlice,
   faUsers,
-  faTerminal,
   faInfo,
   faSignOutAlt,
   faPlus,
@@ -18,38 +17,45 @@ import {
   faWalking,
   faPen,
   faShareAlt,
+  faArchive,
+  faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
 
 library.add(
+  faArchive,
   faCopy,
   faRoute,
   faPizzaSlice,
   faUsers,
-  faTerminal,
   faInfo,
   faSignOutAlt,
   faPlus,
   faCalendarDay,
   faWalking,
   faPen,
-  faShareAlt
+  faShareAlt,
+  faEyeSlash
 )
 
 const pinia = createPinia()
 
-const i18n = createI18n({
+const i18n = createI18n<[typeof messages.ru], 'ru' | 'en'>({
+  legacy: false,
   locale: 'ru',
   fallbackLocale: 'en',
-  messages,
+  messages: {
+    ru: messages.ru,
+    en: messages.en,
+  },
 })
 
-const tripsApp = createApp(TripsApp)
-tripsApp.use(pinia)
-tripsApp.use(i18n)
-tripsApp.component('font-awesome-icon', FontAwesomeIcon)
-tripsApp.mount('#trips-app')
+const app = createApp(TripsApp)
+app.use(pinia)
+app.use(i18n)
+app.component('font-awesome-icon', FontAwesomeIcon)
+app.mount('#trips-app')
 
 useUserStore().fetchUserData()

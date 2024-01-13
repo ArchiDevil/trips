@@ -1,5 +1,5 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useNavStore } from '../stores/nav'
 import { useProductsStore } from '../stores/products'
@@ -7,111 +7,97 @@ import { Modal } from 'bootstrap'
 
 import cardImg from '../assets/6.png'
 import { Product } from '../interfaces'
+
 import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
+import Icon from '../components/Icon.vue'
 
-export default defineComponent({
-  components: { LoadingTitle, PageCard, NavigationBar, ProductEditDialog },
-  data() {
-    return {
-      search: '',
-      lastRequest: undefined as number | undefined,
-      editedProduct: undefined as Product | undefined,
-    }
-  },
-  computed: {
-    lastPage: () => useProductsStore().lastPage,
-    addProductLink: () => '/api/products/add',
-    contentLoading: () => useUserStore().isLoading,
-    page: () => useProductsStore().page,
-    products: () => useProductsStore().products,
-    cardImg: () => cardImg,
-    creator() {
-      const store = useUserStore()
-      return (
-        !store.isLoading &&
-        (store.info.access_group === 'User' ||
-          store.info.access_group === 'Administrator')
-      )
-    },
-    editor() {
-      const store = useUserStore()
-      return !store.isLoading && store.info.access_group === 'Administrator'
-    },
-    modalTitle() {
-      if (this.editedProduct) {
-        return this.$t('products.editModal.editTitle')
-      } else {
-        return this.$t('products.editModal.addTitle')
-      }
-    },
-    modalButtonTitle() {
-      if (this.editedProduct) {
-        return this.$t('products.editModal.editButton')
-      } else {
-        return this.$t('products.editModal.addButton')
-      }
-    },
-    modalAcceptLink() {
-      if (this.editedProduct) {
-        return this.editedProduct.edit_link
-      } else {
-        return this.addProductLink
-      }
-    },
-  },
-  methods: {
-    async fetchProducts() {
-      const store = useProductsStore()
-      store.search = this.search
-      await store.fetchProducts()
-    },
-    async nextPage() {
-      await useProductsStore().nextPage()
-    },
-    async prevPage() {
-      await useProductsStore().prevPage()
-    },
-    async archiveProduct(link: string) {
-      await useProductsStore().archiveProduct(link)
-    },
-    showModal(product: Product | undefined) {
-      this.editedProduct = product
-      const modalElem = document.getElementById('edit-modal')
-      if (!modalElem) {
-        return
-      }
-      const modal = new Modal(modalElem, {
-        keyboard: false,
-      })
-      modal.show()
-      setTimeout(() => {
-        const target = document.getElementById('add-name-input')
-        ;(target as HTMLInputElement)?.select()
-      }, 500)
-    },
-  },
-  async mounted() {
-    useNavStore().link = 'products'
-    await this.fetchProducts()
-    setTimeout(() => {
-      ;(this.$refs.searchbox as HTMLElement).focus()
-    }, 500)
-  },
-  watch: {
-    search(newSearch, oldSearch) {
-      clearTimeout(this.lastRequest)
+const search = ref('')
+const lastRequest = ref<number | undefined>(undefined)
+const editedProduct = ref<Product | undefined>(undefined)
+const searchbox = ref<HTMLElement | null>(null)
 
-      const instance = this
-      this.lastRequest = setTimeout(() => {
-        useProductsStore().page = 0
-        instance.fetchProducts()
-        instance.lastRequest = undefined
-      }, 500)
-    },
-  },
+const lastPage = computed(() => useProductsStore().lastPage)
+const contentLoading = computed(() => useUserStore().isLoading)
+const page = computed(() => useProductsStore().page)
+const products = computed(() => useProductsStore().products)
+
+const creator = computed(() => {
+  const store = useUserStore()
+  return (
+    !store.isLoading &&
+    (store.info.access_group === 'User' ||
+      store.info.access_group === 'Administrator')
+  )
+})
+const editor = computed(() => {
+  const store = useUserStore()
+  return !store.isLoading && store.info.access_group === 'Administrator'
+})
+
+const modalAcceptLink = computed(() => {
+  return editedProduct.value
+    ? editedProduct.value.edit_link
+    : '/api/products/add'
+})
+
+const fetchProducts = async () => {
+  const store = useProductsStore()
+  store.search = search.value
+  await store.fetchProducts()
+}
+
+const nextPage = async () => {
+  await useProductsStore().nextPage()
+}
+
+const prevPage = async () => {
+  await useProductsStore().prevPage()
+}
+
+const archiveProduct = async (link: string) => {
+  await useProductsStore().archiveProduct(link)
+}
+
+const editModal = ref<Modal | null>(null)
+const showModal = (product: Product | undefined) => {
+  editedProduct.value = product
+  const modalElem = document.getElementById('edit-modal')
+  if (!modalElem) {
+    return
+  }
+  editModal.value = new Modal(modalElem, {
+    keyboard: false,
+  })
+  editModal.value.show()
+  setTimeout(() => {
+    const target = document.getElementById('add-name-input')
+    ;(target as HTMLInputElement)?.select()
+  }, 500)
+}
+
+const onProductsUpdate = async () => {
+  editModal.value?.hide()
+  await fetchProducts()
+}
+
+onMounted(async () => {
+  useNavStore().link = 'products'
+  await fetchProducts()
+  setTimeout(() => {
+    ;(searchbox.value as HTMLElement)?.focus()
+  }, 500)
+})
+
+watch(search, () => {
+  clearTimeout(lastRequest.value)
+  lastRequest.value = setTimeout(() => {
+    useProductsStore().page = 0
+    fetchProducts()
+    lastRequest.value = undefined
+  }, 500)
 })
 </script>
 
@@ -151,7 +137,7 @@ export default defineComponent({
             type="button"
             class="btn btn-primary w-100"
             @click="showModal(undefined)">
-            <font-awesome-icon icon="fa-solid fa-plus" />
+            <Icon icon="fa-plus" />
             {{ $t('products.addNew') }}
           </button>
         </PageCard>
@@ -160,7 +146,7 @@ export default defineComponent({
       <div class="col">
         <div class="input-group mb-3">
           <span class="input-group-text">
-            <font-awesome-icon icon="fa-solid fa-search" />
+            <Icon icon="fa-search" />
           </span>
           <input
             :placeholder="$t('products.searchPlaceholder')"
@@ -243,8 +229,8 @@ export default defineComponent({
                   <a
                     @click="showModal(product)"
                     href="javascript:void(0);">
-                    <font-awesome-icon
-                      icon="fa-solid fa-pen"
+                    <Icon
+                      icon="fa-pen"
                       :title="$t('products.editButtonTitle')" />
                   </a>
                 </span>
@@ -253,9 +239,9 @@ export default defineComponent({
                     href="javascript:void(0);"
                     :title="$t('products.archiveButtonTitle')"
                     @click="archiveProduct(product.archive_link)">
-                    <font-awesome-icon
+                    <Icon
                       class="text-danger"
-                      icon="fa-solid fa-archive" />
+                      icon="fa-archive" />
                   </a>
                 </span>
               </td>
@@ -271,7 +257,7 @@ export default defineComponent({
               <a
                 class="page-link"
                 @click="prevPage">
-                <font-awesome-icon icon="fa-solid fa-arrow-left" />
+                <Icon icon="fa-arrow-left" />
               </a>
             </li>
 
@@ -281,7 +267,7 @@ export default defineComponent({
               <a
                 class="page-link"
                 @click="nextPage">
-                <font-awesome-icon icon="fa-solid fa-arrow-right" />
+                <Icon icon="fa-arrow-right" />
               </a>
             </li>
           </ul>
@@ -291,9 +277,8 @@ export default defineComponent({
   </div>
 
   <ProductEditDialog
-    :modal-title="modalTitle"
-    :button-name="modalButtonTitle"
+    id="edit-modal"
     :submit-link="modalAcceptLink"
     :product="editedProduct"
-    @update="fetchProducts" />
+    @update="onProductsUpdate" />
 </template>

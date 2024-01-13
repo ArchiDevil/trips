@@ -9,7 +9,6 @@ import {
   faRoute,
   faPizzaSlice,
   faUsers,
-  faTerminal,
   faInfo,
   faSignOutAlt,
   faPlus,
@@ -27,7 +26,6 @@ library.add(
   faRoute,
   faPizzaSlice,
   faUsers,
-  faTerminal,
   faInfo,
   faSignOutAlt,
   faPlus,
@@ -40,16 +38,20 @@ library.add(
 
 const pinia = createPinia()
 
-const i18n = createI18n({
+const i18n = createI18n<[typeof messages.ru], 'ru' | 'en'>({
+  legacy: false,
   locale: 'ru',
   fallbackLocale: 'en',
-  messages,
+  messages: {
+    ru: messages.ru,
+    en: messages.en,
+  },
 })
 
-const productsApp = createApp(ProductsApp)
-productsApp.use(pinia)
-productsApp.use(i18n)
-productsApp.component('font-awesome-icon', FontAwesomeIcon)
-productsApp.mount('#products-app')
+const app = createApp(ProductsApp)
+app.use(pinia)
+app.use(i18n)
+app.component('font-awesome-icon', FontAwesomeIcon)
+app.mount('#products-app')
 
 useUserStore().fetchUserData()
