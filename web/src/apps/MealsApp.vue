@@ -9,15 +9,18 @@ import DayCard from '../components/DayCard.vue'
 import TripHandlingCard from '../components/TripHandlingCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import Icon from '../components/Icon.vue'
+import AddProductModal from '../components/AddProductModal.vue'
 import CycleDaysModal from '../components/CycleDaysModal.vue'
 import FatalErrorModal from '../components/FatalErrorModal.vue'
-
-// import AddProductModal from '../components/AddProductModal.vue'
 
 const days = ref<Day[]>([])
 const trip = ref<Trip | undefined>()
 const tripLoading = ref(true)
 const mealsLoading = ref(true)
+const currentDay = ref<Day | undefined>(undefined)
+const currentMealName = ref<
+  'breakfast' | 'lunch' | 'dinner' | 'snacks' | undefined
+>(undefined)
 
 const editor = computed(() => {
   return trip.value?.type == 'user'
@@ -104,25 +107,22 @@ const fetchMealsInfo = async () => {
   }
 }
 
-const showAddProductModal = () => {
-  // TODO: do things + integrate this code
-  // let button = $(event.relatedTarget)
-  // let day = button.data('day')
-  // let mealType = button.data('mealtype')
-  // let reloadLink = button.data('reloadlink')
-  // mountedAddProdApp.day = {
-  //   number: day,
-  //   reload_link: reloadLink,
-  // }
-  // mountedAddProdApp.mealName = mealType
-  // mountedAddProdApp.currentProductId = 0
-  // mountedAddProdApp.currentProductName = ''
-  // mountedAddProdApp.mass = ''
-  // mountedAddProdApp.units = []
-  // mountedAddProdApp.unit = undefined
-  // setTimeout(() => {
-  //   document.getElementById('search-product-input').focus()
-  // }, 500)
+const showAddProductModal = (
+  dayNumber: number,
+  datatype: 'breakfast' | 'lunch' | 'dinner' | 'snacks'
+) => {
+  currentDay.value = days.value.find((val) => val.number == dayNumber)
+  currentMealName.value = datatype
+
+  const modalElem = document.getElementById('add-product-modal')
+  if (!modalElem) {
+    return
+  }
+
+  const modal = new Modal(modalElem, {
+    keyboard: false,
+  })
+  modal.show()
 }
 
 const showFatalErrorModal = () => {
@@ -159,12 +159,20 @@ onMounted(async () => {
 <template>
   <NavigationBar />
 
-  <!-- <AddProductModal />-->
+  <AddProductModal
+    v-if="trip && currentDay"
+    :trip="trip"
+    :day="currentDay"
+    :meal-name="currentMealName!"
+    id="add-product-modal"
+    @error="showFatalErrorModal"
+    @update="reload(currentDay!)" />
 
   <CycleDaysModal
     id="cycle-days-modal"
     v-if="trip"
-    :trip="trip" />
+    :trip="trip"
+    @error="showFatalErrorModal" />
 
   <FatalErrorModal id="fatal-error-modal" />
 
@@ -296,7 +304,8 @@ onMounted(async () => {
           :editor="editor"
           :trip="trip"
           @reload="reload(day)"
-          @error="showFatalErrorModal()" />
+          @error="showFatalErrorModal()"
+          @add="(n, type) => showAddProductModal(n, type)" />
       </div>
       <span
         class="spinner-border spinner-border-lg ms-3"
