@@ -17,19 +17,7 @@ defineProps({
 </script>
 
 <template>
-  <Modal>
-    <template #header>
-      <h5
-        class="modal-title"
-        id="shareModalLabel">
-        {{ $t('trips.shareModal.title') }}
-      </h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        :aria-label="$t('trips.shareModal.closeButton')"></button>
-    </template>
+  <Modal :title="$t('trips.shareModal.title')">
     <template #body>
       <div class="row mb-2">
         <label class="col-sm-12">
@@ -62,6 +50,7 @@ defineProps({
         <small class="col text-success">{{ copyStatus }}</small>
       </div>
     </template>
+
     <template #footer>
       <button
         type="button"

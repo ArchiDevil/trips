@@ -190,19 +190,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Modal>
-    <template #header>
-      <h5
-        class="modal-title"
-        id="add-product-modal-label">
-        {{ $t('meals.addModal.title') }}
-      </h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"></button>
-    </template>
-
+  <Modal :title="$t('meals.addModal.title')">
     <template #body>
       <form novalidate>
         <p>{{ $t('meals.addModal.intro') }}</p>
@@ -249,7 +237,7 @@ onMounted(() => {
             <select
               tabindex="3"
               class="form-select"
-              style="flex: 0.25;"
+              style="flex: 0.25"
               v-model="unit">
               <option
                 v-for="unit in units"

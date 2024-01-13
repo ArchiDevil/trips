@@ -145,15 +145,7 @@ watch(
 </script>
 
 <template>
-  <Modal>
-    <template #header>
-      <h5
-        class="modal-title"
-        id="edit-modal-title">
-        {{ title }}
-      </h5>
-    </template>
-
+  <Modal :title="title">
     <template #body>
       <div class="mb-3 row">
         <label

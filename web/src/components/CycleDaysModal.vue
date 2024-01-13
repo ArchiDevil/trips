@@ -64,16 +64,7 @@ const days = computed(() => {
 </script>
 
 <template>
-  <Modal>
-    <template #header>
-      <h5 class="modal-title">
-        {{ $t('meals.cycleDaysModal.title') }}
-      </h5>
-      <button
-        class="btn-close"
-        data-bs-dismiss="modal"></button>
-    </template>
-
+  <Modal :title="$t('meals.cycleDaysModal.title')">
     <template #body>
       <p>{{ $t('meals.cycleDaysModal.description') }}</p>
 

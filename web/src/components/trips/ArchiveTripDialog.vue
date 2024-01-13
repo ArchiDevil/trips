@@ -33,15 +33,7 @@ const archiveTrip = async () => {
 </script>
 
 <template>
-  <Modal>
-    <template #header>
-      <h5
-        class="modal-title"
-        id="archive-modal-title">
-        {{ $t('trips.archiveModal.title') }}
-      </h5>
-    </template>
-
+  <Modal :title="$t('trips.archiveModal.title')">
     <template #body>
       <p>{{ $t('trips.archiveModal.text') }}</p>
       <p

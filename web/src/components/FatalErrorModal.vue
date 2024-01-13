@@ -5,18 +5,11 @@ const reloadWindow = () => window.location.reload()
 </script>
 
 <template>
-  <Modal>
-    <template #header>
-      <h5 class="modal-title">
-        {{ $t('meals.errorModal.title') }}
-      </h5>
-      <button
-        class="btn-close"
-        data-bs-dismiss="modal"></button>
-    </template>
+  <Modal :title="$t('meals.errorModal.title')">
     <template #body>
       {{ $t('meals.errorModal.text') }}
     </template>
+
     <template #footer>
       <button
         class="btn btn-primary"

@@ -122,17 +122,12 @@ onMounted(() => updateGroups())
 </script>
 
 <template>
-  <Modal>
-    <template #header>
-      <h5 class="modal-title">
-        {{
-          props.trip
-            ? $t('trips.editModal.editTitle')
-            : $t('trips.editModal.addTitle')
-        }}
-      </h5>
-    </template>
-
+  <Modal
+    :title="
+      props.trip
+        ? $t('trips.editModal.editTitle')
+        : $t('trips.editModal.addTitle')
+    ">
     <template #body>
       <div
         class="alert alert-danger"

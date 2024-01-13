@@ -1,6 +1,10 @@
 <script setup lang="ts">
 defineProps({
   large: Boolean,
+  title: {
+    type: String,
+    required: true,
+  },
 })
 </script>
 
@@ -16,7 +20,10 @@ defineProps({
       role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <slot name="header"></slot>
+          <h5 class="modal-title">{{ title }}</h5>
+          <button
+            class="btn-close"
+            data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <slot name="body"></slot>
