@@ -12,7 +12,9 @@ const props = defineProps({
     required: true,
   },
 })
-const emit = defineEmits(['archive'])
+const emit = defineEmits<{
+  (e: 'archive'): void
+}>()
 const busy = ref(false)
 
 const error = ref<string | undefined>(undefined)

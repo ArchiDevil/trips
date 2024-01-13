@@ -19,7 +19,9 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update'])
+const emit = defineEmits<{
+  (e: 'update'): void
+}>()
 
 const productName = ref('')
 const caloriesInternal = ref('0')

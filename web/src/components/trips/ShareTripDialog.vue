@@ -2,7 +2,9 @@
 import Icon from '../Icon.vue'
 import Modal from '../Modal.vue'
 
-defineEmits(['copyLink'])
+defineEmits<{
+  (e: 'copyLink'): void
+}>()
 defineProps({
   linkText: {
     required: true,

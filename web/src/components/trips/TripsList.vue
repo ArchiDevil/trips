@@ -10,11 +10,11 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits({
-  edit: (trip: Trip) => true,
-  share: (shareLink: string) => true,
-  archive: (archiveLink: string) => true,
-})
+const emit = defineEmits<{
+  (e: 'edit', trip: Trip): void
+  (e: 'share', shareLink: string): void
+  (e: 'archive', archiveLink: string): void
+}>()
 
 const activeTrips = computed(() => {
   return props.trips.filter((trip) => !trip.trip.archived)

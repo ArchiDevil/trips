@@ -11,7 +11,9 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['copy'])
+const emit = defineEmits<{
+  (e: 'copy'): void
+}>()
 
 const daysCount = ref<string>(props.trip.trip.days_count.toString())
 const overwrite = ref(false)

@@ -51,11 +51,11 @@ const props = defineProps({
   },
 })
 
-defineEmits({
-  edit: (uid: string) => true,
-  share: (shareLink: string) => true,
-  archive: (archiveLink: string) => true,
-})
+defineEmits<{
+  (e: 'edit', uid: string): void
+  (e: 'share', shareLink: string): void
+  (e: 'archive', archiveLink: string): void
+}>()
 
 const fromDate = computed(() => {
   return new Date(props.fromDate).toLocaleDateString()
