@@ -54,7 +54,7 @@ def get_trip(trip_uid: str):
             'type': 'shared' if shared else 'user',
             'attendees': sum(group.persons for group in trip.groups),
             'cover_src': url_for('static', filename=f'img/trips/{get_magic(trip.name)}.png'),
-            'open_link': url_for('meals.days_view', trip_uid=trip.uid),
+            'open_link': f'/meals/{trip.uid}',
             'forget_link': url_for('trips.forget', trip_uid=trip.uid),
             'download_link': url_for('trips.download', trip_uid=trip.uid),
         }

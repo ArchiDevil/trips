@@ -112,7 +112,7 @@ def access(uuid):
             session.commit()
 
         trip = session.query(Trip).filter(Trip.id == link.trip_id).one()
-        return redirect(url_for('meals.days_view', trip_uid=trip.uid))
+        return redirect(f'/meals/{trip.uid}')
 
 
 @bp.get('/incorrect')

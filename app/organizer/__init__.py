@@ -87,9 +87,6 @@ def create_app(test_config=None):
     from . import trips
     app.register_blueprint(trips.bp)
 
-    from . import meals
-    app.register_blueprint(meals.bp)
-
     from . import api
     app.register_blueprint(api.BP)
 
