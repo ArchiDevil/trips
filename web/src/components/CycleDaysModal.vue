@@ -13,6 +13,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
   (e: 'copy'): void
+  (e: 'error'): void
 }>()
 
 const daysCount = ref<string>(props.trip.trip.days_count.toString())
@@ -50,6 +51,7 @@ const apply = async () => {
     })
   } catch (e) {
     console.log(e)
+    emit('error')
   } finally {
     busy.value = false
     emit('copy')
