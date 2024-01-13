@@ -118,13 +118,6 @@ const addMeal = async () => {
   }
 }
 
-const addMealKey = (event: KeyboardEvent) => {
-  if (event.key !== 'Enter') return
-
-  addMeal()
-  event.preventDefault()
-}
-
 const updateList = (value: string) => {
   if (lastRequestHandle.value) {
     clearTimeout(lastRequestHandle.value)
@@ -233,7 +226,7 @@ onMounted(() => {
                 'is-valid': validation.mass,
                 'is-invalid': !validation.mass,
               }"
-              @keyup="($event) => addMealKey($event)" />
+              @keyup.enter.prevent="addMeal()" />
             <select
               tabindex="3"
               class="form-select"
