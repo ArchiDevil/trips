@@ -34,10 +34,8 @@ const mass = ref('')
 const unit = ref<number | undefined>(undefined)
 const products = ref<{ id: number; name: string }[]>([])
 const units = ref<{ name: string; value: number }[]>([])
-const spinnerVisible = ref(false)
 const errorMessage = ref('')
 const lastRequestHandle = ref<number | undefined>(undefined)
-const searchString = ref('')
 const massInput = ref<HTMLInputElement | null>(null)
 const searchInput = ref<HTMLInputElement | null>(null)
 
@@ -67,6 +65,7 @@ const setProduct = async (id: number, name: string) => {
 
   const api = mande(`/api/products/units?id=${productId.value}`)
   try {
+    units.value = []
     const response = await api.get<{ result: boolean; units: number[] }>()
     if (response.result === false) {
       return
@@ -84,15 +83,12 @@ const setProduct = async (id: number, name: string) => {
   }
 }
 
-const clearProduct = () => {
-  productId.value = 0
-  productName.value = ''
-}
-
+const searchString = ref('')
 const searchProducts = () => {
   updateList(searchString.value)
 }
 
+const spinnerVisible = ref(false)
 const addMeal = async () => {
   if (validation.value.mass === false) {
     return
@@ -164,6 +160,11 @@ const onNetworkError = () => {
   emit('error')
 }
 
+const clearProduct = () => {
+  productId.value = 0
+  productName.value = ''
+}
+
 const reset = () => {
   productId.value = 0
   productName.value = ''
@@ -204,6 +205,7 @@ onMounted(() => {
 
     <template #body>
       <form novalidate>
+        <p class="text-muted">Это всё добалвяе</p>
         <div class="form-group row">
           <label class="col-sm-2 col-form-label">
             {{ $t('meals.addModal.productTitle') }}
@@ -211,18 +213,16 @@ onMounted(() => {
           <div class="input-group col-sm-10">
             <input
               type="text"
-              class="form-control col-7 col-md-8"
+              class="form-control"
               v-model="productName"
               disabled />
-            <div class="input-group-append col-5 col-md-4 px-0">
-              <button
-                tabindex="7"
-                class="btn btn-outline-secondary w-100 text-truncate"
-                type="button"
-                @click="clearProduct()">
-                {{ $t('meals.addModal.clearProductButton') }}
-              </button>
-            </div>
+            <button
+              tabindex="7"
+              class="btn btn-outline-secondary"
+              type="button"
+              @click="clearProduct()">
+              {{ $t('meals.addModal.clearProductButton') }}
+            </button>
           </div>
         </div>
         <div class="form-group row">
@@ -234,7 +234,7 @@ onMounted(() => {
           <div class="input-group col-sm-10">
             <input
               tabindex="2"
-              class="form-control col-7 col-md-8"
+              class="form-control"
               id="mass-input"
               name="mass"
               ref="massInput"
@@ -248,7 +248,7 @@ onMounted(() => {
               @keyup="($event) => addMealKey($event)" />
             <select
               tabindex="3"
-              class="custom-select input-group-append col-5 col-md-4 rounded-right"
+              class="form-select"
               v-model="unit">
               <option
                 v-for="unit in units"
@@ -283,9 +283,7 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody id="found-products">
-          <tr
-            v-for="product in products"
-            @click="setProduct(product.id, product.name)">
+          <tr v-for="product in products">
             <th scope="row">
               {{ product.id }}
             </th>

@@ -160,9 +160,9 @@ onMounted(async () => {
   <NavigationBar />
 
   <AddProductModal
-    v-if="trip && currentDay"
+    v-if="trip"
     :trip="trip"
-    :day="currentDay"
+    :day="currentDay!"
     :meal-name="currentMealName!"
     id="add-product-modal"
     @error="showFatalErrorModal"
