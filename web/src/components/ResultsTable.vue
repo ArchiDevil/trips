@@ -81,37 +81,31 @@ const totalCalories = computed(() => {
         <td style="width: 52%">
           <strong>{{ title }}</strong>
         </td>
-        <td
-          style="width: 8%"
-          class="text-end font-weight-bold">
+        <td class="text-end font-weight-bold value-col">
           {{ $t('meals.day.tableTotalRecord') }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate">
+        <td class="text-end text-truncate value-col">
           {{ totalMass }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ totalProteins }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ totalFats }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ totalCarbs }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate">
+        <td class="text-end text-truncate value-col">
           {{ totalCalories }}
         </td>
       </tr>
     </tfoot>
   </table>
 </template>
+
+<style scoped>
+.value-col {
+  width: 8%;
+}
+</style>
