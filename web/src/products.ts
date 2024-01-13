@@ -38,11 +38,14 @@ library.add(
 
 const pinia = createPinia()
 
-const i18n = createI18n({
+const i18n = createI18n<[typeof messages.ru], 'ru' | 'en'>({
   legacy: false,
   locale: 'ru',
   fallbackLocale: 'en',
-  messages,
+  messages: {
+    ru: messages.ru,
+    en: messages.en,
+  },
 })
 
 const app = createApp(ProductsApp)
