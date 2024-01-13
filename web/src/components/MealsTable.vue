@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { mande } from 'mande'
-import { PropType, computed, ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import { Meal } from '../interfaces'
 import Icon from './Icon.vue'
@@ -18,25 +18,17 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  datatype: {
-    type: String as PropType<'breakfast' | 'lunch' | 'dinner' | 'snacks'>,
-    required: true,
-  },
-  dayNumber: {
-    type: Number,
-    required: true,
-  },
   meals: {
     type: Array<Meal>,
     required: true,
   },
-  reloadLink: {
-    type: String,
-    required: true,
-  },
 })
 
-const emit = defineEmits(['reload', 'error'])
+const emit = defineEmits<{
+  (e: 'reload'): void
+  (e: 'error'): void
+  (e: 'add'): void
+}>()
 
 const mealDeleting = ref(false)
 
@@ -121,11 +113,7 @@ const removeMeal = async (mealId: number) => {
             type="button"
             class="btn btn-sm"
             :class="buttonStyle"
-            data-bs-toggle="modal"
-            data-bs-target="#add-product-modal"
-            :data-bs-day="dayNumber"
-            :data-bs-mealtype="datatype"
-            :data-bs-reloadlink="reloadLink">
+            @click="$emit('add')">
             <Icon icon="fa-plus" />
           </button>
         </td>

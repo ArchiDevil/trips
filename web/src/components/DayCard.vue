@@ -23,7 +23,15 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['reload', 'error'])
+const emit = defineEmits<{
+  (e: 'reload'): void
+  (e: 'error'): void
+  (
+    e: 'add',
+    day: number,
+    mealName: 'breakfast' | 'dinner' | 'lunch' | 'snacks'
+  ): void
+}>()
 
 const dayId = computed(() => {
   return `day${props.day.number}`
@@ -128,45 +136,37 @@ onMounted(() => {
         </thead>
       </table>
       <MealsTable
-        :reload-link="day.reload_link"
-        :day-number="day.number"
         :editor="editor"
         :meals="day.meals.breakfast"
         :title="$t('meals.day.breakfastTitle')"
-        datatype="breakfast"
         color-style="success"
         @reload="$emit('reload')"
-        @error="$emit('error')" />
+        @error="$emit('error')"
+        @add="$emit('add', day.number, 'breakfast')" />
       <MealsTable
-        :reload-link="day.reload_link"
-        :day-number="day.number"
         :editor="editor"
         :meals="day.meals.lunch"
         :title="$t('meals.day.lunchTitle')"
-        datatype="lunch"
         color-style="warning"
         @reload="$emit('reload')"
-        @error="$emit('error')" />
+        @error="$emit('error')"
+        @add="$emit('add', day.number, 'lunch')" />
       <MealsTable
-        :reload-link="day.reload_link"
-        :day-number="day.number"
         :editor="editor"
         :meals="day.meals.dinner"
         :title="$t('meals.day.dinnerTitle')"
-        datatype="dinner"
         color-style="info"
         @reload="$emit('reload')"
-        @error="$emit('error')" />
+        @error="$emit('error')"
+        @add="$emit('add', day.number, 'dinner')" />
       <MealsTable
-        :reload-link="day.reload_link"
-        :day-number="day.number"
         :editor="editor"
         :meals="day.meals.snacks"
         :title="$t('meals.day.snacksTitle')"
-        datatype="snacks"
         color-style="secondary"
         @reload="$emit('reload')"
-        @error="$emit('error')" />
+        @error="$emit('error')"
+        @add="$emit('add', day.number, 'snacks')" />
       <ResultsTable
         :day="day"
         :title="$t('meals.day.resultsTitle')"
