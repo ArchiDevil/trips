@@ -3,10 +3,10 @@ from typing import Any
 
 from flask.testing import FlaskClient
 import pytest
-from app.organizer.strings import STRING_TABLE
 
 from organizer.db import get_session
 from organizer.schema import SharingLink, Trip, TripAccess
+from organizer.strings import STRING_TABLE
 
 
 def test_rejects_not_logged_in(client: FlaskClient):
@@ -59,7 +59,6 @@ def test_trips_org_can_get_trip(org_logged_client: FlaskClient):
     assert response.json['cover_src'] == '/static/img/trips/7.png'
     assert response.json['open_link'] == '/meals/uid1'
     assert response.json['forget_link'] == '/trips/forget/uid1'
-    assert response.json['download_link'] == '/trips/download/uid1'
 
     assert response.json['trip']['name'] == 'Taganay trip'
     assert response.json['trip']['from_date'] == '2019-01-01'
@@ -74,6 +73,7 @@ def test_trips_org_can_get_trip(org_logged_client: FlaskClient):
     assert response.json['trip']['archive_link'] == '/api/trips/archive/uid1'
     assert response.json['trip']['packing_link'] == '/reports/packing/uid1'
     assert response.json['trip']['shopping_link'] == '/reports/shopping/uid1'
+    assert response.json['trip']['download_link'] == '/api/trips/download/uid1'
 
 
 def test_trips_org_can_access_shared_trip(org_logged_client: FlaskClient):

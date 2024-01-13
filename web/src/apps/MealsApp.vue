@@ -14,13 +14,7 @@ import CycleDaysModal from '../components/CycleDaysModal.vue'
 import FatalErrorModal from '../components/FatalErrorModal.vue'
 
 const days = ref<Day[]>([])
-const trip = ref<Trip | undefined>()
-const tripLoading = ref(true)
-const mealsLoading = ref(true)
-const currentDay = ref<Day | undefined>(undefined)
-const currentMealName = ref<
-  'breakfast' | 'lunch' | 'dinner' | 'snacks' | undefined
->(undefined)
+const trip = ref<Trip>()
 
 const editor = computed(() => {
   return trip.value?.type == 'user'
@@ -66,17 +60,17 @@ const tillDate = computed(() => {
   return date.toLocaleDateString()
 })
 
-const reload = (day: Day) => {
-  fetch(day.reload_link)
-    .then((response) => response.json())
-    .then((data) => {
-      days.value[data.day.number - 1] = data.day
-    })
-    .catch((error) => {
-      showFatalErrorModal()
-    })
+const reloadDay = async (day: Day) => {
+  try {
+    const api = mande(day.reload_link)
+    const response = await api.get<{ day: Day }>('')
+    days.value[response.day.number - 1] = response.day
+  } catch (e) {
+    showFatalErrorModal()
+  }
 }
 
+const tripLoading = ref(true)
 const fetchTripInfo = async () => {
   const currentTripUid = window.location.pathname.split('/').pop()
   if (!currentTripUid) {
@@ -93,6 +87,7 @@ const fetchTripInfo = async () => {
   }
 }
 
+const mealsLoading = ref(true)
 const fetchMealsInfo = async () => {
   if (!trip.value) {
     console.error('No trip provided')
@@ -107,6 +102,8 @@ const fetchMealsInfo = async () => {
   }
 }
 
+const currentDay = ref<Day>()
+const currentMealName = ref<'breakfast' | 'lunch' | 'dinner' | 'snacks'>()
 const showAddProductModal = (
   dayNumber: number,
   datatype: 'breakfast' | 'lunch' | 'dinner' | 'snacks'
@@ -166,7 +163,7 @@ onMounted(async () => {
     :meal-name="currentMealName!"
     id="add-product-modal"
     @error="showFatalErrorModal"
-    @update="reload(currentDay!)" />
+    @update="reloadDay(currentDay!)" />
 
   <CycleDaysModal
     id="cycle-days-modal"
@@ -303,7 +300,7 @@ onMounted(async () => {
           :day="day"
           :editor="editor"
           :trip="trip"
-          @reload="reload(day)"
+          @reload="reloadDay(day)"
           @error="showFatalErrorModal()"
           @add="(n, type) => showAddProductModal(n, type)" />
       </div>

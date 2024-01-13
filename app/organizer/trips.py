@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from flask import Blueprint, render_template, url_for, redirect, abort, g
+from flask import Blueprint, redirect, abort, g
 from organizer.auth import login_required_group
 from organizer.db import get_session
 from organizer.schema import SharingLink, Trip, AccessGroup, TripAccess
@@ -41,7 +41,7 @@ def access(uuid):
 
         link: Optional[SharingLink] = session.query(SharingLink).filter(SharingLink.uuid == uuid).first()
         if not link:
-            return redirect(url_for('trips.incorrect'))
+            return redirect('/trips/incorrect')
 
         access: Optional[TripAccess] = session.query(TripAccess).filter(
             TripAccess.trip_id == link.trip_id,
@@ -52,9 +52,3 @@ def access(uuid):
 
         trip = session.query(Trip).filter(Trip.id == link.trip_id).one()
         return redirect(f'/meals/{trip.uid}')
-
-
-@bp.get('/incorrect')
-@login_required_group(AccessGroup.User)
-def incorrect():
-    return render_template('trips/incorrect.html')

@@ -88,7 +88,7 @@ onMounted(() => {
       <div class="d-none d-md-block col-md-4 col-xl-3">
         <img
           :src="coverLink"
-          class="w-100 rounded-left"
+          class="w-100 rounded-start"
           alt=""
           :class="{ 'fade-out': past }" />
       </div>

@@ -15,18 +15,18 @@ def test_auth_can_see_login_page(client: FlaskClient):
     assert STRING_TABLE['Site title'].encode() in response.data
 
 
-def test_auth_any_access_updates_last_login(org_logged_client: FlaskClient, app: Flask):
+def test_auth_any_access_updates_last_login(admin_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
-            user = session.query(User).filter(User.login == "Organizer").first()
+            user = session.query(User).filter(User.login == "Administrator").first()
             first_date = user.last_logged_in
 
-    response = org_logged_client.get('/trips/incorrect')
+    response = admin_logged_client.get('/users/')
     assert response.status_code == 200
 
     with app.app_context():
         with get_session() as session:
-            user = session.query(User).filter(User.login == "Organizer").first()
+            user = session.query(User).filter(User.login == "Administrator").first()
             second_date = user.last_logged_in
 
     assert first_date != second_date

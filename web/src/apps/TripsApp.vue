@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { mande } from 'mande'
 import { useI18n } from 'vue-i18n'
 import { Modal } from 'bootstrap'
 
@@ -77,11 +78,13 @@ const generateLink = async () => {
   const link = shareLink.value
   copyStatus.value = undefined
   linkText.value = t('trips.shareModal.linkLoading')
+
   try {
-    const response = await fetch(link)
-    linkText.value = (await response.json()).link
-  } catch (error) {
-    console.error(error)
+    const api = mande(link)
+    const response = await api.get<{ link: string }>()
+    linkText.value = response.link
+  } catch (e) {
+    console.error(e)
   }
 }
 

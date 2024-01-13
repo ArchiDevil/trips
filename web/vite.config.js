@@ -16,6 +16,7 @@ export default defineConfig({
         products: resolve(__dirname, 'products.html'),
         reports: resolve(__dirname, 'reports.html'),
         meals: resolve(__dirname, 'meals.html'),
+        incorrect: resolve(__dirname, 'incorrect.html'),
         // auth: resolve(__dirname, 'auth.html'),
       },
     },
