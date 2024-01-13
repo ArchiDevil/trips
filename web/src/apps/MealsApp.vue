@@ -223,10 +223,7 @@ onMounted(async () => {
           v-if="!tripLoading"
           :from-date="fromDate ?? ''"
           :till-date="tillDate ?? ''"
-          :cover-src="trip.cover_src"
-          :attendees="trip.attendees"
-          :shopping-link="trip.trip.shopping_link"
-          :packing-link="trip.trip.packing_link" />
+          :trip="trip" />
         <span
           class="spinner-border spinner-border-lg ms-3"
           role="status"

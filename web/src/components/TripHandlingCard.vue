@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { PropType } from 'vue'
 import Icon from './Icon.vue'
+import { Trip } from '../interfaces'
 
 defineProps({
   fromDate: {
@@ -10,20 +12,8 @@ defineProps({
     type: String,
     required: true,
   },
-  coverSrc: {
-    type: String,
-    required: true,
-  },
-  attendees: {
-    type: Number,
-    required: true,
-  },
-  shoppingLink: {
-    type: String,
-    required: true,
-  },
-  packingLink: {
-    type: String,
+  trip: {
+    type: Object as PropType<Trip>,
     required: true,
   },
 })
@@ -34,7 +24,7 @@ defineProps({
     class="card shadow"
     style="width: 18rem">
     <img
-      :src="coverSrc"
+      :src="trip.cover_src"
       class="card-img-top"
       alt="" />
     <h5 class="card-header">
@@ -46,17 +36,17 @@ defineProps({
       </p>
       <p class="card-text">
         <Icon icon="fa-walking" /> {{ $t('meals.card.participants') }}:
-        {{ attendees }}
+        {{ trip.attendees }}
       </p>
       <a
         class="btn btn-secondary w-100 my-1"
-        :href="shoppingLink">
+        :href="trip.trip.shopping_link">
         <Icon icon="fa-shopping-cart" />
         {{ $t('meals.card.shoppingButton') }}
       </a>
       <a
         class="btn btn-secondary w-100 my-1"
-        :href="packingLink">
+        :href="trip.trip.packing_link">
         <Icon icon="fa-hiking" /> {{ $t('meals.card.packingButton') }}
       </a>
     </div>
