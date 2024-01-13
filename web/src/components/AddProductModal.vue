@@ -205,7 +205,7 @@ onMounted(() => {
 
     <template #body>
       <form novalidate>
-        <p class="text-muted">Это всё добалвяе</p>
+        <p>{{ $t('meals.addModal.intro') }}</p>
         <div class="form-group row">
           <label class="col-sm-2 col-form-label">
             {{ $t('meals.addModal.productTitle') }}
@@ -249,6 +249,7 @@ onMounted(() => {
             <select
               tabindex="3"
               class="form-select"
+              style="flex: 0.25;"
               v-model="unit">
               <option
                 v-for="unit in units"

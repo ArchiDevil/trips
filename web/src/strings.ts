@@ -54,6 +54,7 @@ export const messages = {
         unableToAddMeal: 'Невозможно добавить продукт'
       },
       addModal: {
+        intro: 'Количество продуктов указывается на одного человека в группе. Общее количество будет вычислено автоматически.',
         title: 'Добавить продукт',
         idTitle: '#',
         nameTitle: 'Название',
@@ -307,6 +308,7 @@ export const messages = {
         unableToAddMeal: 'Unable to add a product'
       },
       addModal: {
+        intro: 'Amount of products is specified per one person in a group. Total amount will be calculated automatically.',
         title: 'Add product',
         idTitle: '#',
         nameTitle: 'Name',
