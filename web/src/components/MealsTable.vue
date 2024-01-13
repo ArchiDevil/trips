@@ -124,14 +124,7 @@ const removeMeal = async (mealId: number) => {
       <tr
         v-for="meal in meals"
         :class="{ showhim: !mealDeleting }">
-        <td
-          style="
-            width: 56%;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            max-width: 1px;
-          ">
+        <td class="name-col">
           <span>{{ meal.name }}</span>
         </td>
         <td style="width: 4%">
@@ -148,29 +141,19 @@ const removeMeal = async (mealId: number) => {
             </a>
           </span>
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate">
+        <td class="text-end text-truncate value-col">
           {{ meal.mass }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ meal.proteins.toFixed(1) }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ meal.fats.toFixed(1) }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ meal.carbs.toFixed(1) }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate">
+        <td class="text-end text-truncate value-col">
           {{ meal.calories.toFixed(1) }}
         </td>
       </tr>
@@ -183,32 +166,36 @@ const removeMeal = async (mealId: number) => {
           class="text-end font-weight-bold">
           {{ $t('meals.day.tableTotalRecord') }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate">
+        <td class="text-end text-truncate value-col">
           {{ totalMass }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ totalProteins }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ totalFats }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate d-none d-sm-table-cell">
+        <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ totalCarbs }}
         </td>
-        <td
-          style="width: 8%"
-          class="text-end text-truncate">
+        <td class="text-end text-truncate value-col">
           {{ totalCalories }}
         </td>
       </tr>
     </tfoot>
   </table>
 </template>
+
+<style scoped>
+.name-col {
+  width: 56%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 1px;
+}
+
+.value-col {
+  width: 8%;
+}
+</style>
