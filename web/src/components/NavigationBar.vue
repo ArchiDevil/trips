@@ -94,6 +94,14 @@ const displayedName = computed(() => {
               {{ $t('docs.howToLink') }}
             </a>
           </li>
+          <li class="nav-item text-danger">
+            <a
+              href="https://forms.gle/nvpf8qoyPuaC2Mza7"
+              class="nav-link">
+              <Icon icon="fa-clipboard-question" />
+              {{ $t('navbar.formLink') }}
+            </a>
+          </li>
         </ul>
 
         <form

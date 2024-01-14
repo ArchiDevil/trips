@@ -30,6 +30,7 @@ import {
   faSpinner,
   faCookieBite,
   faCubes,
+  faClipboardQuestion,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createPinia } from 'pinia'
@@ -59,7 +60,8 @@ library.add(
   faTable,
   faSpinner,
   faCookieBite,
-  faCubes
+  faCubes,
+  faClipboardQuestion
 )
 
 const pinia = createPinia()

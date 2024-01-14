@@ -19,6 +19,7 @@ import {
   faShareAlt,
   faArchive,
   faEyeSlash,
+  faClipboardQuestion,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createPinia } from 'pinia'
@@ -37,7 +38,8 @@ library.add(
   faWalking,
   faPen,
   faShareAlt,
-  faEyeSlash
+  faEyeSlash,
+  faClipboardQuestion
 )
 
 const pinia = createPinia()

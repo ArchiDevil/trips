@@ -180,6 +180,7 @@ export const messages = {
       tripsLink: 'Походы',
       productsLink: 'Продукты',
       usersLink: 'Пользователи',
+      formLink: 'Пройдите опрос!',
       logoutLink: 'Выйти',
     },
     signup: {
@@ -434,6 +435,7 @@ export const messages = {
       tripsLink: 'Trips',
       productsLink: 'Products',
       usersLink: 'Users',
+      formLink: 'Take a survey!',
       logoutLink: 'Logout',
     },
     signup: {
