@@ -94,10 +94,10 @@ const displayedName = computed(() => {
               {{ $t('docs.howToLink') }}
             </a>
           </li>
-          <li class="nav-item text-danger">
+          <li class="nav-item">
             <a
               href="https://forms.gle/nvpf8qoyPuaC2Mza7"
-              class="nav-link">
+              class="nav-link text-danger">
               <Icon icon="fa-clipboard-question" />
               {{ $t('navbar.formLink') }}
             </a>
