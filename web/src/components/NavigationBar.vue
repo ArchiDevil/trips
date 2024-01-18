@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 
 import { useUserStore } from '../stores/user'
-import { useNavStore } from '../stores/nav'
 
 import globals from '../globals'
 import Icon from './Icon.vue'
 
-const navStore = useNavStore()
+defineProps<{
+  link: 'trips' | 'products' | 'users'
+}>()
+
 const userStore = useUserStore()
 
 const admin = computed(() => userStore.info.access_group == 'Administrator')
@@ -60,7 +62,7 @@ const displayedName = computed(() => {
               id="trips-link"
               class="nav-link"
               :href="tripsPage"
-              :class="{ active: navStore.link == 'trips' }">
+              :class="{ active: link == 'trips' }">
               <Icon icon="fa-route" />
               {{ $t('navbar.tripsLink') }}
             </a>
@@ -70,7 +72,7 @@ const displayedName = computed(() => {
               id="products-link"
               class="nav-link"
               :href="productsPage"
-              :class="{ active: navStore.link == 'products' }">
+              :class="{ active: link == 'products' }">
               <Icon icon="fa-pizza-slice" />
               {{ $t('navbar.productsLink') }}
             </a>
@@ -81,7 +83,7 @@ const displayedName = computed(() => {
               class="nav-link"
               :href="usersPage"
               v-if="admin"
-              :class="{ active: navStore.link == 'users' }">
+              :class="{ active: link == 'users' }">
               <Icon icon="fa-users" />
               {{ $t('navbar.usersLink') }}
             </a>

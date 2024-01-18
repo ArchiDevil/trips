@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useUserStore } from '../stores/user'
-import { useNavStore } from '../stores/nav'
 import { useProductsStore } from '../stores/products'
 import { Modal } from 'bootstrap'
 
@@ -84,7 +83,6 @@ const onProductsUpdate = async () => {
 }
 
 onMounted(async () => {
-  useNavStore().link = 'products'
   await fetchProducts()
   setTimeout(() => {
     ;(searchbox.value as HTMLElement)?.focus()
@@ -102,7 +100,7 @@ watch(search, () => {
 </script>
 
 <template>
-  <NavigationBar />
+  <NavigationBar link="products" />
 
   <div class="container-xl">
     <div class="row my-3">

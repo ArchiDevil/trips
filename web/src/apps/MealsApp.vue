@@ -154,7 +154,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <NavigationBar />
+  <NavigationBar link="trips" />
 
   <AddProductModal
     v-if="trip"

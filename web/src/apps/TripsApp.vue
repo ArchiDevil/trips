@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { Modal } from 'bootstrap'
 
 import { Trip } from '../interfaces'
-import { useNavStore } from '../stores/nav'
 import { useTripsStore } from '../stores/trips'
 
 import cardImg from '../assets/1.png'
@@ -137,13 +136,12 @@ const showAddModal = () => {
 }
 
 onMounted(async () => {
-  useNavStore().link = 'trips'
   await tripsStore.fetchTrips()
 })
 </script>
 
 <template>
-  <NavigationBar />
+  <NavigationBar link="trips" />
 
   <div class="container">
     <div class="row my-3">
