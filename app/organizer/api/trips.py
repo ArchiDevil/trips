@@ -73,38 +73,9 @@ def get_trip(trip_uid: str):
         }
 
 
-def validate_input_data(data: dict[str, Any]):
-    name = data['name']
-    if not name or len(name) > 50:
-        raise RuntimeError(STRING_TABLE['Trips edit error incorrect name'])
-
-    groups: list[int] = []
-    try:
-        for group in data['groups']:
-            value = int(group)
-            if value < 1:
-                raise ValueError
-            groups.append(group)
-        if not groups:
-            raise ValueError
-    except ValueError:
-        raise RuntimeError(STRING_TABLE['Trips edit error incorrect groups'])
-
-    from_date = data['from_date']
-    till_date = data['till_date']
-    try:
-        from_date = date.fromisoformat(from_date)
-        till_date = date.fromisoformat(till_date)
-        if till_date < from_date:
-            raise ValueError
-    except ValueError:
-        raise RuntimeError(STRING_TABLE['Trips edit error incorrect dates'])
-    return name, groups, from_date, till_date
-
-
-@BP.get('/get')
+@BP.get('/')
 @api_login_required_group(AccessGroup.User)
-def get_trip_uids():
+def get_trips():
     with get_session() as session:
         user_trips: List[Trip] = []
         shared_trips: List[Trip] = []
@@ -130,7 +101,11 @@ def get_trip_uids():
             for trip in shared_trips:
                 trips.append(trip.uid)
 
-        return {'trips': trips}
+        output = []
+        for trip_uid in trips:
+            output.append(get_trip(trip_uid))
+
+        return output
 
 
 @BP.get('/get/<trip_uid>')
@@ -194,6 +169,35 @@ def archive(trip_uid: str):
         session.commit()
 
     return {'status': 'ok'}
+
+
+def validate_input_data(data: dict[str, Any]):
+    name = data['name']
+    if not name or len(name) > 50:
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect name'])
+
+    groups: list[int] = []
+    try:
+        for group in data['groups']:
+            value = int(group)
+            if value < 1:
+                raise ValueError
+            groups.append(group)
+        if not groups:
+            raise ValueError
+    except ValueError:
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect groups'])
+
+    from_date = data['from_date']
+    till_date = data['till_date']
+    try:
+        from_date = date.fromisoformat(from_date)
+        till_date = date.fromisoformat(till_date)
+        if till_date < from_date:
+            raise ValueError
+    except ValueError:
+        raise RuntimeError(STRING_TABLE['Trips edit error incorrect dates'])
+    return name, groups, from_date, till_date
 
 
 @BP.post('/add')

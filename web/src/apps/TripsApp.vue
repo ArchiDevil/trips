@@ -146,17 +146,15 @@ onMounted(async () => {
   <NavigationBar />
 
   <div class="container">
-    <div
-      class="row my-3"
-      v-if="tripsStore.tripUids.length">
+    <div class="row my-3">
       <div class="col-6">
         <LoadingTitle
           :title="$t('trips.title')"
-          :loading="tripsStore.idsLoading" />
+          :loading="tripsStore.tripsLoading" />
       </div>
       <div
         class="col-6 d-flex flex-row-reverse align-items-end"
-        v-if="!tripsStore.idsLoading">
+        v-if="!tripsStore.tripsLoading">
         <a
           class="btn btn-primary d-block d-lg-none"
           type="button"
@@ -169,17 +167,17 @@ onMounted(async () => {
 
     <div
       class="row my-3"
-      :class="{ 'mt-5': !tripsStore.tripUids.length }"
-      v-if="!tripsStore.idsLoading">
+      :class="{ 'mt-5': !tripsStore.trips.length }"
+      v-if="!tripsStore.tripsLoading">
       <div
         class="col"
-        v-if="!tripsStore.tripUids.length">
+        v-if="!tripsStore.trips.length">
         <Jumbotron @create="showAddModal()" />
       </div>
 
       <div
         class="col-auto d-none d-lg-block"
-        v-if="tripsStore.tripUids.length">
+        v-if="tripsStore.trips.length">
         <PageCard
           :image="cardImg"
           :header-text="$t('trips.cardTitle')"
@@ -196,7 +194,7 @@ onMounted(async () => {
 
       <div
         class="col"
-        v-if="tripsStore.tripUids.length">
+        v-if="tripsStore.trips.length">
         <TripsList
           :trips="sortedTrips"
           @edit="(trip) => showEditModal(trip)"

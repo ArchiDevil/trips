@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { Trip } from '../interfaces'
 import { mande } from 'mande'
+import { tripsApi } from '../backend'
 
 interface PackingProduct {
   name: string
@@ -30,9 +31,9 @@ export const useReportsStore = defineStore('reports', {
   },
   actions: {
     async fetchTrip(uid: string) {
-      const api = mande(`/api/trips/get/${uid}`)
+      const api = tripsApi
       try {
-        this.trip = await api.get<Trip>()
+        this.trip = await api.get<Trip>(`/get/${uid}`)
       } catch (e) {
         console.error(e)
       }

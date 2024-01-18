@@ -33,9 +33,9 @@ def test_trips_forget_forgets_trip(org_logged_client: FlaskClient):
     assert response.status_code == 302
     assert '/' in response.location
 
-    response = org_logged_client.get('/api/trips/get')
+    response = org_logged_client.get('/api/trips/')
     assert response.json
-    assert 1 == len(response.json['trips'])
+    assert 1 == len(response.json)
 
 
 def test_trips_forgetting_unknown_rejects(org_logged_client: FlaskClient):

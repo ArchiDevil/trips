@@ -10,37 +10,58 @@ from organizer.strings import STRING_TABLE
 
 
 def test_rejects_not_logged_in(client: FlaskClient):
-    response = client.get('/api/trips/get')
+    response = client.get('/api/trips/')
     assert response.status_code == 401
 
 
 def test_can_get_trips_for_manager(org_logged_client: FlaskClient):
-    response = org_logged_client.get('/api/trips/get')
+    response = org_logged_client.get('/api/trips/')
     assert response.status_code == 200
     assert response.json
-    assert len(response.json['trips']) == 1
-    assert response.json['trips'][0] == 'uid1'
+    assert len(response.json) == 1
+    assert response.json[0]['uid'] == 'uid1'
+    assert response.json[0]['type'] == 'user'
+    assert response.json[0]['attendees'] == 5
+    assert response.json[0]['cover_src'] == '/static/img/trips/7.png'
+    assert response.json[0]['open_link'] == '/meals/uid1'
+    assert response.json[0]['forget_link'] == '/trips/forget/uid1'
+
+    assert response.json[0]['trip']['name'] == 'Taganay trip'
+    assert response.json[0]['trip']['from_date'] == '2019-01-01'
+    assert response.json[0]['trip']['till_date'] == '2019-01-05'
+    assert response.json[0]['trip']['days_count'] == 5
+    assert response.json[0]['trip']['created_by'] == 2
+    assert response.json[0]['trip']['archived'] is False
+    assert response.json[0]['trip']['groups'] == [2, 3]
+    assert response.json[0]['trip']['user'] == 'Organizer'
+    assert response.json[0]['trip']['edit_link'] == '/api/trips/edit/uid1'
+    assert response.json[0]['trip']['share_link'] == '/api/trips/share/uid1'
+    assert response.json[0]['trip']['archive_link'] == '/api/trips/archive/uid1'
+    assert response.json[0]['trip']['packing_link'] == '/reports/packing/uid1'
+    assert response.json[0]['trip']['shopping_link'] == '/reports/shopping/uid1'
+    assert response.json[0]['trip']['download_link'] == '/api/trips/download/uid1'
 
 
-def test_can_get_shared_trip_uids(org_logged_client: FlaskClient):
+
+def test_can_get_shared_trips(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(TripAccess(trip_id=3, user_id=2))
             session.commit()
 
-    response = org_logged_client.get('/api/trips/get')
+    response = org_logged_client.get('/api/trips/')
     assert response.status_code == 200
     assert response.json
-    assert len(response.json['trips']) == 2
-    assert response.json['trips'][0] == 'uid1'
-    assert response.json['trips'][1] == 'uid3'
+    assert len(response.json) == 2
+    assert response.json[0]['uid'] == 'uid1'
+    assert response.json[1]['uid'] == 'uid3'
 
 
 def test_trips_returns_correct_data_for_admin(admin_logged_client: FlaskClient):
-    response = admin_logged_client.get('/api/trips/get')
+    response = admin_logged_client.get('/api/trips/')
     assert response.status_code == 200
     assert response.json
-    assert 2 == len(response.json['trips'])
+    assert 2 == len(response.json)
 
 
 def test_trips_guest_cannot_access_trips(client: FlaskClient):
