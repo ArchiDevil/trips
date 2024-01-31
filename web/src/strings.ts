@@ -6,7 +6,7 @@ export const messages = {
         participants: 'Участников',
         editButton: 'Редактировать',
         shoppingButton: 'Список покупок',
-        packingButton: 'Отчет для фасовки'
+        packingButton: 'Отчет для фасовки',
       },
       tools: {
         header: 'Инструменты',
@@ -48,10 +48,10 @@ export const messages = {
       },
       units: {
         grams: 'г',
-        pcs: 'шт'
+        pcs: 'шт',
       },
       errors: {
-        unableToAddMeal: 'Невозможно добавить продукт'
+        unableToAddMeal: 'Невозможно добавить продукт',
       },
       addModal: {
         intro: 'Количество продуктов указывается на одного человека в группе. Общее количество будет вычислено автоматически.',
@@ -65,13 +65,13 @@ export const messages = {
         closeButton: 'Закрыть',
         addButton: 'Добавить',
         clearProductButton: 'Очистить',
-        invalidMassError: 'Введите положительное число'
+        invalidMassError: 'Введите положительное число',
       },
       errorModal: {
         title: 'Ошибка соединения',
         text: 'Произошла ошибка соединения с сервером. Попробуйте перезагрузить страницу.',
-        reloadButton: 'Перезагрузить'
-      }
+        reloadButton: 'Перезагрузить',
+      },
     },
     products: {
       editModal: {
@@ -108,7 +108,7 @@ export const messages = {
         proteins: 'Б',
         fats: 'Ж',
         carbs: 'У',
-        archive: 'А'
+        archive: 'А',
       },
       searchPlaceholder: 'Искать продукт',
       addNew: 'Добавить продукт',
@@ -173,7 +173,7 @@ export const messages = {
         archiveButton: 'Архивировать',
         closeButton: 'Закрыть',
         error: 'Произошла ошибка при архивировании похода. Попробуйте перезагрузить страницу.',
-      }
+      },
     },
     navbar: {
       title: 'Hikehub',
@@ -224,7 +224,7 @@ export const messages = {
       error: 'Ошибка при изменении пароля. Попробуйте перезагрузить страницу.',
     },
     docs: {
-      howToLink: 'Как пользоваться сервисом'
+      howToLink: 'Как пользоваться сервисом',
     },
     shopping: {
       title: 'список покупок',
@@ -252,7 +252,45 @@ export const messages = {
       personsSuffix: 'чел',
       piecesSuffix: 'шт',
       gramsSuffix: 'г',
-    }
+    },
+    users: {
+      title: 'Пользователи',
+      add: 'Добавить',
+      table: {
+        id: '#',
+        login: 'Логин',
+        name: 'Отображаемое имя',
+        password: 'Пароль?',
+        group: 'Группа',
+        type: 'Тип',
+        lastLogin: 'Вход',
+        actions: 'Действия',
+      },
+      remove: 'Удалить',
+      edit: 'Редактировать',
+      login: 'Логин',
+      password: 'Пароль',
+      accessGroup: 'Группа',
+      invalidLogin: 'Поле не должно быть пустым',
+      invalidPassword: 'Пароль не должен быть пустым',
+      deleteModal: {
+        title: 'Удалить пользователя?',
+        text: 'Внимание: это действие нельзя отменить!',
+        text2: 'Вы точно хотите удалить этого пользователя?',
+        delete: 'Удалить',
+        close: 'Закрыть',
+      },
+      editModal: {
+        title: 'Редактировать пользователя',
+        edit: 'Применить',
+        close: 'Закрыть',
+      },
+      addModal: {
+        title: 'Добавить пользователя',
+        add: 'Добавить',
+        close: 'Закрыть',
+      }
+    },
   },
   en: {
     meals: {
@@ -261,7 +299,7 @@ export const messages = {
         participants: 'Participants',
         editButton: 'Edit',
         shoppingButton: 'Shopping list',
-        packingButton: 'Packing list'
+        packingButton: 'Packing list',
       },
       tools: {
         header: 'Statistics and tools',
@@ -303,10 +341,10 @@ export const messages = {
       },
       units: {
         grams: 'g',
-        pcs: 'pcs'
+        pcs: 'pcs',
       },
       errors: {
-        unableToAddMeal: 'Unable to add a product'
+        unableToAddMeal: 'Unable to add a product',
       },
       addModal: {
         intro: 'Amount of products is specified per one person in a group. Total amount will be calculated automatically.',
@@ -320,13 +358,13 @@ export const messages = {
         closeButton: 'Close',
         addButton: 'Add',
         clearProductButton: 'Clear',
-        invalidMassError: 'Enter a positive number'
+        invalidMassError: 'Enter a positive number',
       },
       errorModal: {
         title: 'Connection error',
         text: 'Something gone wrong. Try to reload a page.',
-        reloadButton: 'Reload'
-      }
+        reloadButton: 'Reload',
+      },
     },
     products: {
       editModal: {
@@ -363,7 +401,7 @@ export const messages = {
         proteins: 'P',
         fats: 'F',
         carbs: 'C',
-        archive: 'A'
+        archive: 'A',
       },
       searchPlaceholder: 'Find a product',
       addNew: 'Add a product',
@@ -383,8 +421,8 @@ export const messages = {
       cardTitle: 'A new adventure',
       cardText: 'Open a new page in your story by clicking a button below. This is easy.',
       jumbotronTitle: 'Welcome!',
-      jumbotronText: 'We have found out that you do not have any planned trips. The whole world is waiting, let\'s start exploring it together!',
-      jumbotronText2: 'Let\'s start from the button. We will ask for a little portion if information, it does not take long.',
+      jumbotronText: "We have found out that you do not have any planned trips. The whole world is waiting, let's start exploring it together!",
+      jumbotronText2: "Let's start from the button. We will ask for a little portion if information, it does not take long.",
       jumbotronCreateButton: 'Create a trip',
       lastUpdatePrefix: 'Last updated',
       optionsButton: 'More...',
@@ -428,7 +466,7 @@ export const messages = {
         archiveButton: 'Archive',
         closeButton: 'Close',
         error: 'Something went wrong. Try to reload a page.',
-      }
+      },
     },
     navbar: {
       title: 'Hikehub',
@@ -452,10 +490,10 @@ export const messages = {
     },
     forgot: {
       title: 'Restore password',
-      instructions: 'Enter emails address you\'d used when you registered an account. Then follow the instructions from an email.',
+      instructions: "Enter emails address you'd used when you registered an account. Then follow the instructions from an email.",
       sendButton: 'Reset password',
       firstLineSuccess: 'Password reset link has been sent to your email.',
-      secondLineSuccess: 'If you didn\'t receive an email, please check your spam folder.',
+      secondLineSuccess: "If you didn't receive an email, please check your spam folder.",
     },
     login: {
       title: 'Login',
@@ -479,12 +517,12 @@ export const messages = {
       error: 'Something went wrong. Try to reload a page.',
     },
     docs: {
-      howToLink: 'How to use'
+      howToLink: 'How to use',
     },
     shopping: {
       title: 'Shopping list',
-      cardHeader: 'What\'s next?',
-      cardBody: 'The best way to use this report is to print it.\nPrint the list and take it with you to the store. This way you won\'t forget anything.\nWe left you some space for notes in case something goes wrong.',
+      cardHeader: "What's next?",
+      cardBody: "The best way to use this report is to print it.\nPrint the list and take it with you to the store. This way you won't forget anything.\nWe left you some space for notes in case something goes wrong.",
       printButton: 'Print',
       nameTitle: 'Product',
       massTitle: 'Mass',
@@ -507,6 +545,44 @@ export const messages = {
       personsSuffix: 'persons',
       piecesSuffix: 'pcs',
       gramsSuffix: 'g',
-    }
-  }
+    },
+    users: {
+      title: 'Users',
+      add: 'Add',
+      table: {
+        id: '#',
+        login: 'Login',
+        name: 'Displayed name',
+        password: 'Password?',
+        group: 'Group',
+        type: 'Type',
+        lastLogin: 'Login',
+        actions: 'Actions',
+      },
+      remove: 'Remove',
+      edit: 'Edit',
+      login: 'Login',
+      password: 'Password',
+      accessGroup: 'Group',
+      invalidLogin: 'Login must not be empty',
+      invalidPassword: 'Password must not be empty',
+      deleteModal: {
+        title: 'Delete a user?',
+        text: 'Warning: this action cannot be undone!',
+        text2: 'Are you sure you want to delete this user?',
+        delete: 'Delete',
+        close: 'Close',
+      },
+      editModal: {
+        title: 'Edit a user',
+        edit: 'Apply',
+        close: 'Close',
+      },
+      addModal: {
+        title: 'Add a user',
+        add: 'Add',
+        close: 'Close',
+      }
+    },
+  },
 }

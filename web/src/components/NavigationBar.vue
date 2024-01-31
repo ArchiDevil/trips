@@ -112,7 +112,7 @@ const displayedName = computed(() => {
           <img
             v-if="userPhotoUrl"
             :src="userPhotoUrl"
-            class="img-fluid rounded-circle me-2"
+            class="img-fluid rounded-circle me-2 mt-1"
             style="height: 2em" />
           <label class="form-label me-3 mt-2">
             {{ displayedName }}
