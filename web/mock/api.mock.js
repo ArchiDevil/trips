@@ -155,7 +155,16 @@ const packingGetterHandler = {
 const accessGroupsGetterHandler = {
   pattern: '/api/users/access-groups',
   handle: (req, res) => {
-    const data = ['Administrator', 'User']
+    const data = [
+      {
+        id: 0,
+        name: 'Administrator',
+      },
+      {
+        id: 1,
+        name: 'User',
+      },
+    ]
 
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify(data))
