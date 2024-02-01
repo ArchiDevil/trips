@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 
 from organizer.auth import api_login_required_group
 from organizer.db import get_session
-from organizer.schema import AccessGroup, TripAccess, User, VkUser
+from organizer.schema import AccessGroup, User
 
 BP = Blueprint("users", __name__, url_prefix="/users")
 
