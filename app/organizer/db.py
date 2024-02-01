@@ -1,7 +1,8 @@
 from contextlib import contextmanager
+from typing import Any, Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
 
 import click
 from flask import current_app, g
@@ -14,7 +15,7 @@ from organizer.fake_data import init_fake_data_internal
 
 
 @contextmanager
-def get_session():
+def get_session() -> Generator[Session, Any, Any]:
     # this is the first request to the DB
     if 'engine' not in g:
         init_connection()
@@ -42,7 +43,7 @@ def close_connection(e=None):
 
 
 def re_init_schema():
-    BASE.metadata.drop_all(g.engine)
+    BASE.metadata.drop_all(g.engine) # type: ignore
     init_schema_internal(g.engine)
 
 
@@ -58,7 +59,7 @@ def create_user(login: str, password: str, access_group: AccessGroup):
 
         pass_hash = generate_password_hash(password)
         user: User = User(login=login, password=pass_hash,
-                          access_group=access_group)
+                          access_group=access_group) # type: ignore
         session.add(user)
         session.commit()
 
