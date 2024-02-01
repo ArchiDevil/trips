@@ -18,15 +18,15 @@ def test_auth_can_see_login_page(client: FlaskClient):
 def test_auth_any_access_updates_last_login(admin_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
-            user = session.query(User).filter(User.login == "Administrator").first()
+            user = session.query(User).where(User.login == "Administrator").first()
             first_date = user.last_logged_in
 
-    response = admin_logged_client.get('/users/')
+    response = admin_logged_client.get('/api/trips/')
     assert response.status_code == 200
 
     with app.app_context():
         with get_session() as session:
-            user = session.query(User).filter(User.login == "Administrator").first()
+            user = session.query(User).where(User.login == "Administrator").first()
             second_date = user.last_logged_in
 
     assert first_date != second_date
