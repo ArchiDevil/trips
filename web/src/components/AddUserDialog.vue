@@ -1,21 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { AccessGroup } from '../interfaces'
 import Modal from './Modal.vue'
 
 const emit = defineEmits<{
-  (
-    e: 'addUser',
-    username: string,
-    password: string,
-    group: 'Administrator' | 'User'
-  ): void
+  (e: 'addUser', username: string, password: string, group: string): void
+}>()
+
+const props = defineProps<{
+  accessGroups: AccessGroup[]
 }>()
 
 const username = ref('')
 const password = ref('')
-
-const accessGroups = ['Administrator', 'User']
-const currentGroup = ref<'Administrator' | 'User'>('User')
+const currentGroup = ref<string>(props.accessGroups[0].name)
 </script>
 
 <template>
@@ -63,9 +61,9 @@ const currentGroup = ref<'Administrator' | 'User'>('User')
         id="input-group"
         v-model="currentGroup">
         <option
-          v-for="group in accessGroups"
-          :value="group">
-          {{ group }}
+          v-for="group in props.accessGroups"
+          :value="group.name">
+          {{ group.name }}
         </option>
       </select>
     </template>

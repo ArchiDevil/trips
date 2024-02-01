@@ -18,7 +18,7 @@ const fetchUsers = async () => {
   users.value = response
 }
 
-const accessGroups = ref<AccessGroup[]>([])
+const accessGroups = ref<AccessGroup[]>()
 const fetchAccessGroups = async () => {
   const response = await usersApi.get<AccessGroup[]>('/access-groups')
   accessGroups.value = response
@@ -150,11 +150,13 @@ onMounted(async () => {
   <AddUserDialog
     id="add-modal"
     ref="addModal"
+    v-if="accessGroups"
+    :access-groups="accessGroups"
     @add-user="addUser" />
 
   <EditUserDialog
     id="edit-modal"
-    v-if="currentUser"
+    v-if="currentUser && accessGroups"
     :access-groups="accessGroups"
     :user="currentUser"
     @edit-user="editUser" />

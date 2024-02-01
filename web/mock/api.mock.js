@@ -182,10 +182,10 @@ const usersGetterHandler = {
         password: true,
         last_logged_in: '12345',
         user_type: {
-          name: 'Administrator',
+          name: 'User',
         },
         access_group: {
-          name: 'User',
+          name: 'Administrator',
         },
       },
       {
