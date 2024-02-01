@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { AccessGroup, User } from '../interfaces'
 import { useI18n } from 'vue-i18n'
 import Modal from './Modal.vue'
@@ -15,11 +15,22 @@ defineEmits<{
   (e: 'editUser', userId: number, accessGroup: string): void
 }>()
 
-const currentGroup = ref<string>(props.user.access_group.name)
+const currentGroup = ref<string>('')
 
 const title = computed(() => {
   return `${t('users.editModal.title')} ${props.user.displayed_name}`
 })
+
+onMounted(() => {
+  currentGroup.value = props.user.access_group
+})
+
+watch(
+  () => props.user,
+  () => {
+    currentGroup.value = props.user.access_group
+  }
+)
 </script>
 
 <template>

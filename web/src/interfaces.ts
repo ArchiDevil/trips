@@ -84,8 +84,7 @@ export interface User {
   id: number
   login: string
   displayed_name: string
-  password: boolean
   last_logged_in: string
-  user_type: { name: string }
-  access_group: { name: string }
+  user_type: string
+  access_group: string
 }

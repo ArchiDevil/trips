@@ -6,7 +6,6 @@ import UsersApp from './apps/UsersApp.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
-  faCheck,
   faClipboardQuestion,
   faInfo,
   faPen,
@@ -14,7 +13,6 @@ import {
   faPlus,
   faRoute,
   faSignOutAlt,
-  faTimes,
   faTrash,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
@@ -24,8 +22,6 @@ import { useUserStore } from './stores/user'
 
 library.add(
   faPlus,
-  faCheck,
-  faTimes,
   faTrash,
   faPen,
   faRoute,
