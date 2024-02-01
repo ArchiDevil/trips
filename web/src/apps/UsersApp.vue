@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { Modal } from 'bootstrap'
 
 import { AccessGroup, User } from '../interfaces'
@@ -13,6 +13,11 @@ import NavigationBar from '../components/NavigationBar.vue'
 const usersApi = getUsersApi()
 
 const users = ref<User[]>([])
+const sortedUsers = computed(() => {
+  return users.value.sort((a, b) => {
+    return a.id - b.id
+  })
+})
 const fetchUsers = async () => {
   const response = await usersApi.get<User[]>('/')
   users.value = response
@@ -20,11 +25,12 @@ const fetchUsers = async () => {
 
 const accessGroups = ref<AccessGroup[]>()
 const fetchAccessGroups = async () => {
-  const response = await usersApi.get<AccessGroup[]>('/access-groups')
+  const response = await usersApi.get<AccessGroup[]>('/access_groups')
   accessGroups.value = response
 }
 
 const currentUser = ref<User>()
+const addModal = ref<Modal>()
 const showAddModal = () => {
   const modalElem = document.querySelector('#add-modal')
   if (!modalElem) {
@@ -34,9 +40,11 @@ const showAddModal = () => {
   const modal = new Modal(modalElem, {
     keyboard: false,
   })
+  addModal.value = modal
   modal.show()
 }
 
+const editModal = ref<Modal>()
 const showEditModal = async (user: User) => {
   currentUser.value = user
   await nextTick()
@@ -49,6 +57,7 @@ const showEditModal = async (user: User) => {
   const modal = new Modal(modalElem, {
     keyboard: false,
   })
+  editModal.value = modal
   modal.show()
 }
 
@@ -58,6 +67,7 @@ const addUser = async (username: string, password: string, group: string) => {
     password: password,
     access_group: group,
   })
+  addModal.value?.hide()
   await fetchUsers()
 }
 
@@ -65,6 +75,7 @@ const editUser = async (userId: number, accessGroup: string) => {
   await usersApi.put(`/${userId}`, {
     access_group: accessGroup,
   })
+  editModal.value?.hide()
   await fetchUsers()
 }
 
@@ -102,7 +113,6 @@ onMounted(async () => {
             <th>{{ $t('users.table.id') }}</th>
             <th>{{ $t('users.table.login') }}</th>
             <th>{{ $t('users.table.name') }}</th>
-            <th>{{ $t('users.table.password') }}</th>
             <th>{{ $t('users.table.group') }}</th>
             <th>{{ $t('users.table.type') }}</th>
             <th>{{ $t('users.table.lastLogin') }}</th>
@@ -112,7 +122,7 @@ onMounted(async () => {
           <tbody>
             <tr
               class="showhim"
-              v-for="user in users">
+              v-for="user in sortedUsers">
               <th
                 scope="row"
                 style="width: 5%">
@@ -120,11 +130,8 @@ onMounted(async () => {
               </th>
               <td style="width: 20%">{{ user.login }}</td>
               <td style="width: 20%">{{ user.displayed_name }}</td>
-              <td style="width: 5%">
-                <Icon :icon="user.password ? 'fa-check' : 'fa-times'" />
-              </td>
-              <td style="width: 10%">{{ user.access_group.name }}</td>
-              <td style="width: 10%">{{ user.user_type.name }}</td>
+              <td style="width: 10%">{{ user.access_group }}</td>
+              <td style="width: 10%">{{ user.user_type }}</td>
               <td style="width: 15%">
                 {{ new Date(user.last_logged_in).toLocaleString() }}
               </td>
