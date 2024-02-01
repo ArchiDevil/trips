@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from flask import Flask
 from flask.testing import FlaskClient
 
-from organizer.strings import STRING_TABLE
 from organizer.db import get_session
 from organizer.schema import User, PasswordLink
 
@@ -12,7 +11,7 @@ from organizer.schema import User, PasswordLink
 def test_auth_can_see_login_page(client: FlaskClient):
     response = client.get('/auth/login')
     assert response.status_code == 200
-    assert STRING_TABLE['Site title'].encode() in response.data
+    assert 'Hikehub'.encode() in response.data
 
 
 def test_auth_any_access_updates_last_login(admin_logged_client: FlaskClient, app: Flask):
