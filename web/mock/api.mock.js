@@ -181,12 +181,8 @@ const usersGetterHandler = {
         displayed_name: 'Administrator',
         password: true,
         last_logged_in: '12345',
-        user_type: {
-          name: 'User',
-        },
-        access_group: {
-          name: 'Administrator',
-        },
+        user_type: 'User',
+        access_group: 'Administrator',
       },
       {
         id: 2,
@@ -194,12 +190,8 @@ const usersGetterHandler = {
         displayed_name: 'User',
         password: true,
         last_logged_in: '12345',
-        user_type: {
-          name: 'User',
-        },
-        access_group: {
-          name: 'User',
-        },
+        user_type: 'User',
+        access_group: 'User',
       },
     ]
 
