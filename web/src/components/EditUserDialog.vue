@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { User } from '../interfaces'
+import { AccessGroup, User } from '../interfaces'
 import { useI18n } from 'vue-i18n'
 import Modal from './Modal.vue'
 
@@ -8,7 +8,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   user: User
-  accessGroups: string[]
+  accessGroups: AccessGroup[]
 }>()
 
 defineEmits<{
@@ -36,8 +36,8 @@ const title = computed(() => {
         v-model="currentGroup">
         <option
           v-for="group in accessGroups"
-          :value="group">
-          {{ group }}
+          :value="group.name">
+          {{ group.name }}
         </option>
       </select>
     </template>

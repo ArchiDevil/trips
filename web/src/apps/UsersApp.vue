@@ -2,14 +2,15 @@
 import { nextTick, onMounted, ref } from 'vue'
 import { Modal } from 'bootstrap'
 
-import { User } from '../interfaces'
-import { usersApi } from '../backend'
+import { AccessGroup, User } from '../interfaces'
+import { getUsersApi } from '../backend'
 
 import AddUserDialog from '../components/AddUserDialog.vue'
 import EditUserDialog from '../components/EditUserDialog.vue'
-import DeleteUserDialog from '../components/DeleteUserDialog.vue'
 import Icon from '../components/Icon.vue'
 import NavigationBar from '../components/NavigationBar.vue'
+
+const usersApi = getUsersApi()
 
 const users = ref<User[]>([])
 const fetchUsers = async () => {
@@ -17,9 +18,9 @@ const fetchUsers = async () => {
   users.value = response
 }
 
-const accessGroups = ref<string[]>([])
+const accessGroups = ref<AccessGroup[]>([])
 const fetchAccessGroups = async () => {
-  const response = await usersApi.get<string[]>('/access-groups')
+  const response = await usersApi.get<AccessGroup[]>('/access-groups')
   accessGroups.value = response
 }
 
@@ -51,32 +52,19 @@ const showEditModal = async (user: User) => {
   modal.show()
 }
 
-const showDeleteModal = async (user: User) => {
-  currentUser.value = user
-  await nextTick()
-
-  const modalElem = document.querySelector('#delete-modal')
-  if (!modalElem) {
-    return
-  }
-
-  const modal = new Modal(modalElem, {
-    keyboard: false,
+const addUser = async (username: string, password: string, group: string) => {
+  await usersApi.post('/', {
+    login: username,
+    password: password,
+    access_group: group,
   })
-  modal.show()
+  await fetchUsers()
 }
-
-const addUser = async (user: User) => {}
 
 const editUser = async (userId: number, accessGroup: string) => {
   await usersApi.put(`/${userId}`, {
     access_group: accessGroup,
   })
-  await fetchUsers()
-}
-
-const deleteUser = async (user: User) => {
-  await usersApi.delete(`/${user.id}`)
   await fetchUsers()
 }
 
@@ -143,16 +131,6 @@ onMounted(async () => {
               <td style="width: 3%">
                 <span class="text-end float-end mx-1 showme">
                   <a
-                    class="showme text-danger"
-                    @click="showDeleteModal(user)"
-                    href="javascript:void(0)">
-                    <Icon
-                      icon="fa-trash"
-                      :title="$t('users.remove')" />
-                  </a>
-                </span>
-                <span class="text-end float-end mx-1 showme">
-                  <a
                     class="showme"
                     @click="showEditModal(user)"
                     href="javascript:void(0)">
@@ -172,18 +150,12 @@ onMounted(async () => {
   <AddUserDialog
     id="add-modal"
     ref="addModal"
-    @add-user="(user) => addUser(user)" />
+    @add-user="addUser" />
 
   <EditUserDialog
     id="edit-modal"
     v-if="currentUser"
     :access-groups="accessGroups"
     :user="currentUser"
-    @edit-user="(userId, accessGroup) => editUser(userId, accessGroup)" />
-
-  <DeleteUserDialog
-    id="delete-modal"
-    v-if="currentUser"
-    :user="currentUser"
-    @delete-user="(user) => deleteUser(user)" />
+    @edit-user="editUser" />
 </template>

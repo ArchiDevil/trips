@@ -1,4 +1,17 @@
 import { mande } from 'mande'
 
-export const tripsApi = mande('/api/trips')
-export const usersApi = mande('/api/users')
+export function getTripsApi() {
+  if (import.meta.env.DEV) {
+    return mande('http://localhost:8000/api/trips')
+  } else {
+    return mande('/api/trips')
+  }
+}
+
+export function getUsersApi() {
+  if (import.meta.env.DEV) {
+    return mande('http://localhost:8000/api/users')
+  } else {
+    return mande('/api/users')
+  }
+}

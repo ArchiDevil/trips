@@ -75,6 +75,11 @@ export interface Day {
   reload_link: string
 }
 
+export interface AccessGroup {
+  id: number
+  name: string
+}
+
 export interface User {
   id: number
   login: string
