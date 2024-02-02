@@ -31,36 +31,42 @@ watch(
 <template>
   <Modal :title="$t('users.addModal.title')">
     <template #body>
-      <label
-        class="form-label"
-        for="input-name">
-        {{ $t('users.login') }}
-      </label>
-      <input
-        type="text"
-        class="form-control"
-        id="input-name"
-        :placeholder="$t('users.login')"
-        autofocus
-        v-model="username"
-        autocomplete="off" />
-      <div class="invalid-feedback">
-        {{ $t('users.invalidLogin') }}
+      <div class="mb-3">
+        <label
+          class="form-label"
+          for="input-name">
+          {{ $t('users.login') }}
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="input-name"
+          :placeholder="$t('users.login')"
+          :class="{ 'is-invalid': username === '' }"
+          autofocus
+          v-model="username"
+          autocomplete="off" />
+        <div class="invalid-feedback">
+          {{ $t('users.invalidLogin') }}
+        </div>
       </div>
 
-      <label
-        class="form-label"
-        for="input-password">
-        {{ $t('users.password') }}
-      </label>
-      <input
-        class="form-control"
-        type="password"
-        id="input-password"
-        :placeholder="$t('users.password')"
-        v-model="password" />
-      <div class="invalid-feedback">
-        {{ $t('users.invalidPassword') }}
+      <div class="mb-3">
+        <label
+          class="form-label"
+          for="input-password">
+          {{ $t('users.password') }}
+        </label>
+        <input
+          class="form-control"
+          type="password"
+          id="input-password"
+          :placeholder="$t('users.password')"
+          :class="{ 'is-invalid': password === '' }"
+          v-model="password" />
+        <div class="invalid-feedback">
+          {{ $t('users.invalidPassword') }}
+        </div>
       </div>
 
       <label
