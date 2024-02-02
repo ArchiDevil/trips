@@ -196,7 +196,7 @@ def test_trips_share_updates_expiration_time(org_logged_client: FlaskClient):
         with get_session() as session:
             link: SharingLink = (
                 session.query(SharingLink)
-                .filter(SharingLink.uuid == response.json['uuid'])
+                .where(SharingLink.uuid == response.json['uuid'])
                 .one()
             )
             first_time = link.expiration_date
@@ -209,7 +209,7 @@ def test_trips_share_updates_expiration_time(org_logged_client: FlaskClient):
         with get_session() as session:
             link: SharingLink = (
                 session.query(SharingLink)
-                .filter(SharingLink.uuid == response.json['uuid'])
+                .where(SharingLink.uuid == response.json['uuid'])
                 .one()
             )
             assert first_time != link.expiration_date
@@ -232,7 +232,7 @@ def test_trips_can_archive(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip = session.query(Trip).filter(Trip.uid == 'uid1').one()
+            trip = session.query(Trip).where(Trip.uid == 'uid1').one()
             assert trip.archived
 
 
@@ -275,74 +275,66 @@ def test_trips_can_add_trip(org_logged_client: FlaskClient):
     assert response.json['trip']['groups'] == [3, 6]
 
 
-@pytest.mark.parametrize('name', ['', 'a' * 51])
-def test_trips_add_rejects_incorrect_name(org_logged_client: FlaskClient, name: str):
-    response = org_logged_client.post(
-        '/api/trips/add',
-        json={
-            'name': name,
-            'from_date': '2019-09-10',
-            'till_date': '2019-09-12',
-            'groups': [3, 6],
-        },
-    )
-    assert response.status_code == 400
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').first()
-            assert not trip
-
-
-@pytest.mark.parametrize(
-    'dates',
-    [('2019-09-42', '2019-09-56'), ('2019-09-10', '2019-09-08')],
-)
-def test_trips_add_rejects_incorrect_dates(
-    org_logged_client: FlaskClient, dates: list[str]
-):
-    response = org_logged_client.post(
-        '/api/trips/add',
-        json={
-            'name': 'Test trip',
-            'from_date': dates[0],
-            'till_date': dates[1],
-            'groups': [3, 6],
-        },
-    )
-    assert response.status_code == 400
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').first()
-            assert not trip
-
-
-@pytest.mark.parametrize(
-    'groups',
-    [
-        [],
-        [3, 0],
-        [3, -6],
-        ['nan', 4],
-    ],
-)
-def test_trips_add_rejects_incorrect_groups(
-    org_logged_client: FlaskClient, groups: list[Any]
-):
-    data = {
+@pytest.mark.parametrize('json_data', [
+    {},
+    {
+        'name': '',
+        'from_date': '2019-09-10',
+        'till_date': '2019-09-12',
+        'groups': [3, 6],
+    },
+    {
+        'name': 'a' * 51,
+        'from_date': '2019-09-10',
+        'till_date': '2019-09-12',
+        'groups': [3, 6],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-09-42',
+        'till_date': '2019-09-56',
+        'groups': [3, 6],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-09-10',
+        'till_date': '2019-09-08',
+        'groups': [3, 6],
+    },
+    {
         'name': 'Test trip',
         'from_date': '2019-09-10',
         'till_date': '2019-09-12',
-        'groups': groups,
+        'groups': [],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-09-10',
+        'till_date': '2019-09-12',
+        'groups': [3, 0],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-09-10',
+        'till_date': '2019-09-12',
+        'groups': [3, -6],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-09-10',
+        'till_date': '2019-09-12',
+        'groups': ['nan', 4],
     }
-    response = org_logged_client.post('/api/trips/add', json=data)
+])
+def test_trips_add_rejects_incorrect_data(org_logged_client: FlaskClient, json_data: dict):
+    response = org_logged_client.post('/api/trips/add', json=json_data)
     assert response.status_code == 400
 
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').first()
-            assert not trip
+    if json_data.get('name'):
+        with org_logged_client.application.app_context():
+            with get_session() as session:
+                trip: Trip = session.query(Trip).where(Trip.name == json_data.get('name')).first()
+                assert not trip
 
 
 def test_trips_edit_rejects_not_logged_in(client: FlaskClient):
@@ -364,7 +356,7 @@ def test_trips_edit_rejects_insufficient_privileges(org_logged_client: FlaskClie
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').first()
+            trip: Trip = session.query(Trip).where(Trip.name == 'Test trip').first()
             assert not trip
 
 
@@ -397,7 +389,7 @@ def test_trips_can_edit_trip(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').one()
+            trip: Trip = session.query(Trip).where(Trip.name == 'Test trip').one()
             assert trip.from_date == date(2019, 10, 9)
             assert trip.till_date == date(2019, 10, 12)
             assert trip.groups[0].persons == 3
@@ -425,7 +417,7 @@ def test_trips_can_edit_shared_trip(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').one()
+            trip: Trip = session.query(Trip).where(Trip.name == 'Test trip').one()
             assert trip.from_date == date(2019, 10, 9)
             assert trip.till_date == date(2019, 10, 12)
             assert trip.groups[0].persons == 3
@@ -448,77 +440,73 @@ def test_trips_admin_can_edit_any_trip(admin_logged_client: FlaskClient):
 
     with admin_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Test trip').one()
+            trip: Trip = session.query(Trip).where(Trip.name == 'Test trip').one()
             assert trip.from_date == date(2019, 10, 9)
             assert trip.till_date == date(2019, 10, 12)
             assert trip.groups[0].persons == 3
             assert trip.groups[1].persons == 6
 
 
-@pytest.mark.parametrize('name', ['', 'a' * 51])
-def test_trips_edit_rejects_wrong_name(org_logged_client: FlaskClient, name: str):
-    response = org_logged_client.post(
-        '/api/trips/edit/uid1',
-        json={
-            'name': name,
-            'from_date': '2019-10-09',
-            'till_date': '2019-10-12',
-            'groups': [3, 6],
-        },
-    )
+@pytest.mark.parametrize('json_data', [
+    {},
+    {
+        'name': '',
+        'from_date': '2019-10-09',
+        'till_date': '2019-10-12',
+        'groups': [3, 6],
+    },
+    {
+        'name': 'a' * 51,
+        'from_date': '2019-10-09',
+        'till_date': '2019-10-12',
+        'groups': [3, 6],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-09-42',
+        'till_date': '2019-09-56',
+        'groups': [3, 6],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-09-10',
+        'till_date': '2019-09-08',
+        'groups': [3, 6],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-10-09',
+        'till_date': '2019-10-12',
+        'groups': [],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-10-09',
+        'till_date': '2019-10-12',
+        'groups': [3, 0],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-10-09',
+        'till_date': '2019-10-12',
+        'groups': [3, -6],
+    },
+    {
+        'name': 'Test trip',
+        'from_date': '2019-10-09',
+        'till_date': '2019-10-12',
+        'groups': ['nan', 4],
+    },
+])
+def test_trips_edit_rejects_incorrect_data(org_logged_client: FlaskClient, json_data: dict):
+    response = org_logged_client.post('/api/trips/edit/uid1', json=json_data)
     assert response.status_code == 400
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 10, 9)
-            assert trip.till_date != date(2019, 10, 12)
-            assert trip.groups[0].persons != 3
-            assert trip.groups[1].persons != 6
-
-
-@pytest.mark.parametrize(
-    'dates', [('42-09-2019', '56-09-2019'), ('10-09-2019', '08-09-2019')]
-)
-def test_trips_edit_rejects_incorrect_dates(org_logged_client: FlaskClient, dates: str):
-    response = org_logged_client.post(
-        '/api/trips/edit/uid1',
-        json={
-            'name': 'Test trip',
-            'from_date': dates[0],
-            'till_date': dates[1],
-            'groups': [3, 6],
-        },
-    )
-    assert response.status_code == 400
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.groups[0].persons != 3
-            assert trip.groups[1].persons != 6
-
-
-@pytest.mark.parametrize('groups', [[], [3, 0], [3, -6], ['nan', 4]])
-def test_trips_edit_rejects_empty_groups(
-    org_logged_client: FlaskClient, groups: list[Any]
-):
-    response = org_logged_client.post(
-        '/api/trips/edit/uid1',
-        json={
-            'name': 'Test trip',
-            'from_date': '2019-10-09',
-            'till_date': '2019-10-12',
-            'groups': groups,
-        },
-    )
-    assert response.status_code == 400
-
-    with org_logged_client.application.app_context():
-        with get_session() as session:
-            trip: Trip = session.query(Trip).filter(Trip.name == 'Taganay trip').one()
-            assert trip.from_date != date(2019, 10, 9)
-            assert trip.till_date != date(2019, 10, 12)
+            trip: Trip = session.query(Trip).where(Trip.name == 'Taganay trip').one()
+            assert trip.from_date == date(2019, 1, 1)
+            assert trip.till_date == date(2019, 1, 5)
             assert trip.groups[0].persons == 2
             assert trip.groups[1].persons == 3
 
