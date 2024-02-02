@@ -31,4 +31,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
   },
+  resolve: {
+    alias: {
+      '~bootstrap': resolve(__dirname, 'node_modules/bootstrap'),
+    },
+  },
 })
