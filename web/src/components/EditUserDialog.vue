@@ -7,28 +7,38 @@ import Modal from './Modal.vue'
 const { t } = useI18n()
 
 const props = defineProps<{
-  user: User
+  user: User | undefined
   accessGroups: AccessGroup[]
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'editUser', userId: number, accessGroup: string): void
 }>()
 
 const currentGroup = ref<string>('')
 
 const title = computed(() => {
-  return `${t('users.editModal.title')} ${props.user.displayed_name}`
+  return props.user
+    ? `${t('users.editModal.title')} ${props.user.displayed_name}`
+    : ''
 })
 
+const editUser = () => {
+  if (props.user) {
+    emit('editUser', props.user.id, currentGroup.value)
+  } else {
+    console.error('User is not defined')
+  }
+}
+
 onMounted(() => {
-  currentGroup.value = props.user.access_group
+  currentGroup.value = props.user ? props.user.access_group : ''
 })
 
 watch(
   () => props.user,
   () => {
-    currentGroup.value = props.user.access_group
+    currentGroup.value = props.user ? props.user.access_group : ''
   }
 )
 </script>
@@ -56,7 +66,7 @@ watch(
     <template #footer>
       <button
         class="btn btn-primary"
-        @click="$emit('editUser', user.id, currentGroup)">
+        @click="editUser()">
         {{ $t('users.editModal.edit') }}
       </button>
 

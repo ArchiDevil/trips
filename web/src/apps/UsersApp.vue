@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
-import { Modal } from 'bootstrap'
+import { computed, onMounted, ref } from 'vue'
 
+import { ModalMethods, useModal } from '../composables/modal'
 import { AccessGroup, User } from '../interfaces'
 import { getUsersApi } from '../backend'
 
@@ -23,42 +23,19 @@ const fetchUsers = async () => {
   users.value = response
 }
 
-const accessGroups = ref<AccessGroup[]>()
+const accessGroups = ref<AccessGroup[]>([])
 const fetchAccessGroups = async () => {
   const response = await usersApi.get<AccessGroup[]>('/access_groups')
   accessGroups.value = response
 }
 
+const addModal: ModalMethods = useModal('#add-modal')
+const editModal: ModalMethods = useModal('#edit-modal')
+
 const currentUser = ref<User>()
-const addModal = ref<Modal>()
-const showAddModal = () => {
-  const modalElem = document.querySelector('#add-modal')
-  if (!modalElem) {
-    return
-  }
-
-  const modal = new Modal(modalElem, {
-    keyboard: false,
-  })
-  addModal.value = modal
-  modal.show()
-}
-
-const editModal = ref<Modal>()
 const showEditModal = async (user: User) => {
   currentUser.value = user
-  await nextTick()
-
-  const modalElem = document.querySelector('#edit-modal')
-  if (!modalElem) {
-    return
-  }
-
-  const modal = new Modal(modalElem, {
-    keyboard: false,
-  })
-  editModal.value = modal
-  modal.show()
+  editModal.show()
 }
 
 const addUser = async (username: string, password: string, group: string) => {
@@ -67,7 +44,8 @@ const addUser = async (username: string, password: string, group: string) => {
     password: password,
     access_group: group,
   })
-  addModal.value?.hide()
+
+  addModal.hide()
   await fetchUsers()
 }
 
@@ -75,7 +53,7 @@ const editUser = async (userId: number, accessGroup: string) => {
   await usersApi.put(`/${userId}`, {
     access_group: accessGroup,
   })
-  editModal.value?.hide()
+  editModal.hide()
   await fetchUsers()
 }
 
@@ -99,7 +77,7 @@ onMounted(async () => {
       <div class="col">
         <button
           class="btn btn-primary"
-          @click="showAddModal()">
+          @click="addModal.show()">
           <Icon icon="fa-plus" />
           {{ $t('users.add') }}
         </button>
@@ -156,14 +134,11 @@ onMounted(async () => {
 
   <AddUserDialog
     id="add-modal"
-    ref="addModal"
-    v-if="accessGroups"
     :access-groups="accessGroups"
     @add-user="addUser" />
 
   <EditUserDialog
     id="edit-modal"
-    v-if="currentUser && accessGroups"
     :access-groups="accessGroups"
     :user="currentUser"
     @edit-user="editUser" />

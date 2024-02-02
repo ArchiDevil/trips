@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { AccessGroup } from '../interfaces'
 import Modal from './Modal.vue'
 
@@ -13,7 +13,19 @@ const props = defineProps<{
 
 const username = ref('')
 const password = ref('')
-const currentGroup = ref<string>(props.accessGroups[0].name)
+const currentGroup = ref<string>('')
+
+onMounted(() => {
+  currentGroup.value =
+    props.accessGroups.length > 0 ? props.accessGroups[0].name : ''
+})
+
+watch(
+  () => props.accessGroups,
+  (newValue) => {
+    currentGroup.value = newValue[0].name
+  }
+)
 </script>
 
 <template>
