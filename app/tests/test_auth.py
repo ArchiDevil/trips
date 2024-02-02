@@ -11,7 +11,7 @@ from organizer.schema import User, PasswordLink
 def test_auth_can_see_login_page(client: FlaskClient):
     response = client.get('/auth/login')
     assert response.status_code == 200
-    assert 'Hikehub'.encode() in response.data
+    assert 'Hikehub' in response.data.decode('utf-8')
 
 
 def test_auth_any_access_updates_last_login(admin_logged_client: FlaskClient, app: Flask):
