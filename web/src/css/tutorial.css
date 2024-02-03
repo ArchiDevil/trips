@@ -21,7 +21,7 @@ h3 {
 }
 
 img {
-    @apply mb-8 max-h-full max-w-full mt-4 border-2 border-slate-400;
+  @apply mb-8 max-h-full max-w-full mt-4 border-2 border-slate-400;
 }
 
 p {
