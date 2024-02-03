@@ -38,21 +38,12 @@ const showEditModal = async (user: User) => {
   editModal.show()
 }
 
-const addUser = async (username: string, password: string, group: string) => {
-  await usersApi.post('/', {
-    login: username,
-    password: password,
-    access_group: group,
-  })
-
+const onAddUser = async () => {
   addModal.hide()
   await fetchUsers()
 }
 
-const editUser = async (userId: number, accessGroup: string) => {
-  await usersApi.put(`/${userId}`, {
-    access_group: accessGroup,
-  })
+const onEditUser = async () => {
   editModal.hide()
   await fetchUsers()
 }
@@ -135,11 +126,11 @@ onMounted(async () => {
   <AddUserDialog
     id="add-modal"
     :access-groups="accessGroups"
-    @add-user="addUser" />
+    @add="onAddUser" />
 
   <EditUserDialog
     id="edit-modal"
     :access-groups="accessGroups"
     :user="currentUser"
-    @edit-user="editUser" />
+    @edit="onEditUser" />
 </template>

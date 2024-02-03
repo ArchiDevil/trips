@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { AccessGroup } from '../interfaces'
+import { getUsersApi } from '../backend'
 import Modal from './Modal.vue'
 
 const emit = defineEmits<{
-  (e: 'addUser', username: string, password: string, group: string): void
+  (e: 'add'): void
 }>()
 
 const props = defineProps<{
@@ -14,6 +15,16 @@ const props = defineProps<{
 const username = ref('')
 const password = ref('')
 const currentGroup = ref<string>('')
+
+const onAdd = async () => {
+  await getUsersApi().post('/', {
+    login: username.value,
+    password: password.value,
+    access_group: currentGroup.value,
+  })
+
+  emit('add')
+}
 
 onMounted(() => {
   currentGroup.value =
@@ -89,7 +100,7 @@ watch(
     <template #footer>
       <button
         class="btn btn-primary"
-        @click="$emit('addUser', username, password, currentGroup)">
+        @click="onAdd()">
         {{ $t('users.addModal.add') }}
       </button>
 

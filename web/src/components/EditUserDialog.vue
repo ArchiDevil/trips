@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { AccessGroup, User } from '../interfaces'
 import { useI18n } from 'vue-i18n'
+import { getUsersApi } from '../backend'
 import Modal from './Modal.vue'
 
 const { t } = useI18n()
@@ -12,7 +13,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'editUser', userId: number, accessGroup: string): void
+  (e: 'edit'): void
 }>()
 
 const currentGroup = ref<string>('')
@@ -23,12 +24,17 @@ const title = computed(() => {
     : ''
 })
 
-const editUser = () => {
-  if (props.user) {
-    emit('editUser', props.user.id, currentGroup.value)
-  } else {
+const onEdit = async () => {
+  if (!props.user) {
     console.error('User is not defined')
+    return
   }
+
+  await getUsersApi().put(`/${props.user.id}`, {
+    access_group: currentGroup.value,
+  })
+
+  emit('edit')
 }
 
 onMounted(() => {
@@ -66,7 +72,7 @@ watch(
     <template #footer>
       <button
         class="btn btn-primary"
-        @click="editUser()">
+        @click="onEdit()">
         {{ $t('users.editModal.edit') }}
       </button>
 
