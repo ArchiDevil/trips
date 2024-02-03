@@ -14,16 +14,21 @@ const props = defineProps<{
 
 const username = ref('')
 const password = ref('')
-const currentGroup = ref<string>('')
+const currentGroup = ref('')
+const errorMessage = ref('')
 
 const onAdd = async () => {
-  await getUsersApi().post('/', {
-    login: username.value,
-    password: password.value,
-    access_group: currentGroup.value,
-  })
-
-  emit('add')
+  try {
+    await getUsersApi().post('/', {
+      login: username.value,
+      password: password.value,
+      access_group: currentGroup.value,
+    })
+    emit('add')
+  } catch (error) {
+    errorMessage.value = error as string
+    console.error('Failed to add user:', error)
+  }
 }
 
 onMounted(() => {
@@ -42,6 +47,11 @@ watch(
 <template>
   <Modal :title="$t('users.addModal.title')">
     <template #body>
+      <div
+        class="mb-3"
+        v-if="errorMessage">
+        <p class="text-danger">{{ errorMessage }}</p>
+      </div>
       <div class="mb-3">
         <label
           class="form-label"

@@ -24,17 +24,22 @@ const title = computed(() => {
     : ''
 })
 
+const errorMessage = ref('')
 const onEdit = async () => {
   if (!props.user) {
     console.error('User is not defined')
     return
   }
 
-  await getUsersApi().put(`/${props.user.id}`, {
-    access_group: currentGroup.value,
-  })
-
-  emit('edit')
+  try {
+    await getUsersApi().put(`/${props.user.id}`, {
+      access_group: currentGroup.value,
+    })
+    emit('edit')
+  } catch (error) {
+    console.error('Failed to edit user:', error)
+    errorMessage.value = error as string
+  }
 }
 
 onMounted(() => {
@@ -52,21 +57,28 @@ watch(
 <template>
   <Modal :title="title">
     <template #body>
-      <label
-        class="form-label"
-        for="input-group">
-        {{ $t('users.accessGroup') }}
-      </label>
-      <select
-        class="form-select"
-        id="input-group"
-        v-model="currentGroup">
-        <option
-          v-for="group in accessGroups"
-          :value="group.name">
-          {{ group.name }}
-        </option>
-      </select>
+      <div
+        class="mb-3"
+        v-if="errorMessage">
+        <p class="text-danger">{{ errorMessage }}</p>
+      </div>
+      <div>
+        <label
+          class="form-label"
+          for="input-group">
+          {{ $t('users.accessGroup') }}
+        </label>
+        <select
+          class="form-select"
+          id="input-group"
+          v-model="currentGroup">
+          <option
+            v-for="group in accessGroups"
+            :value="group.name">
+            {{ group.name }}
+          </option>
+        </select>
+      </div>
     </template>
 
     <template #footer>
