@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Сервис для подготовки еды в поход. Собирайте питание умно и легко.">
 
-  <link rel="stylesheet" href="./src/css/styles.css">
+  <link rel="stylesheet" href="./src/css/tutorial.css">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -44,37 +44,39 @@
   <!-- /Yandex.Metrika counter -->
 </head>
 
-<body class="bg-light">
+<body class="bg-slate-50 font-body">
   <noscript>
     <div><img src="https://mc.yandex.ru/watch/88901903" style="position:absolute; left:-9999px;" alt="" /></div>
   </noscript>
 
-  <div class="container">
-    <div class="row my-3">
-      <div class="col">
-        <small><a href="/">Вернуться на главную</a></small>
-      </div>
+  <div class="container px-6 lg:px-0">
+    <div class="my-3">
+      <small>
+        <a href="/">Вернуться на главную</a>
+      </small>
     </div>
-    <div class="row my-3">
-      <div class="d-none d-lg-block col-2"></div>
-      <div class="col-lg-8">
-        <h1 class="display-3">Как пользоваться сайтом</h1>
-        <p class="lead">
+    <div class="my-3 grid grid-cols-6">
+      <div class="hidden lg:block lg:col-span-1"></div>
+      <div class="col-span-full lg:col-span-4">
+        <h1>Как пользоваться сайтом</h1>
+        <p class="font-light text-lg">
           В этом руководстве описан полный путь от создания похода до покупки и фасовки продуктов.
           Для удобства руководство разбито на короткие шаги.
         </p>
 
-        <h2 class="display-4 pt-5">Создание похода</h2>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/1.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <h2>Создание похода</h2>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/1.jpg" loading="lazy"/>
+        </div>
         <p>
           Всё начинается с&nbsp;создания похода.
           Сразу после короткой регистрации вы&nbsp;увидите блок, как на&nbsp;картинке.
           Нажмите кнопку &laquo;Создать поход&raquo; и&nbsp;заполните появившуюся
           форму.
         </p>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/2.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/2.jpg" loading="lazy"/>
+        </div>
         <p>
           Вам нужно придумать название похода, указать даты для расчета приемов пищи и&nbsp;сколько групп
           питания у&nbsp;вас будет.
@@ -91,9 +93,10 @@
           в&nbsp;любой момент.
         </p>
 
-        <h2 class="display-4 pt-5">Наполнение меню</h2>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/3.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <h2>Наполнение меню</h2>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/3.jpg" loading="lazy"/>
+        </div>
         <p>
           Страница похода разделена на&nbsp;две части.
           Слева находятся элементы управления, справа&nbsp;&mdash; дни для заполнения.
@@ -107,8 +110,9 @@
           в&nbsp;правой части заголовка.
           Откроется диалог, где вы&nbsp;сможете найти нужный продукт.
         </p>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/4.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/4.jpg" loading="lazy"/>
+        </div>
         <p>
           Диалог позволяет вам искать продукт по&nbsp;его имени или части.
           Например, вы&nbsp;можете ввести &laquo;шоко&raquo;, и&nbsp;в&nbsp;базе продуктов будут найдены все
@@ -119,8 +123,9 @@
           <strong>Масса продукта указывается на&nbsp;одного человека на&nbsp;один прием пищи.</strong>
           Приложение само рассчитает общую массу на&nbsp;всех туристов.
         </p>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/5.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/5.jpg" loading="lazy"/>
+        </div>
         <p>Некоторые продукты удобно брать в&nbsp;штуках, например, конфеты.
           Если вы&nbsp;добавляете такой продукт, то&nbsp;справа от&nbsp;поля &laquo;масса&raquo; есть
           выпадающее меню, в&nbsp;котором можно выбрать штуки.
@@ -134,9 +139,10 @@
           После создания продукта его смогут использовать другие туристы.
         </p>
 
-        <h3 class="display-4 pt-5">Создание продукта</h3>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/6.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <h3>Создание продукта</h3>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/6.jpg" loading="lazy"/>
+        </div>
         <p>
           Чтобы создать продукт нажмите на&nbsp;ссылку <a href="/products/">&laquo;Продукты&raquo;</a>
           в&nbsp;верхней панели сайта.
@@ -147,9 +153,10 @@
           &laquo;Вычислять&raquo; в&nbsp;правой части поля ввода.
         </p>
 
-        <h3 class="display-4 pt-5">Как упростить заполнение раскладки</h3>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/7.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <h3>Как упростить заполнение раскладки</h3>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/7.jpg" loading="lazy"/>
+        </div>
         <p>
           Если вы&nbsp;идете в&nbsp;долгий поход, то&nbsp;заполнять каждый день может быть утомительно.
           Чтобы упростить создание продуктовой раскладки, сервис может копировать содержимое дней.
@@ -160,9 +167,10 @@
           В&nbsp;появившемся диалоге укажите какие дни скопировать и&nbsp;куда.
         </p>
 
-        <h2 class="display-4 pt-5">Поход в магазин</h2>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/8.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <h2>Поход в магазин</h2>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/8.jpg" loading="lazy"/>
+        </div>
         <p>
           Когда вы&nbsp;полностью составили меню и&nbsp;обсудили его с&nbsp;группой, настало время идти
           покупать продукты.
@@ -176,9 +184,10 @@
           Рядом с&nbsp;каждым продуктом указано необходимое количество в&nbsp;граммах или штуках.
         </p>
 
-        <h2 class="display-4 pt-5">Фасовка</h2>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/9.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <h2>Фасовка</h2>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/9.jpg" loading="lazy"/>
+        </div>
         <p>
           Когда все продукты куплены, и&nbsp;вы&nbsp;готовы заняться упаковкой, нажмите на&nbsp;кнопку
           &laquo;Отчет для фасовки&raquo; на&nbsp;странице похода.
@@ -187,8 +196,9 @@
           желтые.
           Это сделано для удобства фасовки, чтобы было легко найти нужный прием пищи.
         </p>
-        <div class="d-flex justify-content-center"><img src="./static/img/tutorial/10.jpg"
-            class="mb-4 mh-100 mw-100 shadow" /></div>
+        <div class="flex justify-center">
+          <img src="./static/img/tutorial/10.jpg" loading="lazy"/>
+        </div>
         <p>
           Вы&nbsp;можете настраивать нужное количество информации на&nbsp;экране.
           Для этого выберите в&nbsp;выпадающем меню сверху нужное количество дней в&nbsp;одном ряду.
@@ -199,18 +209,17 @@
           на&nbsp;человека, а&nbsp;людей у&nbsp;вас 6, то&nbsp;сервис укажет, что на&nbsp;завтрак второго дня
           вы&nbsp;должны положить 180 грамм.
           Если у&nbsp;вас несколько групп, то&nbsp;вы&nbsp;увидите несколько колонок с&nbsp;массой продукта
-          для каждой из&nbsp;них.
-          Нафасуйте продукты для каждой группы отдельно.</p>
+          для каждой из&nbsp;них. Нафасуйте продукты для каждой группы отдельно.</p>
         <p>
           Удачи в&nbsp;походе!
         </p>
       </div>
-      <div class="d-none d-lg-block col-2"></div>
+      <div class="hidden lg:block lg:col-span-1"></div>
     </div>
-    <div class="row my-3">
-      <div class="col">
-        <small><a href="/">Вернуться на главную</a></small>
-      </div>
+    <div class="my-3">
+      <small>
+        <a href="/">Вернуться на главную</a>
+      </small>
     </div>
   </div>
 
