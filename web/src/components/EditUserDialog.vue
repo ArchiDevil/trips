@@ -20,7 +20,7 @@ const currentGroup = ref<string>('')
 
 const title = computed(() => {
   return props.user
-    ? `${t('users.editModal.title')} ${props.user.displayed_name}`
+    ? `${t('users.editModal.title')} ${props.user.login}`
     : ''
 })
 

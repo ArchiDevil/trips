@@ -17,6 +17,12 @@ const password = ref('')
 const currentGroup = ref('')
 const errorMessage = ref('')
 
+const reset = () => {
+  username.value = ''
+  password.value = ''
+  errorMessage.value = ''
+}
+
 const onAdd = async () => {
   try {
     await getUsersApi().post('/', {
@@ -25,6 +31,7 @@ const onAdd = async () => {
       access_group: currentGroup.value,
     })
     emit('add')
+    reset()
   } catch (error) {
     errorMessage.value = error as string
     console.error('Failed to add user:', error)
@@ -116,7 +123,8 @@ watch(
 
       <button
         class="btn btn-secondary"
-        data-bs-dismiss="modal">
+        data-bs-dismiss="modal"
+        @click="reset()">
         {{ $t('users.addModal.close') }}
       </button>
     </template>
