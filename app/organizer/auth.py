@@ -33,7 +33,7 @@ def login_required_group(group):
 
             # update last user login/access
             with get_session() as sql_session:
-                user = sql_session.query(User).filter(User.id == g.user.id).first()
+                user = sql_session.query(User).where(User.id == g.user.id).first()
                 user.last_logged_in = datetime.utcnow()
                 sql_session.commit()
 
@@ -50,6 +50,13 @@ def api_login_required_group(group=None):
                 abort(401)
             if group and g.user.access_group.value < group.value:
                 abort(403)
+
+            # update last user login/access
+            with get_session() as sql_session:
+                user = sql_session.query(User).where(User.id == g.user.id).first()
+                user.last_logged_in = datetime.utcnow()
+                sql_session.commit()
+
             return view(**kwargs)
         return api_wrapped_view_grouped
     return api_login_required_grouped

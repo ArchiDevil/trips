@@ -74,3 +74,17 @@ export interface Day {
   meals: Record<string, Meal[]>
   reload_link: string
 }
+
+export interface AccessGroup {
+  id: number
+  name: string
+}
+
+export interface User {
+  id: number
+  login: string
+  displayed_name: string
+  last_logged_in: string
+  user_type: string
+  access_group: string
+}

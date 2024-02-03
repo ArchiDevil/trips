@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Trip } from '../interfaces'
-import { tripsApi } from '../backend'
+import { getTripsApi } from '../backend'
 
 export const useTripsStore = defineStore('trips', {
   state() {
@@ -14,7 +14,7 @@ export const useTripsStore = defineStore('trips', {
     async fetchTrips() {
       this.trips = []
       this.tripsLoading = true
-      const api = tripsApi
+      const api = getTripsApi()
       try {
         const response = await api.get<Trip[]>('/')
         this.trips = response

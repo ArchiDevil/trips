@@ -152,10 +152,60 @@ const packingGetterHandler = {
   },
 }
 
+const accessGroupsGetterHandler = {
+  pattern: '/api/users/access-groups',
+  handle: (req, res) => {
+    const data = [
+      {
+        id: 0,
+        name: 'Administrator',
+      },
+      {
+        id: 1,
+        name: 'User',
+      },
+    ]
+
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(data))
+  },
+}
+
+const usersGetterHandler = {
+  pattern: '/api/users/',
+  handle: (req, res) => {
+    const data = [
+      {
+        id: 1,
+        login: 'Administrator',
+        displayed_name: 'Administrator',
+        password: true,
+        last_logged_in: '12345',
+        user_type: 'User',
+        access_group: 'Administrator',
+      },
+      {
+        id: 2,
+        login: 'User',
+        displayed_name: 'User',
+        password: true,
+        last_logged_in: '12345',
+        user_type: 'User',
+        access_group: 'User',
+      },
+    ]
+
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(data))
+  },
+}
+
 module.exports = [
   userApiHandler,
   productsSearchHandler,
   tripsGetterHandler,
   tripGetterHandler,
   packingGetterHandler,
+  accessGroupsGetterHandler,
+  usersGetterHandler,
 ]
