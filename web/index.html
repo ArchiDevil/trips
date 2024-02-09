@@ -7,7 +7,7 @@
   <link rel="canonical" href="https://hikehub.ru/">
   <meta name="description" content="Сервис для подготовки еды в поход. Собирайте питание умно и легко.">
 
-  <link rel="stylesheet" href="./src/css/landing.scss">
+  <link rel="stylesheet" href="./src/css/landing.css">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -45,47 +45,51 @@
   <!-- /Yandex.Metrika counter -->
 </head>
 
-<body>
+<body class="font-body">
   <noscript>
     <div><img src="https://mc.yandex.ru/watch/88901903" style="position:absolute; left:-9999px;" alt="" /></div>
   </noscript>
 
-  <div class="container-fluid" id="header">
-    <div class="container py-5">
-      <div class="row d-none d-md-block" style="padding-top: 10rem;"></div>
-      <div class="row d-none d-sm-block d-md-none" style="padding-top: 5rem;"></div>
-      <div class="row mt-5 justify-content-center">
-        <div class="col-md-8 justify-content-lg-center">
-          <h1 class="display-2 text-uppercase text-white text-center text-lg-start">Hikehub</h1>
-          <p class="h2 text-white text-center text-lg-start">
+  <header>
+    <div class="container py-12">
+      <div class="hidden md:block pt-40"></div>
+      <div class="hidden sm:block md:hidden pt-20"></div>
+      <div class="flex mt-12 justify-center">
+        <div class="w-2/3 lg:justify-center">
+          <h1 class="uppercase text-white text-center lg:text-start text-7xl tracking-widest">
+            Hikehub
+          </h1>
+          <p class="text-3xl font-semibold text-white text-center lg:text-start mb-2 leading-tight">
             Сервис для подготовки еды в&nbsp;поход.<br />
             Собирайте питание умно и&nbsp;легко.
           </p>
-          <div class="row mt-4">
-            <div class="col-lg-6 mb-3">
-              <a class="btn btn-primary btn-lg p-2 p-md-3 d-block" href="/auth/signup">Регистрация</a>
+          <div class="flex mt-6">
+            <div class="lg:w-1/2 pr-3">
+              <a class="block leading-6 text-center cursor-pointer select-none transition-colors p-2 md:p-4 no-underline btn-primary btn-lg font-display" href="/auth/signup">Регистрация</a>
             </div>
-            <div class="col-lg-6">
-              <a class="btn btn-secondary btn-lg p-2 p-md-3 d-block" href="/auth/login">Вход</a>
+            <div class="lg:w-1/2 pl-3">
+              <a class="block leading-6 text-center cursor-pointer select-none transition-colors p-2 md:p-4 no-underline btn-secondary btn-lg font-display" href="/auth/login">Вход</a>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </header>
+
+  <article>
 
   <div class="container">
-    <div class="row pt-5 justify-content-center">
+    <div class="row pt-5 flex content-center">
       <div class="col-md-8">
-        <img src="./static/img/2.jpg" class="w-100" />
+        <img src="./static/img/2.jpg" class="w-full" />
       </div>
     </div>
-    <div class="row pt-3 justify-content-center">
+    <div class="row pt-3 flex content-center">
       <div class="col-md-8">
         <h2>Сэкономьте свое время</h2>
       </div>
     </div>
-    <div class="row pb-5 justify-content-center">
+    <div class="row pb-5 flex content-center">
       <div class="col-md-8">
         <p>
           Так выглядит день похода в&nbsp;<strong>HIKEHUB</strong>.
@@ -104,7 +108,7 @@
   </div>
 
   <div class="container">
-    <div class="row pt-5 justify-content-center">
+    <div class="row pt-5 flex content-center">
       <div class="col-md-8">
         <video width="100%" height="100%" muted="true" loop="true" autoplay>
           <source src="./static/vid/1.mp4" type="video/mp4">
@@ -112,12 +116,12 @@
         </video>
       </div>
     </div>
-    <div class="row pt-3 justify-content-center">
+    <div class="row pt-3 flex content-center">
       <div class="col-md-8">
         <h2>Не&nbsp;тратьте время на&nbsp;поиск продуктов</h2>
       </div>
     </div>
-    <div class="row pb-5 justify-content-center">
+    <div class="row pb-5 flex content-center">
       <div class="col-md-8">
         <p>
           В&nbsp;сервисе уже есть база продуктов, сформированная туристами.
@@ -129,17 +133,17 @@
   </div>
 
   <div class="container">
-    <div class="row pt-5 justify-content-center">
+    <div class="row pt-5 flex content-center">
       <div class="col-md-8">
-        <img src="./static/img/3.jpg" class="w-100" />
+        <img src="./static/img/3.jpg" class="w-full" />
       </div>
     </div>
-    <div class="row pt-3 justify-content-center">
+    <div class="row pt-3 flex content-center">
       <div class="col-md-8">
         <h2>Упростите покупки</h2>
       </div>
     </div>
-    <div class="row pb-5 justify-content-center">
+    <div class="row pb-5 flex content-center">
       <div class="col-md-8">
         <p>
           Сайт автоматически считает количество продуктов, которые вы&nbsp;добавляете в&nbsp;меню и&nbsp;создает список
@@ -152,9 +156,11 @@
     </div>
   </div>
 
-  <div class="container-fluid py-5" id="footer">
+  </article>
+
+  <footer class="container-fluid py-5">
     <div class="container">
-      <div class="row justify-content-center pb-2">
+      <div class="row flex content-center pb-2">
         <div class="col-md-8 text-white">
           <h2 class="text-center text-lg-start">Облегчите подготовку к&nbsp;походу с&nbsp;HIKEHUB</h2>
         </div>
@@ -165,7 +171,7 @@
           <a class="btn btn-primary btn-lg p-3 d-block" href="/auth/signup">Регистрация</a>
         </div>
       </div>
-      <div class="row">
+      <div class="flex">
         <div class="col-sm-2"></div>
         <div class="col-md-8">
           <p class="text-white">
@@ -176,48 +182,62 @@
             дополнительной информацией и&nbsp;документами.
           </p>
           <p class="text-white">Поделитесь ссылкой на&nbsp;сайт в&nbsp;соцсетях. Это поможет развитию проекта.</p>
-          <div class="d-none d-md-block">
-            <a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-              target="_blank"><img src="https://static.addtoany.com/buttons/vk.svg" width="40" height="40"
-                class="share-button"></a>
-            <a href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-              target="_blank"><img src="https://static.addtoany.com/buttons/telegram.svg" width="40" height="40"
-                class="share-button"></a>
-            <a href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-              target="_blank"><img src="https://static.addtoany.com/buttons/facebook.svg" width="40" height="40"
-                class="share-button"></a>
-            <a href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-              target="_blank"><img src="https://static.addtoany.com/buttons/twitter.svg" width="40" height="40"
-                class="share-button"></a>
-            <a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-              target="_blank"><img src="https://static.addtoany.com/buttons/viber.svg" width="40" height="40"
-                class="share-button"></a>
-            <a href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-              target="_blank"><img src="https://static.addtoany.com/buttons/whatsapp.svg" width="40" height="40"
-                class="share-button"></a>
+          <div class="hidden md:block">
+            <a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+              <img src="https://static.addtoany.com/buttons/vk.svg" width="40" height="40" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+            </a>
+            <a href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+              <img src="https://static.addtoany.com/buttons/telegram.svg" width="40" height="40" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+            </a>
+            <a href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+              <img src="https://static.addtoany.com/buttons/facebook.svg" width="40" height="40" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+            </a>
+            <a href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+              <img src="https://static.addtoany.com/buttons/twitter.svg" width="40" height="40" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+            </a>
+            <a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+              <img src="https://static.addtoany.com/buttons/viber.svg" width="40" height="40" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+            </a>
+            <a href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+              <img src="https://static.addtoany.com/buttons/whatsapp.svg" width="40" height="40" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+            </a>
           </div>
         </div>
       </div>
-      <div class="row d-flex d-md-none">
-        <div class="col"><a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-            target="_blank"><img src="https://static.addtoany.com/buttons/vk.svg" class="share-button"></a></div>
-        <div class="col"><a
-            href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-            target="_blank"><img src="https://static.addtoany.com/buttons/telegram.svg" class="share-button"></a></div>
-        <div class="col"><a
-            href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-            target="_blank"><img src="https://static.addtoany.com/buttons/facebook.svg" class="share-button"></a></div>
-        <div class="col"><a
-            href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-            target="_blank"><img src="https://static.addtoany.com/buttons/twitter.svg" class="share-button"></a></div>
-        <div class="col"><a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-            target="_blank"><img src="https://static.addtoany.com/buttons/viber.svg" class="share-button"></a></div>
-        <div class="col"><a
-            href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname="
-            target="_blank"><img src="https://static.addtoany.com/buttons/whatsapp.svg" class="share-button"></a></div>
+      <div class="flex md:hidden">
+        <div class="col">
+          <a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+            <img src="https://static.addtoany.com/buttons/vk.svg" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+          </a>
+        </div>
+        <div class="col">
+          <a href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+            <img src="https://static.addtoany.com/buttons/telegram.svg" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+          </a>
+        </div>
+        <div class="col">
+          <a href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+            <img src="https://static.addtoany.com/buttons/facebook.svg" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+          </a>
+        </div>
+        <div class="col">
+          <a href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+            <img src="https://static.addtoany.com/buttons/twitter.svg" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+          </a>
+        </div>
+        <div class="col">
+          <a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+            <img src="https://static.addtoany.com/buttons/viber.svg" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+          </a>
+        </div>
+        <div class="col">
+          <a href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
+            <img src="https://static.addtoany.com/buttons/whatsapp.svg" class="bg-blue-500 hover:bg-blue-900 rounded transition-colors">
+          </a>
+        </div>
       </div>
     </div>
-  </div>
+  </footer>
 </body>
 
 </html>
