@@ -89,7 +89,7 @@ footer {
 p,
 a,
 li {
-  font-family: 'Open Sans', sans-serif;
+  @apply font-body;
 }
 
 .btn-bs {
@@ -107,7 +107,7 @@ a {
 }
 
 .btn-bs {
-  font-family: 'Montserrat', sans-serif;
+  @apply font-display;
 }
 
 .btn-lg-bs {
@@ -149,9 +149,9 @@ a {
 }
 
 .share-button-bs {
+  @apply rounded-md transition-colors;
+
   background-color: royalblue;
-  border-radius: 4px;
-  transition: 150ms;
 }
 
 .share-button-bs:hover {
@@ -230,18 +230,6 @@ h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1
   line-height: 1.2;
 }
 
-.d-none-bs {
-  @apply hidden;
-}
-
-.d-flex-bs {
-  @apply flex;
-}
-
-.d-block-bs {
-  @apply block;
-}
-
 @media (min-width: 576px) {
   .container-bs {
       max-width: 540px;
@@ -262,12 +250,8 @@ h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1
 }
 
 @media (min-width: 768px) {
-  .d-md-block-bs {
-    display: block !important;
-  }
-
-  .d-md-none-bs {
-    display: none !important;
+  .container-bs {
+    max-width: 720px;
   }
 
   .col-md-8-bs {
@@ -309,4 +293,8 @@ h2,
 h3 {
   font-family: 'Montserrat', sans-serif;
   font-weight: 600;
+}
+
+.text-uppercase-bs {
+  text-transform: uppercase !important;
 }
