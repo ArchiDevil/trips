@@ -231,15 +231,15 @@ h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1
 }
 
 .d-none-bs {
-  display: none !important;
+  @apply hidden;
 }
 
 .d-flex-bs {
-  display: flex !important;
+  @apply flex;
 }
 
 .d-block-bs {
-  display: block !important;
+  @apply block;
 }
 
 @media (min-width: 576px) {
@@ -297,29 +297,11 @@ h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1
 }
 
 .col-bs {
-  flex: 1 0 0%;
-}
-
-.p-3-bs {
-  padding: 1rem !important;
-}
-
-.pb-5-bs {
-  padding-bottom: 3rem !important;
-}
-
-.pb-2-bs {
-  padding-bottom: .5rem !important;
-}
-
-.py-5-bs {
-  padding-top: 3rem !important;
-  padding-bottom: 3rem !important;
+  @apply grow shrink-0 basis-0;
 }
 
 p {
-  margin-top: 0;
-  margin-bottom: 1rem;
+  @apply mt-0 mb-4;
 }
 
 h1,
