@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" type="text/css" href="./src/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="./src/css/empty.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -36,35 +36,33 @@
     <!-- /Yandex.Metrika counter -->
   </head>
 
-<body class="bg-light">
+<body class="font-body">
   <noscript>
     <div><img src="https://mc.yandex.ru/watch/88901903" style="position:absolute; left:-9999px;" alt="" /></div>
    </noscript>
 
-   <div class="container">
-        <div class="row my-3">
-            <div class="col">
-                <span class="display-4">Ошибка</span>
-            </div>
-        </div>
-
-        <div class="row my-3">
-            <div class="col">
-                <div class="alert alert-danger">
-                    <h4 class="alert-heading">Неправильная ссылка</h4>
-                    <p>Похоже, что эта ссылка истекла или изначально была неверной. Попросите руководителя похода создать новую ссылку и перейдите по ней.</p>
-                    <hr>
-                    <p class="mb-0">А поскольку эта страница совсем пустая и неинтересная, то мы отправимся на главную через 5 секунд.</p>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="flex my-4 max-w-screen-md">
+      <div class="bg-red-100 p-8 rounded-3xl">
+        <h1 class="text-3xl font-display mb-2">Неправильная ссылка 🙃</h4>
+        <p class="mb-2">
+          Похоже, что эта ссылка истекла или изначально была неверной.
+          Попросите руководителя похода создать новую ссылку и перейдите по
+          ней.
+        </p>
+        <p>
+          А поскольку эта страница совсем пустая и неинтересная, то мы
+          отправимся на главную страницу через 5 секунд.
+        </p>
+      </div>
     </div>
+  </div>
 
-    <script>
-        setTimeout(function () {
-            window.location.href = '/trips/';
-        }, 5000);
-    </script>
+  <script>
+    setTimeout(function () {
+      window.location.href = '/trips/';
+    }, 5000);
+  </script>
 </body>
 
 </html>

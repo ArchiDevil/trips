@@ -1,0 +1,93 @@
+@import './typefaces.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  @apply box-border;
+}
+
+footer {
+  background-image: linear-gradient(
+    180deg,
+    #fcc5e4 -56.7%,
+    #fda34b -30.41%,
+    #ff7882 4.65%,
+    #c8699e 34.45%,
+    #7046aa 67.75%,
+    #0c1db8 95.79%,
+    #020f75 118.58%
+  );
+}
+
+p {
+  @apply mt-0 mb-4;
+}
+
+a {
+  @apply underline underline-offset-4;
+}
+
+h1,
+h2 {
+  @apply font-display font-semibold mt-0 mb-2 leading-[1.2];
+}
+
+h2 {
+  @apply text-2xl;
+}
+
+.share-button {
+  @apply rounded-md transition-colors bg-blue-500 hover:bg-blue-900;
+}
+
+img, svg {
+  @apply align-middle;
+
+  display: initial;
+}
+
+.btn {
+  @apply select-none text-center cursor-pointer no-underline align-middle transition-all leading-normal;
+  @apply p-4 rounded-[2.5rem] border-[0.15rem] border-solid border-transparent;
+  @apply bg-transparent;
+  @apply text-[1.75rem] text-[#212529];
+  @apply font-display;
+}
+
+.btn-primary {
+  @apply bg-[#ffc600] border-[#ffc600];
+  @apply hover:bg-[#ffd133] hover:border-[#ffd133] hover:text-white;
+  @apply active:bg-[#ffd133] active:border-[#ffd133];
+}
+
+.btn-secondary {
+  @apply text-[#ffc600] border-[#ffc600];
+  @apply hover:bg-[#ffd133] hover:border-[#ffd133] hover:text-[#212529];
+  @apply active:bg-[#ffc600];
+}
+
+.row {
+  @apply flex flex-wrap -mx-3;
+}
+
+.row > * {
+  @apply shrink-0 w-full max-w-full px-3 mt-0;
+}
+
+.col {
+  @apply grow shrink-0 basis-0;
+}
+
+.col-md-2 {
+  @apply md:grow-0 shrink-0 md:basis-auto md:w-2/12;
+}
+
+.col-lg-6 {
+  @apply lg:grow-0 shrink-0 lg:basis-auto lg:w-6/12;
+}
+
+.col-md-8 {
+  @apply md:grow-0 shrink-0 md:basis-auto md:w-8/12;
+}
