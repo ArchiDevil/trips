@@ -50,8 +50,10 @@ img, svg {
 
 .btn {
   @apply select-none text-center cursor-pointer no-underline align-middle transition-all leading-normal;
-  @apply p-4 rounded-[2.5rem] border-[0.15rem] text-[1.75rem] border-solid border-transparent;
-  @apply bg-transparent text-[#212529];
+  @apply p-4 rounded-[2.5rem] border-[0.15rem] border-solid border-transparent;
+  @apply bg-transparent;
+  @apply text-[1.75rem] text-[#212529];
+  @apply font-display;
 }
 
 .btn-primary {
