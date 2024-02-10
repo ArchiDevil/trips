@@ -38,7 +38,6 @@
   --bs-btn-disabled-opacity: .65;
   --bs-btn-focus-box-shadow: 0 0 0 .25rem rgba(var(--bs-btn-focus-shadow-rgb), .5);
   padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
-  font-family: var(--bs-btn-font-family);
   font-size: var(--bs-btn-font-size);
   font-weight: var(--bs-btn-font-weight);
   line-height: var(--bs-btn-line-height);
@@ -63,18 +62,6 @@
 }
 
 
-
-p,
-a,
-li {
-  @apply font-body;
-}
-
-a {
-  @apply underline;
-
-  text-underline-offset: 0.25rem;
-}
 
 .btn-lg-bs {
   border-radius: 2.5rem;
@@ -172,10 +159,6 @@ img, svg {
   margin-top: var(--bs-gutter-y);
 }
 
-.text-center-bs {
-  text-align: center !important;
-}
-
 h2, .h2-bs {
   font-size: calc(1.325rem + .9vw);
 }
@@ -198,11 +181,6 @@ h2, .h2-bs, h1, .h1-bs {
       max-width: 540px;
   }
 
-  .col-sm-2-bs {
-    flex: 0 0 auto;
-    width: 16.66666667%;
-  }
-
   .display-2-bs {
     font-size: 3.25rem;
   }
@@ -216,25 +194,11 @@ h2, .h2-bs, h1, .h1-bs {
   .container-bs {
     max-width: 720px;
   }
-
-  .col-md-2-bs {
-    flex: 0 0 auto;
-    width: 16.66666667%;
-  }
 }
 
 @media (min-width: 992px) {
-  .col-lg-6-bs {
-    flex: 0 0 auto;
-    width: 50%;
-  }
-
-  .text-lg-start-bs {
-    text-align: left !important;
-  }
-
-  .justify-content-lg-center-bs {
-    justify-content: center !important;
+  .container-bs {
+    max-width: 960px;
   }
 }
 
@@ -252,12 +216,27 @@ h2, .h2-bs, h1, .h1-bs {
   @apply grow shrink-0 basis-0;
 }
 
+.col-sm-2-bs {
+  @apply sm:grow-0 sm:shrink-0 sm:basis-auto sm:w-2/12;
+}
+
+.col-md-2-bs {
+  @apply md:grow-0 md:shrink-0 md:basis-auto md:w-2/12;
+}
+
+.col-lg-6-bs {
+  @apply lg:grow-0 lg:shrink-0 lg:basis-auto lg:w-6/12;
+}
+
+.col-md-8 {
+  @apply md:grow-0 md:shrink-0 md:basis-auto md:w-8/12;
+}
+
 .display-2-bs {
   @apply font-semibold;
 
   letter-spacing: 0.5rem;
 }
-
 
 
 
@@ -302,6 +281,10 @@ p {
   @apply mt-0 mb-4;
 }
 
+a {
+  @apply underline underline-offset-4;
+}
+
 h1,
 h2 {
   @apply font-display font-semibold;
@@ -315,8 +298,4 @@ h2 {
 
 .share-button {
   @apply rounded-md transition-colors bg-blue-500 hover:bg-blue-900;
-}
-
-.col-md-8 {
-  @apply md:grow-0 md:shrink-0 md:basis-auto md:w-2/3;
 }
