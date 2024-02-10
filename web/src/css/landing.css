@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-#header {
+header {
   background: url('../../static/img/1.jpg');
   background-size: cover;
   background-repeat: no-repeat;
@@ -12,7 +12,7 @@
   height: 100vh;
 }
 
-#footer {
+footer {
   background-image: linear-gradient(
     180deg,
     #fcc5e4 -56.7%,
@@ -118,4 +118,22 @@ a {
 
 .share-button-bs:hover {
   background-color: darkblue;
+}
+
+
+
+
+
+.row-bs {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: calc(-1 * var(--bs-gutter-y));
+  margin-right: calc(-0.5 * var(--bs-gutter-x));
+  margin-left: calc(-0.5 * var(--bs-gutter-x));
+}
+
+.justify-content-center-bs {
+  justify-content: center !important;
 }
