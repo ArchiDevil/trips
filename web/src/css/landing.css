@@ -61,8 +61,6 @@
   --bs-btn-border-radius: .5rem;
 }
 
-
-
 .btn-lg-bs {
   border-radius: 2.5rem;
   border-width: 0.15rem;
@@ -163,17 +161,14 @@ h2, .h2-bs {
   font-size: calc(1.325rem + .9vw);
 }
 
-h2, .h2-bs, h1, .h1-bs {
-  margin-top: 0;
-  margin-bottom: .5rem;
-  font-weight: 500;
-  line-height: 1.2;
+h2, .h2-bs, h1 {
+  @apply mt-0 mb-2 leading-[1.2];
 }
 
 .display-2-bs {
+  @apply leading-[1.2];
+
   font-size: calc(1.575rem + 3.9vw);
-  font-weight: 300;
-  line-height: 1.2;
 }
 
 @media (min-width: 576px) {
@@ -210,6 +205,10 @@ h2, .h2-bs, h1, .h1-bs {
   .container-bs {
     max-width: 1140px;
   }
+
+  .h2-bs {
+    font-size: 2rem;
+  }
 }
 
 .col-bs {
@@ -224,18 +223,16 @@ h2, .h2-bs, h1, .h1-bs {
   @apply md:grow-0 md:shrink-0 md:basis-auto md:w-2/12;
 }
 
-.col-lg-6-bs {
-  @apply lg:grow-0 lg:shrink-0 lg:basis-auto lg:w-6/12;
-}
-
 .col-md-8 {
   @apply md:grow-0 md:shrink-0 md:basis-auto md:w-8/12;
 }
 
-.display-2-bs {
-  @apply font-semibold;
+.col-lg-6-bs {
+  @apply lg:grow-0 lg:shrink-0 lg:basis-auto lg:w-6/12;
+}
 
-  letter-spacing: 0.5rem;
+.display-2-bs {
+  @apply tracking-[.5rem];
 }
 
 
@@ -257,11 +254,11 @@ h2, .h2-bs, h1, .h1-bs {
 
 
 header {
-  @apply bg-cover bg-no-repeat;
-
   background: url('../../static/img/1.jpg');
   background-position: 100% 100%;
   height: 100vh;
+
+  @apply bg-cover bg-no-repeat;
 }
 
 footer {
@@ -286,11 +283,11 @@ a {
 }
 
 h1,
-h2 {
+h2, .h2-bs {
   @apply font-display font-semibold;
 }
 
-@media (min-width: 992px) {
+@media (max-width: 992px) {
   header {
     background-position: 75% 100%;
   }
