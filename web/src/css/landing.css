@@ -4,14 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
-header {
+#header {
   background: url('../../static/img/1.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
   background-position: 100% 100%;
-
-  @apply px-3 w-full h-dvh bg-cover bg-no-repeat;
+  height: 100vh;
 }
 
-footer {
+#footer {
   background-image: linear-gradient(
     180deg,
     #fcc5e4 -56.7%,
@@ -27,24 +28,36 @@ footer {
 h1,
 h2,
 h3 {
-  @apply font-display font-semibold;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+}
+
+p,
+a,
+li {
+  font-family: 'Open Sans', sans-serif;
+}
+
+.btn-bs {
+  text-decoration: none;
 }
 
 a {
-  @apply underline;
+  text-decoration: underline;
   text-underline-offset: 0.25rem;
 }
 
-.display-2 {
+.display-2-bs {
+  font-weight: 600;
   letter-spacing: 0.5rem;
 }
 
 @media (max-width: 576px) {
-  .display-2 {
+  .display-2-bs {
     font-size: 3.25rem;
   }
 
-  .h2 {
+  .h2-bs {
     font-size: 1.75rem;
   }
 }
@@ -55,44 +68,54 @@ a {
   }
 }
 
-.btn {
-  @apply font-display;
+.btn-bs {
+  font-family: 'Montserrat', sans-serif;
 }
 
-.btn-lg {
+.btn-lg-bs {
   border-radius: 2.5rem;
   border-width: 0.15rem;
   font-size: 1.75rem;
 }
 
-.btn-primary {
+.btn-primary-bs {
   background-color: #ffc600;
-  color: #212529;
+  color: var(--dark);
   border-color: #ffc600;
 }
 
-.btn-primary:hover {
+.btn-primary-bs:hover {
   background-color: #ffd133;
   border-color: #ffd133;
 }
 
-.btn-primary:active {
+.btn-primary-bs:active {
   background-color: #ffd133;
   border-color: #ffd133;
 }
 
-.btn-secondary {
+.btn-secondary-bs {
   background-color: #00ffc600;
   color: #ffc600;
   border-color: #ffc600;
 }
 
-.btn-secondary:hover {
+.btn-secondary-bs:hover {
   background-color: #ffd133;
   border-color: #ffd133;
-  color: #212529;
+  color: var(--dark);
 }
 
-.btn-secondary:active .btn-secondary:focus {
+.btn-secondary-bs:active .btn-secondary-bs:focus {
   background-color: #ffc600;
+}
+
+.share-button-bs {
+  background-color: royalblue;
+  border-radius: 4px;
+  transition: 150ms;
+}
+
+.share-button-bs:hover {
+  background-color: darkblue;
 }
