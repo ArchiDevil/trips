@@ -199,9 +199,12 @@ img, svg {
   }
 }
 
-
 .col-bs {
   flex: 1 0 0%;
+}
+
+.p-3-bs {
+  padding: 1rem !important;
 }
 
 .pb-5-bs {
@@ -215,10 +218,6 @@ img, svg {
 .py-5-bs {
   padding-top: 3rem !important;
   padding-bottom: 3rem !important;
-}
-
-.justify-content-center-bs {
-  justify-content: center !important;
 }
 
 p {
