@@ -122,7 +122,7 @@ def forgot():
         session.commit()
 
     # send a link via send-in-blue
-    if 'SENDINBLUE_APP_KEY' in current_app.config:
+    if 'BREVO_API_KEY' in current_app.config:
         reset_link = url_for('auth.reset', token=uuid, _external=True, _scheme='https')
         email_body = render_template('reset_password_email.html', sitename=current_app.config['SERVER_NAME'], reset_link=reset_link)
         try:

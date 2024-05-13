@@ -24,6 +24,7 @@ services:
       SERVER_NAME: ${SERVER_NAME}
       VK_APP_SECRET: ${VK_APP_SECRET}
       VK_CLIENT_ID: ${VK_CLIENT_ID}
+      BREVO_API_KEY: ${BREVO_API_KEY}
     restart: on-failure
 
   proxy:

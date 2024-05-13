@@ -59,10 +59,10 @@ def create_app(test_config=None):
             RECAPTCHA_SERVER_KEY=recaptcha_server_key
         )
 
-    sendinblue_api_key = os.environ.get('SENDINBLUE_API_KEY', None)
-    if sendinblue_api_key:
+    brevo_api_key = os.environ.get('BREVO_API_KEY', None)
+    if brevo_api_key:
         app.config.from_mapping(
-            SENDINBLUE_API_KEY=sendinblue_api_key
+            BREVO_API_KEY=brevo_api_key
         )
 
     if test_config is None:
