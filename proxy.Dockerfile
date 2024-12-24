@@ -1,5 +1,5 @@
 # Build web part
-FROM node:20 as build
+FROM node:20 AS build
 
 COPY ./web /web
 WORKDIR /web
