@@ -1,7 +1,6 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import mockServer from 'vite-plugin-mock-server'
 
 // vite.config.js
 export default defineConfig({
@@ -24,14 +23,7 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    {
-      ...mockServer(),
-      apply: 'serve',
-    },
   ],
-  test: {
-    environment: 'jsdom',
-  },
   resolve: {
     alias: {
       '~bootstrap': resolve(__dirname, 'node_modules/bootstrap'),
