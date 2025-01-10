@@ -7,7 +7,6 @@ import { Trip, Day, MealName } from '../interfaces'
 
 import DayCard from '../components/DayCard.vue'
 import TripHandlingCard from '../components/TripHandlingCard.vue'
-import NavigationBar from '../components/NavigationBar.vue'
 import BaseIcon from '../components/BaseIcon.vue'
 import AddProductModal from '../components/AddProductModal.vue'
 import CycleDaysModal from '../components/CycleDaysModal.vue'
@@ -154,8 +153,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <NavigationBar link="trips" />
-
   <AddProductModal
     v-if="trip"
     id="add-product-modal"

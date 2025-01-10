@@ -1,9 +1,10 @@
 import { createI18n } from 'vue-i18n'
 import { createApp } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
 import ruMessages from './locales/ru.json'
 import enMessages from './locales/en.json'
-import MealsApp from './apps/MealsApp.vue'
+import TripApp from './apps/TripApp.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
@@ -31,6 +32,10 @@ import {
   faSpinner,
   faCookieBite,
   faCubes,
+  faPrint,
+  faCarrot,
+  faFish,
+  faCandyCane,
   faClipboardQuestion,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -62,7 +67,11 @@ library.add(
   faSpinner,
   faCookieBite,
   faCubes,
-  faClipboardQuestion
+  faClipboardQuestion,
+  faPrint,
+  faCarrot,
+  faFish,
+  faCandyCane
 )
 
 const pinia = createPinia()
@@ -77,10 +86,33 @@ const i18n = createI18n<[typeof ruMessages], 'ru' | 'en'>({
   },
 })
 
-const app = createApp(MealsApp)
+const MealsApp = () => import('./apps/MealsApp.vue')
+const ShoppingApp = () => import('./apps/ShoppingApp.vue')
+const PackingApp = () => import('./apps/PackingApp.vue')
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/meals/:uid',
+      component: MealsApp,
+    },
+    {
+      path: '/reports/shopping/:uid',
+      component: ShoppingApp,
+    },
+    {
+      path: '/reports/packing/:uid',
+      component: PackingApp,
+    },
+  ],
+})
+
+const app = createApp(TripApp)
 app.use(pinia)
 app.use(i18n)
+app.use(router)
 app.component('FontAwesomeIcon', FontAwesomeIcon)
-app.mount('#meals-app')
+app.mount('#trip-app')
 
 useUserStore().fetchUserData()

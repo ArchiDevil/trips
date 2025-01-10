@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BaseIcon from './BaseIcon.vue';
+import BaseIcon from './BaseIcon.vue'
 import { Trip } from '../interfaces'
 
 defineProps<{
@@ -30,19 +30,19 @@ defineProps<{
         <BaseIcon icon="fa-walking" /> {{ $t('meals.card.participants') }}:
         {{ trip.attendees }}
       </p>
-      <a
+      <RouterLink
         class="btn btn-secondary w-100 my-1"
-        :href="trip.trip.shopping_link"
+        :to="trip.trip.shopping_link"
       >
         <BaseIcon icon="fa-shopping-cart" />
         {{ $t('meals.card.shoppingButton') }}
-      </a>
-      <a
+      </RouterLink>
+      <RouterLink
         class="btn btn-secondary w-100 my-1"
-        :href="trip.trip.packing_link"
+        :to="trip.trip.packing_link"
       >
         <BaseIcon icon="fa-hiking" /> {{ $t('meals.card.packingButton') }}
-      </a>
+      </RouterLink>
     </div>
   </div>
 </template>
