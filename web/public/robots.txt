@@ -8,5 +8,6 @@ Disallow: /auth
 Disallow: /api
 Disallow: /reports
 Disallow: /developer
+Disallow: /users
 
 Sitemap: https://hikehub.ru/sitemap.xml
