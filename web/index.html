@@ -27,20 +27,22 @@
 
   <!-- Yandex.Metrika counter -->
   <script type="text/javascript">
-    (function (m, e, t, r, i, k, a) {
-      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
-      m[i].l = 1 * new Date();
-      for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
-      k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-    })
-      (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    setTimeout(() => {
+        (function (m, e, t, r, i, k, a) {
+        m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+        m[i].l = 1 * new Date();
+        for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+        k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+      })
+        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
 
-    ym(88901903, "init", {
-      clickmap: true,
-      trackLinks: true,
-      accurateTrackBounce: true,
-      webvisor: true
-    });
+      ym(88901903, "init", {
+        clickmap: true,
+        trackLinks: true,
+        accurateTrackBounce: true,
+        webvisor: true
+      });
+    }, 2500);
   </script>
   <!-- /Yandex.Metrika counter -->
 </head>
@@ -77,7 +79,12 @@
     <div class="container px-3">
       <div class="row pt-12 justify-center">
         <div class="col-md-8">
-          <img src="./static/img/2.jpg" class="w-full" loading="lazy"/>
+          <img
+            src="./static/img/2.jpg"
+            class="w-full"
+            loading="lazy"
+            alt="Изображение списка формирования меню в походе в сравнении с неудобными инструментами"
+          />
         </div>
       </div>
       <div class="row pt-4 justify-center">
@@ -131,7 +138,12 @@
     <div class="container px-3">
       <div class="row pt-12 justify-center">
         <div class="col-md-8">
-          <img src="./static/img/3.jpg" class="w-full" loading="lazy"/>
+          <img
+            src="./static/img/3.jpg"
+            class="w-full"
+            loading="lazy"
+            alt="Изображение списка для покупки продуктов в приложении"
+          />
         </div>
       </div>
       <div class="row pt-4 justify-center">
@@ -179,22 +191,22 @@
           <p class="text-white">Поделитесь ссылкой на&nbsp;сайт в&nbsp;соцсетях. Это поможет развитию проекта.</p>
           <div class="grid grid-cols-6 text-center md:text-left md:block">
             <a href="https://www.addtoany.com/add_to/vk?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
-              <img src="https://static.addtoany.com/buttons/vk.svg" class="share-button w-16 md:w-10">
+              <img src="https://static.addtoany.com/buttons/vk.svg" class="share-button w-16 md:w-10" alt="Иконка Vk">
             </a>
             <a href="https://www.addtoany.com/add_to/telegram?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
-              <img src="https://static.addtoany.com/buttons/telegram.svg" class="share-button w-16 md:w-10">
+              <img src="https://static.addtoany.com/buttons/telegram.svg" class="share-button w-16 md:w-10" alt="Иконка Telegram">
             </a>
             <a href="https://www.addtoany.com/add_to/facebook?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
-              <img src="https://static.addtoany.com/buttons/facebook.svg" class="share-button w-16 md:w-10">
+              <img src="https://static.addtoany.com/buttons/facebook.svg" class="share-button w-16 md:w-10" alt="Иконка Facebook">
             </a>
             <a href="https://www.addtoany.com/add_to/twitter?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
-              <img src="https://static.addtoany.com/buttons/twitter.svg" class="share-button w-16 md:w-10">
+              <img src="https://static.addtoany.com/buttons/twitter.svg" class="share-button w-16 md:w-10" alt="Иконка Twitter">
             </a>
             <a href="https://www.addtoany.com/add_to/viber?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
-              <img src="https://static.addtoany.com/buttons/viber.svg" class="share-button w-16 md:w-10">
+              <img src="https://static.addtoany.com/buttons/viber.svg" class="share-button w-16 md:w-10" alt="Иконка Viber">
             </a>
             <a href="https://www.addtoany.com/add_to/whatsapp?linkurl=https%3A%2F%2Fhikehub.ru&amp;linkname=" target="_blank">
-              <img src="https://static.addtoany.com/buttons/whatsapp.svg" class="share-button w-16 md:w-10">
+              <img src="https://static.addtoany.com/buttons/whatsapp.svg" class="share-button w-16 md:w-10" alt="Иконка WhatsApp">
             </a>
           </div>
         </div>
