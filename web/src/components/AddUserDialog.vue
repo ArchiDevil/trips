@@ -2,10 +2,10 @@
 import { onMounted, ref, watch } from 'vue'
 import { AccessGroup } from '../interfaces'
 import { getUsersApi } from '../backend'
-import Modal from './Modal.vue'
+import BaseModal from './BaseModal.vue'
 
 const emit = defineEmits<{
-  (e: 'add'): void
+  add: []
 }>()
 
 const props = defineProps<{
@@ -52,28 +52,33 @@ watch(
 </script>
 
 <template>
-  <Modal :title="$t('users.addModal.title')">
+  <BaseModal :title="$t('users.addModal.title')">
     <template #body>
       <div
+        v-if="errorMessage"
         class="mb-3"
-        v-if="errorMessage">
-        <p class="text-danger">{{ errorMessage }}</p>
+      >
+        <p class="text-danger">
+          {{ errorMessage }}
+        </p>
       </div>
       <div class="mb-3">
         <label
           class="form-label"
-          for="input-name">
+          for="input-name"
+        >
           {{ $t('users.login') }}
         </label>
         <input
+          id="input-name"
+          v-model="username"
           type="text"
           class="form-control"
-          id="input-name"
           :placeholder="$t('users.login')"
           :class="{ 'is-invalid': username === '' }"
           autofocus
-          v-model="username"
-          autocomplete="off" />
+          autocomplete="off"
+        >
         <div class="invalid-feedback">
           {{ $t('users.invalidLogin') }}
         </div>
@@ -82,16 +87,18 @@ watch(
       <div class="mb-3">
         <label
           class="form-label"
-          for="input-password">
+          for="input-password"
+        >
           {{ $t('users.password') }}
         </label>
         <input
+          id="input-password"
+          v-model="password"
           class="form-control"
           type="password"
-          id="input-password"
           :placeholder="$t('users.password')"
           :class="{ 'is-invalid': password === '' }"
-          v-model="password" />
+        >
         <div class="invalid-feedback">
           {{ $t('users.invalidPassword') }}
         </div>
@@ -99,16 +106,20 @@ watch(
 
       <label
         class="form-label"
-        for="input-group">
+        for="input-group"
+      >
         {{ $t('users.accessGroup') }}
       </label>
       <select
-        class="form-select"
         id="input-group"
-        v-model="currentGroup">
+        v-model="currentGroup"
+        class="form-select"
+      >
         <option
           v-for="group in props.accessGroups"
-          :value="group.name">
+          :key="group.id"
+          :value="group.name"
+        >
           {{ group.name }}
         </option>
       </select>
@@ -117,16 +128,18 @@ watch(
     <template #footer>
       <button
         class="btn btn-primary"
-        @click="onAdd()">
+        @click="onAdd()"
+      >
         {{ $t('users.addModal.add') }}
       </button>
 
       <button
         class="btn btn-secondary"
         data-bs-dismiss="modal"
-        @click="reset()">
+        @click="reset()"
+      >
         {{ $t('users.addModal.close') }}
       </button>
     </template>
-  </Modal>
+  </BaseModal>
 </template>

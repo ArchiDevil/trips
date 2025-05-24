@@ -1,14 +1,23 @@
+export type UserAccessGroup = 'User' | 'Administrator'
+export type UserType = 'Native' | 'Vk'
+
 export interface UserInfo {
   id: number
   login: string
   displayed_name: string
-  access_group: 'User' | 'Administrator'
-  user_type: 'Native' | 'Vk'
+  access_group: UserAccessGroup
+  user_type: UserType
   photo_url: string | null
 }
 
+type GRecaptchaOptions = {
+  sitekey: string
+  callback: (response: string) => void
+  'expired-callback': () => void
+}
+
 export interface GRecaptcha {
-  render: (element: string, options: any) => void
+  render: (element: string, options: GRecaptchaOptions) => void
   getResponse: () => string
 }
 
@@ -68,10 +77,12 @@ export interface Meal {
   carbs: number
 }
 
+export type MealName = 'breakfast' | 'lunch' | 'dinner' | 'snacks'
+
 export interface Day {
   number: number
   date: string
-  meals: Record<string, Meal[]>
+  meals: { [key in MealName]: Meal[] }
   reload_link: string
 }
 
@@ -85,6 +96,6 @@ export interface User {
   login: string
   displayed_name: string
   last_logged_in: string
-  user_type: string
-  access_group: string
+  user_type: UserType
+  access_group: UserAccessGroup
 }

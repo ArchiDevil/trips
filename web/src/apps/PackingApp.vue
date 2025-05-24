@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useReportsStore } from '../stores/reports'
 
-import Icon from '../components/Icon.vue'
+import BaseIcon from '../components/BaseIcon.vue'
 
 const tripUid = useRoute().params.uid as string
 const store = useReportsStore()
@@ -28,8 +28,9 @@ onMounted(async () => {
 
 <template>
   <div
+    v-if="store.trip"
     class="container"
-    v-if="store.trip">
+  >
     <div class="row d-print-none">
       <div class="col">
         <h1 class="display-4 my-3">
@@ -39,8 +40,9 @@ onMounted(async () => {
       <div class="col-auto d-flex align-items-end">
         <div class="my-2 d-none d-sm-block">
           <select
+            v-model="colsCount"
             class="form-select"
-            v-model="colsCount">
+          >
             <option value="1">
               {{ $t('packing.selector.one') }}
             </option>
@@ -66,23 +68,31 @@ onMounted(async () => {
   </div>
 
   <div
+    v-if="store.packingData && store.trip"
     class="container-fluid"
-    v-if="store.packingData && store.trip">
+  >
     <div
       class="row"
-      :class="rowsClass">
+      :class="rowsClass"
+    >
       <div
+        v-for="day in Object.keys(store.packingData.products)"
+        :key="day"
         class="col p-1"
-        v-for="day in Object.keys(store.packingData.products)">
+      >
         <h5>{{ $t('packing.dayPrefix') }} {{ day }}</h5>
         <table class="table table-sm">
           <thead>
             <tr>
-              <th class="d-none d-print-table-cell">T</th>
+              <th class="d-none d-print-table-cell">
+                T
+              </th>
               <th>{{ $t('packing.productColumn') }}</th>
               <th
+                v-for="person_group in store.trip.trip.groups"
+                :key="person_group"
                 class="text-end"
-                v-for="person_group in store.trip.trip.groups">
+              >
                 {{ person_group }}
                 {{ $t('packing.personsSuffix') }}
               </th>
@@ -91,28 +101,37 @@ onMounted(async () => {
           <tbody>
             <tr
               v-for="product in store.packingData.products[day]"
+              :key="product.name"
               :class="{
                 'table-success': product.meal == 0,
                 'table-warning': product.meal == 1,
                 'table-info': product.meal == 2,
                 'table-secondary': product.meal == 3,
-              }">
+              }"
+            >
               <td class="d-none d-print-table-cell">
-                <Icon
+                <BaseIcon
+                  v-if="product.meal == 0"
                   icon="fa-carrot"
-                  v-if="product.meal == 0" />
-                <Icon
+                />
+                <BaseIcon
+                  v-if="product.meal == 1"
                   icon="fa-fish"
-                  v-if="product.meal == 1" />
-                <Icon
+                />
+                <BaseIcon
+                  v-if="product.meal == 2"
                   icon="fa-pizza-slice"
-                  v-if="product.meal == 2" />
-                <Icon
+                />
+                <BaseIcon
+                  v-if="product.meal == 3"
                   icon="fa-candy-cane"
-                  v-if="product.meal == 3" />
+                />
               </td>
               <td>{{ product.name }}</td>
-              <td v-for="(_, idx) in store.trip.trip.groups">
+              <td
+                v-for="(_, idx) in store.trip.trip.groups"
+                :key="idx"
+              >
                 <template v-if="product.grams">
                   {{ Math.ceil(product.mass[idx] / product.grams) }}
                   {{ $t('packing.piecesSuffix') }}

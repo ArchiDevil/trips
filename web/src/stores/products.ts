@@ -14,7 +14,7 @@ export const useProductsStore = defineStore('products', {
   },
   actions: {
     async fetchProducts() {
-      let searchApi = mande('/api/products/search')
+      const searchApi = mande('/api/products/search')
       try {
         const response = await searchApi.get<ProductsInfo>('', {
           query: {
@@ -25,7 +25,7 @@ export const useProductsStore = defineStore('products', {
         this.productsPerPage = response.products_per_page
         this.products = response.products
         this.totalCount = response.total_count
-      } catch (error: any) {
+      } catch (error) {
         const mandeError = error as MandeError
         console.error(mandeError)
       }
@@ -35,7 +35,7 @@ export const useProductsStore = defineStore('products', {
       try {
         await api.post()
         await this.fetchProducts()
-      } catch (error: any) {
+      } catch (error) {
         const mandeError = error as MandeError
         console.error(mandeError)
       }

@@ -2,7 +2,8 @@ import { createI18n } from 'vue-i18n'
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { messages } from './strings.js'
+import ruMessages from './locales/ru.json'
+import enMessages from './locales/en.json'
 import { GRecaptcha } from './interfaces.js'
 import loginGlobals from './login-globals.js'
 
@@ -12,16 +13,16 @@ import LoginForm from './components/LoginForm.vue'
 import SignupForm from './components/SignupForm.vue'
 
 interface AuthWindow extends Window {
-  onCaptchaLoad: any
+  onCaptchaLoad: (recaptcha: GRecaptcha) => void
 }
 
-const i18n = createI18n<[typeof messages.ru], 'ru' | 'en'>({
+const i18n = createI18n<[typeof ruMessages], 'ru' | 'en'>({
   legacy: false,
   locale: 'ru',
   fallbackLocale: 'en',
   messages: {
-    ru: messages.ru,
-    en: messages.en,
+    ru: ruMessages,
+    en: enMessages,
   },
 })
 
@@ -45,5 +46,7 @@ const mountedApp = app.mount('#app')
 
 function onCaptchaLoad(grecaptcha: GRecaptcha) {
   loginGlobals.grecaptcha = grecaptcha
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ;(mountedApp as any).loading = false
 }

@@ -4,7 +4,7 @@ import { computed } from 'vue'
 import { useUserStore } from '../stores/user'
 
 import globals from '../globals'
-import Icon from './Icon.vue'
+import BaseIcon from './BaseIcon.vue';
 
 defineProps<{
   link: 'trips' | 'products' | 'users'
@@ -33,12 +33,14 @@ const displayedName = computed(() => {
 
 <template>
   <nav
+    id="nav-app"
     class="navbar navbar-expand-lg navbar-light bg-light shadow"
-    id="nav-app">
+  >
     <div class="container-fluid">
       <a
         class="navbar-brand"
-        :href="mainPage">
+        :href="mainPage"
+      >
         {{ $t('navbar.title') }}
       </a>
 
@@ -49,21 +51,24 @@ const displayedName = computed(() => {
         data-bs-target="#navbarNavAltMarkup"
         aria-controls="navbarNavAltMarkup"
         aria-expanded="false"
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon" />
       </button>
 
       <div
+        id="navbarNavAltMarkup"
         class="collapse navbar-collapse"
-        id="navbarNavAltMarkup">
+      >
         <ul class="navbar-nav me-auto mt-2 mt-lg-0">
           <li class="nav-item">
             <a
               id="trips-link"
               class="nav-link"
               :href="tripsPage"
-              :class="{ active: link == 'trips' }">
-              <Icon icon="fa-route" />
+              :class="{ active: link == 'trips' }"
+            >
+              <BaseIcon icon="fa-route" />
               {{ $t('navbar.tripsLink') }}
             </a>
           </li>
@@ -72,56 +77,63 @@ const displayedName = computed(() => {
               id="products-link"
               class="nav-link"
               :href="productsPage"
-              :class="{ active: link == 'products' }">
-              <Icon icon="fa-pizza-slice" />
+              :class="{ active: link == 'products' }"
+            >
+              <BaseIcon icon="fa-pizza-slice" />
               {{ $t('navbar.productsLink') }}
             </a>
           </li>
           <li class="nav-item">
             <a
+              v-if="admin"
               id="users-link"
               class="nav-link"
               :href="usersPage"
-              v-if="admin"
-              :class="{ active: link == 'users' }">
-              <Icon icon="fa-users" />
+              :class="{ active: link == 'users' }"
+            >
+              <BaseIcon icon="fa-users" />
               {{ $t('navbar.usersLink') }}
             </a>
           </li>
           <li class="nav-item">
             <a
               href="/tutorial.html"
-              class="nav-link">
-              <Icon icon="fa-info" />
+              class="nav-link"
+            >
+              <BaseIcon icon="fa-info" />
               {{ $t('docs.howToLink') }}
             </a>
           </li>
           <li class="nav-item">
             <a
               href="https://forms.gle/nvpf8qoyPuaC2Mza7"
-              class="nav-link text-danger">
-              <Icon icon="fa-clipboard-question" />
+              class="nav-link text-danger"
+            >
+              <BaseIcon icon="fa-clipboard-question" />
               {{ $t('navbar.formLink') }}
             </a>
           </li>
         </ul>
 
         <form
+          v-if="!userLoading"
           class="d-flex my-2 my-lg-0"
-          v-if="!userLoading">
+        >
           <img
             v-if="userPhotoUrl"
             :src="userPhotoUrl"
             class="img-fluid rounded-circle me-2 mt-1"
-            style="height: 2em" />
+            style="height: 2em"
+          >
           <label class="form-label me-3 mt-2">
             {{ displayedName }}
           </label>
           <a
             class="btn btn-outline-success my-2 my-sm-0"
-            :href="logoutLink">
+            :href="logoutLink"
+          >
             {{ $t('navbar.logoutLink') }}
-            <Icon icon="fa-sign-out-alt" />
+            <BaseIcon icon="fa-sign-out-alt" />
           </a>
         </form>
       </div>

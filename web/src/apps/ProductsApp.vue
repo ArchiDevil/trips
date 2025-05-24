@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useProductsStore } from '../stores/products'
 import { Modal } from 'bootstrap'
@@ -11,18 +11,16 @@ import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 import ProductEditDialog from '../components/ProductEditDialog.vue'
-import Icon from '../components/Icon.vue'
+import BaseIcon from '../components/BaseIcon.vue'
+
+const productsStore = useProductsStore()
 
 const search = ref('')
 const lastRequest = ref<number | undefined>(undefined)
 const editedProduct = ref<Product | undefined>(undefined)
-const searchbox = ref<HTMLElement | null>(null)
+const searchbox = useTemplateRef('searchbox')
 
-const lastPage = computed(() => useProductsStore().lastPage)
 const contentLoading = computed(() => useUserStore().isLoading)
-const page = computed(() => useProductsStore().page)
-const products = computed(() => useProductsStore().products)
-
 const creator = computed(() => {
   const store = useUserStore()
   return (
@@ -36,6 +34,10 @@ const editor = computed(() => {
   return !store.isLoading && store.info.access_group === 'Administrator'
 })
 
+const lastPage = computed(() => productsStore.lastPage)
+const page = computed(() => productsStore.page)
+const products = computed(() => productsStore.products)
+
 const modalAcceptLink = computed(() => {
   return editedProduct.value
     ? editedProduct.value.edit_link
@@ -43,21 +45,20 @@ const modalAcceptLink = computed(() => {
 })
 
 const fetchProducts = async () => {
-  const store = useProductsStore()
-  store.search = search.value
-  await store.fetchProducts()
+  productsStore.search = search.value
+  await productsStore.fetchProducts()
 }
 
 const nextPage = async () => {
-  await useProductsStore().nextPage()
+  await productsStore.nextPage()
 }
 
 const prevPage = async () => {
-  await useProductsStore().prevPage()
+  await productsStore.prevPage()
 }
 
 const archiveProduct = async (link: string) => {
-  await useProductsStore().archiveProduct(link)
+  await productsStore.archiveProduct(link)
 }
 
 const editModal = ref<Modal | null>(null)
@@ -92,7 +93,7 @@ onMounted(async () => {
 watch(search, () => {
   clearTimeout(lastRequest.value)
   lastRequest.value = setTimeout(() => {
-    useProductsStore().page = 0
+    productsStore.page = 0
     fetchProducts()
     lastRequest.value = undefined
   }, 500)
@@ -107,35 +108,42 @@ watch(search, () => {
       <div class="col-8">
         <LoadingTitle
           :title="$t('products.title')"
-          :loading="contentLoading" />
+          :loading="contentLoading"
+        />
       </div>
       <div
+        v-if="creator"
         class="col d-flex flex-row-reverse align-items-end"
-        v-if="creator">
+      >
         <button
           class="btn btn-primary d-block d-lg-none"
           type="button"
-          @click="showModal(undefined)">
+          @click="showModal(undefined)"
+        >
           {{ $t('products.addNewShort') }}
         </button>
       </div>
     </div>
 
     <div
+      v-if="!contentLoading"
       class="row my-3"
-      v-if="!contentLoading">
+    >
       <div
+        v-if="creator"
         class="col-auto d-none d-lg-block"
-        v-if="creator">
+      >
         <PageCard
           :image="cardImg"
           :header-text="$t('products.cardHeader')"
-          :body-text="$t('products.cardText')">
+          :body-text="$t('products.cardText')"
+        >
           <button
             type="button"
             class="btn btn-primary w-100"
-            @click="showModal(undefined)">
-            <Icon icon="fa-plus" />
+            @click="showModal(undefined)"
+          >
+            <BaseIcon icon="fa-plus" />
             {{ $t('products.addNew') }}
           </button>
         </PageCard>
@@ -144,15 +152,16 @@ watch(search, () => {
       <div class="col">
         <div class="input-group mb-3">
           <span class="input-group-text">
-            <Icon icon="fa-search" />
+            <BaseIcon icon="fa-search" />
           </span>
           <input
+            id="input-search"
+            ref="searchbox"
+            v-model="search"
             :placeholder="$t('products.searchPlaceholder')"
             type="text"
             class="form-control"
-            v-model="search"
-            ref="searchbox"
-            id="input-search" />
+          >
         </div>
 
         <table class="table table-sm table-hover table-responsive-xs">
@@ -161,43 +170,50 @@ watch(search, () => {
               <th
                 class="text-end"
                 scope="col"
-                style="width: 8%">
+                style="width: 8%"
+              >
                 {{ $t('products.table.id') }}
               </th>
               <th
                 scope="col"
-                style="width: 52%">
+                style="width: 52%"
+              >
                 {{ $t('products.table.name') }}
               </th>
               <th
                 class="text-end"
                 scope="col"
-                style="width: 8%">
+                style="width: 8%"
+              >
                 {{ $t('products.table.calories') }}
               </th>
               <th
                 class="text-end d-none d-sm-table-cell"
                 scope="col"
-                style="width: 8%">
+                style="width: 8%"
+              >
                 {{ $t('products.table.proteins') }}
               </th>
               <th
                 class="text-end d-none d-sm-table-cell"
                 scope="col"
-                style="width: 8%">
+                style="width: 8%"
+              >
                 {{ $t('products.table.fats') }}
               </th>
               <th
                 class="text-end d-none d-sm-table-cell"
                 scope="col"
-                style="width: 8%">
+                style="width: 8%"
+              >
                 {{ $t('products.table.carbs') }}
               </th>
               <th
+                v-if="editor"
                 class="text-end"
                 scope="col"
                 style="width: 8%"
-                v-if="editor">
+              >
                 {{ $t('products.table.archive') }}
               </th>
             </tr>
@@ -205,14 +221,19 @@ watch(search, () => {
           <tbody>
             <tr
               v-for="product in products"
-              class="showhim">
+              :key="product.id"
+              class="showhim"
+            >
               <th
                 class="text-end"
-                scope="row">
+                scope="row"
+              >
                 {{ product.id }}
               </th>
               <td>{{ product.name }}</td>
-              <td class="text-end">{{ product.calories.toFixed(1) }}</td>
+              <td class="text-end">
+                {{ product.calories.toFixed(1) }}
+              </td>
               <td class="text-end d-none d-sm-table-cell">
                 {{ product.proteins.toFixed(1) }}
               </td>
@@ -225,21 +246,25 @@ watch(search, () => {
               <td v-if="editor">
                 <span class="text-end float-end mx-1 showme">
                   <a
+                    href="javascript:void(0);"
                     @click="showModal(product)"
-                    href="javascript:void(0);">
-                    <Icon
+                  >
+                    <BaseIcon
                       icon="fa-pen"
-                      :title="$t('products.editButtonTitle')" />
+                      :title="$t('products.editButtonTitle')"
+                    />
                   </a>
                 </span>
                 <span class="text-end float-end mx-1 showme">
                   <a
                     href="javascript:void(0);"
                     :title="$t('products.archiveButtonTitle')"
-                    @click="archiveProduct(product.archive_link)">
-                    <Icon
+                    @click="archiveProduct(product.archive_link)"
+                  >
+                    <BaseIcon
                       class="text-danger"
-                      icon="fa-archive" />
+                      icon="fa-archive"
+                    />
                   </a>
                 </span>
               </td>
@@ -251,21 +276,25 @@ watch(search, () => {
           <ul class="pagination">
             <li
               class="page-item"
-              :class="{ disabled: page == 0 }">
+              :class="{ disabled: page == 0 }"
+            >
               <a
                 class="page-link"
-                @click="prevPage">
-                <Icon icon="fa-arrow-left" />
+                @click="prevPage"
+              >
+                <BaseIcon icon="fa-arrow-left" />
               </a>
             </li>
 
             <li
               class="page-item"
-              :class="{ disabled: page == lastPage }">
+              :class="{ disabled: page == lastPage }"
+            >
               <a
                 class="page-link"
-                @click="nextPage">
-                <Icon icon="fa-arrow-right" />
+                @click="nextPage"
+              >
+                <BaseIcon icon="fa-arrow-right" />
               </a>
             </li>
           </ul>
@@ -278,5 +307,6 @@ watch(search, () => {
     id="edit-modal"
     :submit-link="modalAcceptLink"
     :product="editedProduct"
-    @update="onProductsUpdate" />
+    @update="onProductsUpdate"
+  />
 </template>

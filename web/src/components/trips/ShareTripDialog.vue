@@ -1,23 +1,19 @@
 <script setup lang="ts">
-import Icon from '../Icon.vue'
-import Modal from '../Modal.vue'
+import BaseIcon from '../BaseIcon.vue';
+import BaseModal from '../BaseModal.vue'
+
+defineProps<{
+  linkText: string
+  copyStatus?: string
+}>()
 
 defineEmits<{
-  (e: 'copyLink'): void
+  copyLink: []
 }>()
-defineProps({
-  linkText: {
-    required: true,
-    type: String,
-  },
-  copyStatus: {
-    type: String,
-  },
-})
 </script>
 
 <template>
-  <Modal :title="$t('trips.shareModal.title')">
+  <BaseModal :title="$t('trips.shareModal.title')">
     <template #body>
       <div class="row mb-2">
         <label class="col-sm-12">
@@ -30,12 +26,14 @@ defineProps({
             type="text"
             class="form-control"
             :placeholder="linkText"
-            readonly />
+            readonly
+          >
           <button
             class="btn btn-outline-primary"
             type="button"
-            @click="$emit('copyLink')">
-            <Icon icon="fa-copy" />
+            @click="$emit('copyLink')"
+          >
+            <BaseIcon icon="fa-copy" />
           </button>
         </div>
       </div>
@@ -45,8 +43,9 @@ defineProps({
         </small>
       </div>
       <div
+        v-if="copyStatus"
         class="row"
-        v-if="copyStatus">
+      >
         <small class="col text-success">{{ copyStatus }}</small>
       </div>
     </template>
@@ -55,9 +54,10 @@ defineProps({
       <button
         type="button"
         class="btn btn-secondary"
-        data-bs-dismiss="modal">
+        data-bs-dismiss="modal"
+      >
         {{ $t('trips.shareModal.closeButton') }}
       </button>
     </template>
-  </Modal>
+  </BaseModal>
 </template>

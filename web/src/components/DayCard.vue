@@ -1,36 +1,23 @@
 <script setup lang="ts">
-import { PropType, computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { mande } from 'mande'
 import { Dropdown } from 'bootstrap'
 
 import MealsTable from './MealsTable.vue'
 import ResultsTable from './ResultsTable.vue'
-import Icon from './Icon.vue'
-import { Trip, Day } from '../interfaces'
+import BaseIcon from './BaseIcon.vue'
+import { Trip, Day, MealName } from '../interfaces'
 
-const props = defineProps({
-  trip: {
-    type: Object as PropType<Trip>,
-    required: true,
-  },
-  day: {
-    type: Object as PropType<Day>,
-    required: true,
-  },
-  editor: {
-    type: Boolean,
-    required: true,
-  },
-})
+const props = defineProps<{
+  trip: Trip,
+  day: Day,
+  editor: boolean
+}>()
 
 const emit = defineEmits<{
-  (e: 'reload'): void
-  (e: 'error'): void
-  (
-    e: 'add',
-    day: number,
-    mealName: 'breakfast' | 'dinner' | 'lunch' | 'snacks'
-  ): void
+  reload: []
+  error: []
+  add: [number, MealName]
 }>()
 
 const dayId = computed(() => {
@@ -58,24 +45,26 @@ const clearMeals = async () => {
 }
 
 const dropdown = ref<Dropdown | null>(null)
-const dropdownToggle = ref<HTMLButtonElement | null>(null)
+const dropdownToggle = useTemplateRef('dropdownToggle')
 
 onMounted(() => {
-  const toggle = dropdownToggle.value as HTMLButtonElement
+  const toggle = dropdownToggle.value!
   dropdown.value = new Dropdown(toggle)
 })
 </script>
 
 <template>
   <div
+    :id="dayId"
     class="card shadow mb-3"
-    :id="dayId">
+  >
     <div class="card-header bg-light d-flex">
       <button
         type="button"
         class="btn btn-light btn-sm float-start me-3"
-        @click="switchVisibility()">
-        <Icon :icon="expanded ? 'fa-compress-alt' : 'fa-expand-alt'" />
+        @click="switchVisibility()"
+      >
+        <BaseIcon :icon="expanded ? 'fa-compress-alt' : 'fa-expand-alt'" />
       </button>
       <h5 class="mb-0 flex-grow-1 align-self-center">
         {{ $t('meals.day.numberPrefix') }} {{ day.number }} — {{ day.date }}
@@ -83,20 +72,22 @@ onMounted(() => {
       <div class="dropdown">
         <button
           v-if="editor"
+          ref="dropdownToggle"
           type="button"
           class="btn btn-light btn-sm float-end dropdown-toggle"
           aria-expanded="false"
-          ref="dropdownToggle"
-          data-bs-toggle="dropdown">
-          <Icon icon="fa-ellipsis-v" />
+          data-bs-toggle="dropdown"
+        >
+          <BaseIcon icon="fa-ellipsis-v" />
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li>
             <a
               href="javascript:void(0)"
               class="dropdown-item text-danger"
-              @click="clearMeals()">
-              <Icon icon="fa-eraser" /> {{ $t('meals.day.clearDayButton') }}
+              @click="clearMeals()"
+            >
+              <BaseIcon icon="fa-eraser" /> {{ $t('meals.day.clearDayButton') }}
             </a>
           </li>
         </ul>
@@ -104,33 +95,41 @@ onMounted(() => {
     </div>
     <div
       class="card-body"
-      :class="{ 'd-none': !expanded }">
+      :class="{ 'd-none': !expanded }"
+    >
       <table class="table table-sm">
         <thead>
-          <th style="width: 60%">{{ $t('meals.day.nameTitle') }}</th>
+          <th style="width: 60%">
+            {{ $t('meals.day.nameTitle') }}
+          </th>
           <th
             style="width: 8%"
-            class="text-end">
+            class="text-end"
+          >
             {{ $t('meals.day.massTitle') }}
           </th>
           <th
             style="width: 8%"
-            class="text-end d-none d-sm-table-cell">
+            class="text-end d-none d-sm-table-cell"
+          >
             {{ $t('meals.day.proteinsTitle') }}
           </th>
           <th
             style="width: 8%"
-            class="text-end d-none d-sm-table-cell">
+            class="text-end d-none d-sm-table-cell"
+          >
             {{ $t('meals.day.fatsTitle') }}
           </th>
           <th
             style="width: 8%"
-            class="text-end d-none d-sm-table-cell">
+            class="text-end d-none d-sm-table-cell"
+          >
             {{ $t('meals.day.carbsTitle') }}
           </th>
           <th
             style="width: 8%"
-            class="text-end">
+            class="text-end"
+          >
             {{ $t('meals.day.caloriesTitle') }}
           </th>
         </thead>
@@ -142,7 +141,8 @@ onMounted(() => {
         color-style="success"
         @reload="$emit('reload')"
         @error="$emit('error')"
-        @add="$emit('add', day.number, 'breakfast')" />
+        @add="$emit('add', day.number, 'breakfast')"
+      />
       <MealsTable
         :editor="editor"
         :meals="day.meals.lunch"
@@ -150,7 +150,8 @@ onMounted(() => {
         color-style="warning"
         @reload="$emit('reload')"
         @error="$emit('error')"
-        @add="$emit('add', day.number, 'lunch')" />
+        @add="$emit('add', day.number, 'lunch')"
+      />
       <MealsTable
         :editor="editor"
         :meals="day.meals.dinner"
@@ -158,7 +159,8 @@ onMounted(() => {
         color-style="info"
         @reload="$emit('reload')"
         @error="$emit('error')"
-        @add="$emit('add', day.number, 'dinner')" />
+        @add="$emit('add', day.number, 'dinner')"
+      />
       <MealsTable
         :editor="editor"
         :meals="day.meals.snacks"
@@ -166,11 +168,13 @@ onMounted(() => {
         color-style="secondary"
         @reload="$emit('reload')"
         @error="$emit('error')"
-        @add="$emit('add', day.number, 'snacks')" />
+        @add="$emit('add', day.number, 'snacks')"
+      />
       <ResultsTable
         :day="day"
         :title="$t('meals.day.resultsTitle')"
-        color-style="danger" />
+        color-style="danger"
+      />
     </div>
   </div>
 </template>

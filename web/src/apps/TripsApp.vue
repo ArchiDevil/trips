@@ -8,7 +8,7 @@ import { Trip } from '../interfaces'
 import { useTripsStore } from '../stores/trips'
 
 import cardImg from '../assets/1.png'
-import Jumbotron from '../components/trips/Jumbotron.vue'
+import WelcomeJumbotron from '../components/trips/WelcomeJumbotron.vue'
 import LoadingTitle from '../components/LoadingTitle.vue'
 import PageCard from '../components/PageCard.vue'
 import NavigationBar from '../components/NavigationBar.vue'
@@ -16,7 +16,7 @@ import ArchiveTripDialog from '../components/trips/ArchiveTripDialog.vue'
 import ShareTripDialog from '../components/trips/ShareTripDialog.vue'
 import TripsList from '../components/trips/TripsList.vue'
 import TripEditorModal from '../components/trips/TripEditorModal.vue'
-import Icon from '../components/Icon.vue'
+import BaseIcon from '../components/BaseIcon.vue'
 
 const { t } = useI18n()
 
@@ -31,11 +31,10 @@ const sortedTrips = computed(() => {
     )
   }
 
-  const store = useTripsStore()
-  let upcomingTrips = store.trips.filter((trip) => {
+  const upcomingTrips = tripsStore.trips.filter((trip) => {
     return new Date(trip.trip.till_date).getTime() - Date.now() >= 0
   })
-  let pastTrips = store.trips.filter((trip) => {
+  const pastTrips = tripsStore.trips.filter((trip) => {
     return new Date(trip.trip.till_date).getTime() - Date.now() < 0
   })
   return [
@@ -148,60 +147,71 @@ onMounted(async () => {
       <div class="col-6">
         <LoadingTitle
           :title="$t('trips.title')"
-          :loading="tripsStore.tripsLoading" />
+          :loading="tripsStore.tripsLoading"
+        />
       </div>
       <div
+        v-if="!tripsStore.tripsLoading"
         class="col-6 d-flex flex-row-reverse align-items-end"
-        v-if="!tripsStore.tripsLoading">
+      >
         <a
           class="btn btn-primary d-block d-lg-none"
           type="button"
           href="javascript:void(0)"
-          @click="showAddModal()">
+          @click="showAddModal()"
+        >
           {{ $t('trips.createShortButton') }}
         </a>
       </div>
     </div>
 
     <div
+      v-if="!tripsStore.tripsLoading"
       class="row my-3"
       :class="{ 'mt-5': !tripsStore.trips.length }"
-      v-if="!tripsStore.tripsLoading">
+    >
       <div
+        v-if="!tripsStore.trips.length"
         class="col"
-        v-if="!tripsStore.trips.length">
-        <Jumbotron @create="showAddModal()" />
+      >
+        <WelcomeJumbotron @create="showAddModal()" />
       </div>
 
       <div
+        v-if="tripsStore.trips.length"
         class="col-auto d-none d-lg-block"
-        v-if="tripsStore.trips.length">
+      >
         <PageCard
           :image="cardImg"
           :header-text="$t('trips.cardTitle')"
-          :body-text="$t('trips.cardText')">
+          :body-text="$t('trips.cardText')"
+        >
           <button
-            @click="showAddModal()"
             class="btn btn-primary w-100"
-            role="button">
-            <Icon icon="fa-plus" />
+            role="button"
+            @click="showAddModal()"
+          >
+            <BaseIcon icon="fa-plus" />
             {{ $t('trips.createButton') }}
           </button>
         </PageCard>
       </div>
 
       <div
+        v-if="tripsStore.trips.length"
         class="col"
-        v-if="tripsStore.trips.length">
+      >
         <TripsList
           :trips="sortedTrips"
           @edit="(trip) => showEditModal(trip)"
           @share="(shareLink) => showShareModal(shareLink)"
-          @archive="(archiveLink) => showArchiveModal(archiveLink)" />
+          @archive="(archiveLink) => showArchiveModal(archiveLink)"
+        />
         <div
+          v-if="tripsStore.tripsLoading"
           class="spinner-border"
           role="status"
-          v-if="tripsStore.tripsLoading"></div>
+        />
       </div>
     </div>
   </div>
@@ -210,14 +220,17 @@ onMounted(async () => {
     id="share-modal"
     :link-text="linkText"
     :copy-status="copyStatus"
-    @copy-link="copyLink()" />
+    @copy-link="copyLink()"
+  />
 
   <ArchiveTripDialog
     id="archive-modal"
     :archive-link="archiveLink"
-    @archive="onTripArchived" />
+    @archive="onTripArchived"
+  />
 
   <TripEditorModal
     id="edit-modal"
-    :trip="currentTrip" />
+    :trip="currentTrip"
+  />
 </template>

@@ -2,18 +2,15 @@
 import { mande } from 'mande'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Modal from '../Modal.vue'
+import BaseModal from '../BaseModal.vue'
 
 const { t } = useI18n()
 
-const props = defineProps({
-  archiveLink: {
-    type: String,
-    required: true,
-  },
-})
+const props = defineProps<{
+  archiveLink: string
+}>()
 const emit = defineEmits<{
-  (e: 'archive'): void
+  archive: []
 }>()
 const busy = ref(false)
 
@@ -24,7 +21,7 @@ const archiveTrip = async () => {
     busy.value = true
     await api.post('')
     emit('archive')
-  } catch (e) {
+  } catch {
     error.value = t('trips.archiveModal.error')
   } finally {
     busy.value = false
@@ -33,12 +30,13 @@ const archiveTrip = async () => {
 </script>
 
 <template>
-  <Modal :title="$t('trips.archiveModal.title')">
+  <BaseModal :title="$t('trips.archiveModal.title')">
     <template #body>
       <p>{{ $t('trips.archiveModal.text') }}</p>
       <p
+        v-if="error"
         class="text-danger"
-        v-if="error">
+      >
         {{ error }}
       </p>
     </template>
@@ -47,20 +45,23 @@ const archiveTrip = async () => {
       <button
         type="button"
         class="btn btn-danger"
-        @click="archiveTrip">
+        @click="archiveTrip"
+      >
         {{ $t('trips.archiveModal.archiveButton') }}
       </button>
       <button
         type="button"
         class="btn btn-secondary"
-        data-bs-dismiss="modal">
+        data-bs-dismiss="modal"
+      >
         <span
+          v-if="busy"
           class="spinner-border spinner-border-sm"
           role="status"
           aria-hidden="true"
-          v-if="busy"></span>
+        />
         {{ $t('trips.archiveModal.closeButton') }}
       </button>
     </template>
-  </Modal>
+  </BaseModal>
 </template>

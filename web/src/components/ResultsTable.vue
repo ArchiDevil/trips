@@ -1,21 +1,12 @@
 <script setup lang="ts">
-import { PropType, computed } from 'vue'
+import { computed } from 'vue'
 import { Day } from '../interfaces'
 
-const props = defineProps({
-  day: {
-    type: Object as PropType<Day>,
-    required: true,
-  },
-  colorStyle: {
-    type: String,
-    required: true,
-  },
-  title: {
-    type: String,
-    required: true,
-  },
-})
+const props = defineProps<{
+  day: Day
+  colorStyle: 'danger'
+  title: string
+}>()
 
 const tableStyle = computed(() => {
   return `table-${props.colorStyle}`
@@ -23,8 +14,8 @@ const tableStyle = computed(() => {
 
 const totalMass = computed(() => {
   let total = 0
-  for (let mealType of Object.keys(props.day.meals)) {
-    for (let meal of props.day.meals[mealType]) {
+  for (const meals of Object.values(props.day.meals)) {
+    for (const meal of meals) {
       total += meal.mass
     }
   }
@@ -33,8 +24,8 @@ const totalMass = computed(() => {
 
 const totalProteins = computed(() => {
   let total = 0
-  for (const mealType of Object.keys(props.day.meals)) {
-    for (const meal of props.day.meals[mealType]) {
+  for (const meals of Object.values(props.day.meals)) {
+    for (const meal of meals) {
       total += meal.proteins
     }
   }
@@ -43,8 +34,8 @@ const totalProteins = computed(() => {
 
 const totalFats = computed(() => {
   let total = 0
-  for (const mealType of Object.keys(props.day.meals)) {
-    for (const meal of props.day.meals[mealType]) {
+  for (const meals of Object.values(props.day.meals)) {
+    for (const meal of meals) {
       total += meal.fats
     }
   }
@@ -53,8 +44,8 @@ const totalFats = computed(() => {
 
 const totalCarbs = computed(() => {
   let total = 0
-  for (const mealType of Object.keys(props.day.meals)) {
-    for (const meal of props.day.meals[mealType]) {
+  for (const meals of Object.values(props.day.meals)) {
+    for (const meal of meals) {
       total += meal.carbs
     }
   }
@@ -63,8 +54,8 @@ const totalCarbs = computed(() => {
 
 const totalCalories = computed(() => {
   let total = 0
-  for (const mealType of Object.keys(props.day.meals)) {
-    for (const meal of props.day.meals[mealType]) {
+  for (const meals of Object.values(props.day.meals)) {
+    for (const meal of meals) {
       total += meal.calories
     }
   }
@@ -75,7 +66,8 @@ const totalCalories = computed(() => {
 <template>
   <table
     class="table table-sm table-hover mb-0"
-    :class="tableStyle">
+    :class="tableStyle"
+  >
     <tfoot>
       <tr>
         <td style="width: 52%">

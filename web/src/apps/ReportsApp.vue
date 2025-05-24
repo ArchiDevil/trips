@@ -5,6 +5,7 @@ import NavigationBar from '../components/NavigationBar.vue'
 <template>
   <NavigationBar
     link="trips"
-    class="d-print-none" />
+    class="d-print-none"
+  />
   <RouterView />
 </template>

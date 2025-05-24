@@ -29,6 +29,7 @@ export default defineComponent({
       return this.loginCorrect && this.response.length > 0
     },
     loginCorrect() {
+      // eslint-disable-next-line no-useless-escape
       return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
         this.login
       )
@@ -39,6 +40,16 @@ export default defineComponent({
         'is-valid': this.loginCorrect && this.loginValidated,
       }
     },
+  },
+  mounted() {
+    this.grecaptcha = loginGlobals.grecaptcha
+    if (this.grecaptcha) {
+      this.grecaptcha.render('g-recaptcha', {
+        sitekey: loginGlobals.sitekey,
+        callback: this.setResponse,
+        'expired-callback': this.resetResponse,
+      })
+    }
   },
   methods: {
     async resetPassword() {
@@ -64,62 +75,63 @@ export default defineComponent({
       this.response = ''
     },
   },
-  mounted() {
-    this.grecaptcha = loginGlobals.grecaptcha
-    if (this.grecaptcha) {
-      this.grecaptcha.render('g-recaptcha', {
-        sitekey: loginGlobals.sitekey,
-        callback: this.setResponse,
-        'expired-callback': this.resetResponse,
-      })
-    }
-  },
 })
 </script>
 
 <template>
   <FormContainer
     v-if="state === 'default'"
-    :title="$t('forgot.title')">
+    :title="$t('forgot.title')"
+  >
     <div class="mb-3">
       <p>{{ $t('forgot.instructions') }}</p>
       <input
+        v-model="login"
         type="text"
         class="form-control"
         :class="loginClass"
         :placeholder="$t('signup.usernamePlaceholder')"
-        @input="loginValidated = true"
         required
         name="login"
-        v-model="login" />
+        @input="loginValidated = true"
+      >
       <div class="invalid-feedback">
         {{ $t('signup.usernameError') }}
       </div>
     </div>
     <div
+      id="g-recaptcha"
       class="mb-3 g-recaptcha"
-      id="g-recaptcha"></div>
+    />
     <div>
       <button
         id="sendButton"
         class="btn btn-primary btn-block w-100"
+        :disabled="!buttonAvailable"
         @click="resetPassword"
-        :disabled="!buttonAvailable">
+      >
         {{ $t('forgot.sendButton') }}
         <div
+          v-if="loading"
           class="spinner-border spinner-border-sm"
           role="status"
-          v-if="loading">
-        </div>
+        />
       </button>
     </div>
   </FormContainer>
 
   <div
+    v-else
     class="shadow p-4 m-3 bg-white rounded"
-    v-else>
-    <h2 class="text-center my-3">{{ $t('forgot.title') }}</h2>
-    <p>{{ $t('forgot.firstLineSuccess') }}</p>
-    <p class="mb-0">{{ $t('forgot.secondLineSuccess') }}</p>
+  >
+    <h2 class="text-center my-3">
+      {{ $t('forgot.title') }}
+    </h2>
+    <p>
+      {{ $t('forgot.firstLineSuccess') }}
+    </p>
+    <p class="mb-0">
+      {{ $t('forgot.secondLineSuccess') }}
+    </p>
   </div>
 </template>

@@ -1,29 +1,20 @@
 <script setup lang="ts">
 import { mande } from 'mande'
-import { PropType, computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { Day, Trip } from '../interfaces'
-import Modal from './Modal.vue'
+import { Day, MealName, Trip } from '../interfaces'
+import BaseModal from './BaseModal.vue'
 
-const props = defineProps({
-  trip: {
-    type: Object as PropType<Trip>,
-    required: true,
-  },
-  day: {
-    type: Object as PropType<Day>,
-    required: true,
-  },
-  mealName: {
-    type: String as PropType<'breakfast' | 'lunch' | 'dinner' | 'snacks'>,
-    required: true,
-  },
-})
+const props = defineProps<{
+  trip: Trip
+  day: Day
+  mealName: MealName
+}>()
 
 const emit = defineEmits<{
-  (e: 'error'): void
-  (e: 'update'): void
+  update: []
+  error: []
 }>()
 
 const { t } = useI18n()
@@ -31,13 +22,13 @@ const { t } = useI18n()
 const productId = ref(0)
 const productName = ref('')
 const mass = ref('')
-const unit = ref<number | undefined>(undefined)
+const unit = ref<number>()
 const products = ref<{ id: number; name: string }[]>([])
 const units = ref<{ name: string; value: number }[]>([])
 const errorMessage = ref('')
-const lastRequestHandle = ref<number | undefined>(undefined)
-const massInput = ref<HTMLInputElement | null>(null)
-const searchInput = ref<HTMLInputElement | null>(null)
+const lastRequestHandle = ref<number>()
+const massInput = useTemplateRef('massInput')
+const searchInput = useTemplateRef('searchInput')
 
 const validation = computed(() => {
   return {
@@ -70,15 +61,15 @@ const setProduct = async (id: number, name: string) => {
     if (response.result === false) {
       return
     }
-    for (let unit of response.units) {
-      let name = unit === 0 ? t('meals.units.grams') : t('meals.units.pcs')
+    for (const unit of response.units) {
+      const name = unit === 0 ? t('meals.units.grams') : t('meals.units.pcs')
       units.value.push({
         name: name,
         value: unit,
       })
     }
     unit.value = 0
-  } catch (error) {
+  } catch {
     onNetworkError()
   }
 }
@@ -113,7 +104,7 @@ const addMeal = async () => {
       reset()
     }
     spinnerVisible.value = false
-  } catch (e) {
+  } catch {
     onNetworkError()
   }
 }
@@ -137,13 +128,13 @@ const updateList = (value: string) => {
       }>()
       lastRequestHandle.value = undefined
       products.value = []
-      for (let product of response.products) {
+      for (const product of response.products) {
         products.value.push({
           id: product.id,
           name: product.name,
         })
       }
-    } catch (e) {
+    } catch {
       onNetworkError()
     }
   }, 500)
@@ -183,7 +174,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Modal :title="$t('meals.addModal.title')">
+  <BaseModal :title="$t('meals.addModal.title')">
     <template #body>
       <form novalidate>
         <p>{{ $t('meals.addModal.intro') }}</p>
@@ -193,15 +184,17 @@ onMounted(() => {
           </label>
           <div class="input-group col-sm-10">
             <input
+              v-model="productName"
               type="text"
               class="form-control"
-              v-model="productName"
-              disabled />
+              disabled
+            >
             <button
               tabindex="7"
               class="btn btn-outline-secondary"
               type="button"
-              @click="clearProduct()">
+              @click="clearProduct()"
+            >
               {{ $t('meals.addModal.clearProductButton') }}
             </button>
           </div>
@@ -209,71 +202,85 @@ onMounted(() => {
         <div class="form-group row">
           <label
             for="mass-input"
-            class="col-sm-2 col-form-label">
+            class="col-sm-2 col-form-label"
+          >
             {{ $t('meals.addModal.massTitle') }}
           </label>
           <div class="input-group col-sm-10">
             <input
+              id="mass-input"
+              ref="massInput"
+              v-model="mass"
               tabindex="2"
               class="form-control"
-              id="mass-input"
               name="mass"
-              ref="massInput"
               :placeholder="$t('meals.addModal.massPlaceholder')"
-              v-model="mass"
               autocomplete="off"
               :class="{
                 'is-valid': validation.mass,
                 'is-invalid': !validation.mass,
               }"
-              @keyup.enter.prevent="addMeal()" />
+              @keyup.enter.prevent="addMeal()"
+            >
             <select
+              v-model="unit"
               tabindex="3"
               class="form-select"
               style="flex: 0.25"
-              v-model="unit">
+            >
               <option
-                v-for="unit in units"
-                v-bind:value="unit.value">
-                {{ unit.name }}
+                v-for="un in units"
+                :key="un.name"
+                :value="un.value"
+              >
+                {{ un.name }}
               </option>
             </select>
             <div class="invalid-feedback">
               {{ $t('meals.addModal.invalidMassError') }}
             </div>
           </div>
-          <div class="input-group"></div>
+          <div class="input-group" />
         </div>
       </form>
-      <div class="border-bottom"></div>
+      <div class="border-bottom" />
 
       <div class="input-group my-3">
         <input
+          ref="searchInput"
+          v-model="searchString"
           tabindex="6"
           type="text"
-          ref="searchInput"
           class="form-control"
           :placeholder="$t('meals.addModal.searchPlaceholder')"
-          v-model="searchString"
-          @input="searchProducts()" />
+          @input="searchProducts()"
+        >
       </div>
       <table class="table table-sm table-hover">
         <thead>
           <tr>
-            <th style="width: 8%">{{ $t('meals.addModal.idTitle') }}</th>
-            <th>{{ $t('meals.addModal.nameTitle') }}</th>
+            <th style="width: 8%">
+              {{ $t('meals.addModal.idTitle') }}
+            </th>
+            <th>
+              {{ $t('meals.addModal.nameTitle') }}
+            </th>
           </tr>
         </thead>
         <tbody id="found-products">
-          <tr v-for="product in products">
+          <tr
+            v-for="product in products"
+            :key="product.id"
+          >
             <th scope="row">
               {{ product.id }}
             </th>
             <td>
               <a
                 tabindex="-1"
+                href="javascript:void(0);"
                 @click="setProduct(product.id, product.name)"
-                href="javascript:void(0);">
+              >
                 {{ product.name }}
               </a>
             </td>
@@ -284,31 +291,35 @@ onMounted(() => {
 
     <template #footer>
       <span
+        v-if="errorMessageVisible"
         id="error-message"
         class="align-middle text-danger mx-3"
-        v-if="errorMessageVisible">
+      >
         {{ errorMessage }}
       </span>
       <button
         tabindex="5"
         type="button"
         class="btn btn-secondary col-3"
-        data-bs-dismiss="modal">
+        data-bs-dismiss="modal"
+      >
         {{ $t('meals.addModal.closeButton') }}
       </button>
       <button
-        tabindex="4"
         id="add-product-button"
+        :disabled="submitDisabled"
+        tabindex="4"
         type="button"
         class="btn btn-primary col-3"
-        v-bind:disabled="submitDisabled"
-        @click="addMeal">
+        @click="addMeal"
+      >
         <span
-          class="spinner-border spinner-border-sm"
           v-if="spinnerVisible"
-          role="status"></span>
+          class="spinner-border spinner-border-sm"
+          role="status"
+        />
         {{ $t('meals.addModal.addButton') }}
       </button>
     </template>
-  </Modal>
+  </BaseModal>
 </template>

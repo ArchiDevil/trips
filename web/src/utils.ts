@@ -1,7 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isNumber(value: any) {
   return !isNaN(+value)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function notEmpty(value: any) {
   return value.toString().length > 0
 }

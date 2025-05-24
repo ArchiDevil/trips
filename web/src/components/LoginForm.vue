@@ -12,7 +12,7 @@ interface LoginBackendResponse {
 }
 
 function getRedirect() {
-  let params = new URLSearchParams(window.location.search)
+  const params = new URLSearchParams(window.location.search)
   if (params.has('redirect')) {
     return params.get('redirect')!
   }
@@ -57,6 +57,16 @@ export default defineComponent({
       }
     },
   },
+  mounted() {
+    this.grecaptcha = loginGlobals.grecaptcha
+    if (this.grecaptcha) {
+      this.grecaptcha.render('g-recaptcha', {
+        sitekey: loginGlobals.sitekey,
+        callback: this.setResponse,
+        'expired-callback': this.resetResponse,
+      })
+    }
+  },
   methods: {
     setResponse(response: string) {
       this.response = response
@@ -86,16 +96,6 @@ export default defineComponent({
       }
     },
   },
-  mounted() {
-    this.grecaptcha = loginGlobals.grecaptcha
-    if (this.grecaptcha) {
-      this.grecaptcha.render('g-recaptcha', {
-        sitekey: loginGlobals.sitekey,
-        callback: this.setResponse,
-        'expired-callback': this.resetResponse,
-      })
-    }
-  },
 })
 </script>
 
@@ -103,19 +103,21 @@ export default defineComponent({
   <FormContainer :title="$t('login.title')">
     <div class="mb-3">
       <input
+        v-model="login"
         type="text"
         class="form-control"
         required
-        v-model="login"
-        :placeholder="$t('login.usernamePlaceholder')" />
+        :placeholder="$t('login.usernamePlaceholder')"
+      >
     </div>
     <div class="mb-3">
       <input
+        v-model="password"
         type="password"
         class="form-control"
         required
-        v-model="password"
-        :placeholder="$t('login.passwordPlaceholder')" />
+        :placeholder="$t('login.passwordPlaceholder')"
+      >
       <div class="d-flex flex-row-reverse">
         <router-link to="/auth/forgot">
           <small>{{ $t('login.forgotLink') }}</small>
@@ -123,19 +125,22 @@ export default defineComponent({
       </div>
     </div>
     <div
+      id="g-recaptcha"
       class="mb-3 g-recaptcha"
-      id="g-recaptcha"></div>
+    />
     <div class="mb-3">
       <div class="form-check">
         <input
+          id="remember-me-check"
+          v-model="remember"
           type="checkbox"
           class="form-check-input"
-          id="remember-me-check"
           name="remember"
-          v-model="remember" />
+        >
         <label
           class="form-check-label"
-          for="remember-me-check">
+          for="remember-me-check"
+        >
           {{ $t('login.rememberMe') }}
         </label>
       </div>
@@ -143,7 +148,8 @@ export default defineComponent({
     <input
       class="d-none"
       name="redirect"
-      :value="redirect" />
+      :value="redirect"
+    >
     <div class="mb-3">
       <button
         id="loginButton"
@@ -151,27 +157,30 @@ export default defineComponent({
         :disabled="!loginEnabled"
         class="btn btn-block w-100"
         :class="loginButtonClass"
-        @click="loginReq">
+        @click="loginReq"
+      >
         {{ $t('login.loginButton') }}
         <div
+          v-if="loginLoading"
           class="spinner-border spinner-border-sm"
           role="status"
-          v-if="loginLoading">
-        </div>
+        />
       </button>
       <small
+        v-if="serverResponse"
         class="form-text text-center"
         :class="statusMessageClass"
-        v-if="serverResponse">
+      >
         {{ serverResponse }}
       </small>
     </div>
-    <hr />
+    <hr>
     <div>
       <a
         class="btn btn-block text-white w-100"
         style="background-color: #4a76a8"
-        :href="vkLoginLink">
+        :href="vkLoginLink"
+      >
         {{ $t('login.vkLoginButton') }}
       </a>
     </div>

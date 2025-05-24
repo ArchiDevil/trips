@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import Modal from './Modal.vue'
+import BaseModal from './BaseModal.vue'
 
 const reloadWindow = () => window.location.reload()
 </script>
 
 <template>
-  <Modal :title="$t('meals.errorModal.title')">
+  <BaseModal :title="$t('meals.errorModal.title')">
     <template #body>
       {{ $t('meals.errorModal.text') }}
     </template>
@@ -13,9 +13,10 @@ const reloadWindow = () => window.location.reload()
     <template #footer>
       <button
         class="btn btn-primary"
-        @click="reloadWindow">
+        @click="reloadWindow"
+      >
         {{ $t('meals.errorModal.reloadButton') }}
       </button>
     </template>
-  </Modal>
+  </BaseModal>
 </template>

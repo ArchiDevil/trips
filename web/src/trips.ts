@@ -1,7 +1,8 @@
 import { createI18n } from 'vue-i18n'
 import { createApp } from 'vue'
 
-import { messages } from './strings'
+import ruMessages from './locales/ru.json'
+import enMessages from './locales/en.json'
 import TripsApp from './apps/TripsApp.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -44,20 +45,20 @@ library.add(
 
 const pinia = createPinia()
 
-const i18n = createI18n<[typeof messages.ru], 'ru' | 'en'>({
+const i18n = createI18n<[typeof ruMessages], 'ru' | 'en'>({
   legacy: false,
   locale: 'ru',
   fallbackLocale: 'en',
   messages: {
-    ru: messages.ru,
-    en: messages.en,
+    ru: ruMessages,
+    en: enMessages,
   },
 })
 
 const app = createApp(TripsApp)
 app.use(pinia)
 app.use(i18n)
-app.component('font-awesome-icon', FontAwesomeIcon)
+app.component('FontAwesomeIcon', FontAwesomeIcon)
 app.mount('#trips-app')
 
 useUserStore().fetchUserData()

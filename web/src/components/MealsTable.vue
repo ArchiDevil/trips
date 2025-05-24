@@ -3,31 +3,19 @@ import { mande } from 'mande'
 import { computed, ref } from 'vue'
 
 import { Meal } from '../interfaces'
-import Icon from './Icon.vue'
+import BaseIcon from './BaseIcon.vue';
 
-const props = defineProps({
-  colorStyle: {
-    type: String,
-    required: true,
-  },
-  editor: {
-    type: Boolean,
-    required: true,
-  },
-  title: {
-    type: String,
-    required: true,
-  },
-  meals: {
-    type: Array<Meal>,
-    required: true,
-  },
-})
+const props = defineProps<{
+  colorStyle: 'success' | 'warning' | 'danger' | 'info' | 'secondary'
+  editor: boolean
+  title: string
+  meals: Meal[]
+}>()
 
 const emit = defineEmits<{
-  (e: 'reload'): void
-  (e: 'error'): void
-  (e: 'add'): void
+  reload: []
+  add: []
+  error: []
 }>()
 
 const mealDeleting = ref(false)
@@ -42,31 +30,31 @@ const tableStyle = computed(() => {
 
 const totalMass = computed(() => {
   return props.meals
-    .reduce((total: number, meal: any) => total + meal.mass, 0)
+    .reduce((total: number, meal: Meal) => total + meal.mass, 0)
     .toFixed(0)
 })
 
 const totalProteins = computed(() => {
   return props.meals
-    .reduce((total: number, meal: any) => total + meal.proteins, 0)
+    .reduce((total: number, meal: Meal) => total + meal.proteins, 0)
     .toFixed(1)
 })
 
 const totalFats = computed(() => {
   return props.meals
-    .reduce((total: number, meal: any) => total + meal.fats, 0)
+    .reduce((total: number, meal: Meal) => total + meal.fats, 0)
     .toFixed(1)
 })
 
 const totalCarbs = computed(() => {
   return props.meals
-    .reduce((total: number, meal: any) => total + meal.carbs, 0)
+    .reduce((total: number, meal: Meal) => total + meal.carbs, 0)
     .toFixed(1)
 })
 
 const totalCalories = computed(() => {
   return props.meals
-    .reduce((total: number, meal: any) => total + meal.calories, 0)
+    .reduce((total: number, meal: Meal) => total + meal.calories, 0)
     .toFixed(1)
 })
 
@@ -80,7 +68,7 @@ const removeMeal = async (mealId: number) => {
       }),
     })
     emit('reload')
-  } catch (e) {
+  } catch {
     emit('error')
   } finally {
     mealDeleting.value = false
@@ -96,48 +84,56 @@ const removeMeal = async (mealId: number) => {
           <h5 class="mb-1">
             {{ title }}
             <span
+              v-if="mealDeleting"
               class="spinner-grow spinner-grow-sm"
               role="status"
-              v-if="mealDeleting"></span>
+            />
           </h5>
         </td>
-        <td></td>
-        <td></td>
-        <td class="d-none d-sm-table-cell"></td>
-        <td class="d-none d-sm-table-cell"></td>
-        <td class="d-none d-sm-table-cell"></td>
+        <td />
+        <td />
+        <td class="d-none d-sm-table-cell" />
+        <td class="d-none d-sm-table-cell" />
+        <td class="d-none d-sm-table-cell" />
         <td
+          v-if="editor"
           class="text-end"
-          v-if="editor">
+        >
           <button
             type="button"
             class="btn btn-sm"
             :class="buttonStyle"
-            @click="$emit('add')">
-            <Icon icon="fa-plus" />
+            @click="$emit('add')"
+          >
+            <BaseIcon icon="fa-plus" />
           </button>
         </td>
-        <td v-else></td>
+        <td v-else />
       </tr>
     </thead>
     <tbody>
       <tr
         v-for="meal in meals"
-        :class="{ showhim: !mealDeleting }">
+        :key="meal.id"
+        :class="{ showhim: !mealDeleting }"
+      >
         <td class="name-col">
           <span>{{ meal.name }}</span>
         </td>
         <td style="width: 4%">
           <span
+            v-if="editor"
             class="text-end showme"
-            v-if="editor">
+          >
             <a
+              href="javascript:void(0);"
               @click="removeMeal(meal.id)"
-              href="javascript:void(0);">
-              <Icon
+            >
+              <BaseIcon
                 icon="fa-trash"
                 class="text-danger"
-                :title="$t('meals.day.tableDeleteRecord')" />
+                :title="$t('meals.day.tableDeleteRecord')"
+              />
             </a>
           </span>
         </td>
@@ -163,7 +159,8 @@ const removeMeal = async (mealId: number) => {
         <td
           colspan="2"
           style="width: 60%"
-          class="text-end font-weight-bold">
+          class="text-end font-weight-bold"
+        >
           {{ $t('meals.day.tableTotalRecord') }}
         </td>
         <td class="text-end text-truncate value-col">

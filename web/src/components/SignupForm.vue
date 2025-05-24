@@ -33,13 +33,14 @@ export default defineComponent({
   },
   computed: {
     vkLoginLink() {
-      let params = new URLSearchParams(window.location.search)
+      const params = new URLSearchParams(window.location.search)
       if (params.has('redirect')) {
         return `${globals.urls.vkLogin}?redirect=${params.get('redirect')}`
       }
       return globals.urls.vkLogin
     },
     loginValid() {
+      // eslint-disable-next-line no-useless-escape
       return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
         this.login
       )
@@ -72,6 +73,24 @@ export default defineComponent({
         'text-success': this.state === 'registered',
       }
     },
+  },
+  watch: {
+    login() {
+      if (this.state === 'error') {
+        this.loginValidated = false
+        this.state = 'default'
+      }
+    },
+  },
+  mounted() {
+    this.grecaptcha = loginGlobals.grecaptcha
+    if (this.grecaptcha) {
+      this.grecaptcha.render('g-recaptcha', {
+        sitekey: loginGlobals.sitekey,
+        callback: this.setResponse,
+        'expired-callback': this.resetResponse,
+      })
+    }
   },
   methods: {
     setResponse(response: string) {
@@ -109,24 +128,6 @@ export default defineComponent({
       this.isLoading = false
     },
   },
-  mounted() {
-    this.grecaptcha = loginGlobals.grecaptcha
-    if (this.grecaptcha) {
-      this.grecaptcha.render('g-recaptcha', {
-        sitekey: loginGlobals.sitekey,
-        callback: this.setResponse,
-        'expired-callback': this.resetResponse,
-      })
-    }
-  },
-  watch: {
-    login(newValue, oldValue) {
-      if (this.state === 'error') {
-        this.loginValidated = false
-        this.state = 'default'
-      }
-    },
-  },
 })
 </script>
 
@@ -134,6 +135,7 @@ export default defineComponent({
   <FormContainer :title="$t('signup.title')">
     <div class="mb-3">
       <input
+        v-model="login"
         type="text"
         class="form-control"
         :placeholder="$t('signup.usernamePlaceholder')"
@@ -141,16 +143,17 @@ export default defineComponent({
           'is-valid': loginValid && loginValidated,
           'is-invalid': !loginValid && loginValidated,
         }"
-        @input="loginValidated = true"
         required
-        v-model="login"
-        :disabled="isLoading" />
+        :disabled="isLoading"
+        @input="loginValidated = true"
+      >
       <div class="invalid-feedback">
         {{ $t('signup.usernameError') }}
       </div>
     </div>
     <div class="mb-3">
       <input
+        v-model="password.password"
         type="password"
         class="form-control"
         :placeholder="$t('signup.passwordPlaceholder')"
@@ -158,16 +161,17 @@ export default defineComponent({
           'is-valid': passwordLong && passwordValidated,
           'is-invalid': !passwordLong && passwordValidated,
         }"
-        @input="passwordValidated = true"
         required
-        v-model="password.password"
-        :disabled="isLoading" />
+        :disabled="isLoading"
+        @input="passwordValidated = true"
+      >
       <div class="invalid-feedback">
         {{ $t('signup.passwordError') }}
       </div>
     </div>
     <div class="mb-3">
       <input
+        v-model="password.confirm"
         type="password"
         class="form-control"
         :placeholder="$t('signup.repeatPasswordPlaceholder')"
@@ -175,49 +179,52 @@ export default defineComponent({
           'is-valid': passwordMatch && passwordValidated,
           'is-invalid': !passwordMatch && passwordValidated,
         }"
-        @input="passwordValidated = true"
         required
-        v-model="password.confirm"
-        :disabled="isLoading" />
+        :disabled="isLoading"
+        @input="passwordValidated = true"
+      >
       <div class="invalid-feedback">
         {{ $t('signup.repeatPasswordError') }}
       </div>
     </div>
     <div
+      id="g-recaptcha"
       class="mb-3 g-recaptcha"
-      id="g-recaptcha"></div>
+    />
     <div class="mb-3">
       <button
         class="btn btn-primary btn-block w-100"
         :class="registerButtonClass"
         :disabled="!buttonActive || isLoading"
-        @click="signup">
+        @click="signup"
+      >
         {{ $t('signup.signupButton') }}
         <span
+          v-if="isLoading"
           class="spinner-border spinner-border-sm"
           role="status"
-          v-if="isLoading" />
+        />
       </button>
       <small
+        v-if="statusMessage"
         class="form-text text-center"
         :class="statusMessageClass"
-        v-if="statusMessage">
+      >
         {{ statusMessage }}
       </small>
     </div>
-    <hr />
+    <hr>
     <div>
       <a
         class="btn btn-block text-white w-100"
         style="background-color: #4a76a8"
-        :href="vkLoginLink">
+        :href="vkLoginLink"
+      >
         {{ $t('signup.vkLoginButton') }}
       </a>
     </div>
   </FormContainer>
   <small class="m-3">
-    <router-link to="/auth/login"
-      >{{ $t('signup.wantedToLogin') }}
-    </router-link>
+    <router-link to="/auth/login">{{ $t('signup.wantedToLogin') }}</router-link>
   </small>
 </template>

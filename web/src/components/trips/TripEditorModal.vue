@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { mande } from 'mande'
 
 import DatePicker from 'vue-datepicker-next'
@@ -7,14 +7,12 @@ import 'vue-datepicker-next/index.css'
 import 'vue-datepicker-next/locale/ru.es'
 
 import UserGroup from './UserGroup.vue'
-import Modal from '../Modal.vue'
+import BaseModal from '../BaseModal.vue'
 import { Trip } from '../../interfaces'
 
-const props = defineProps({
-  trip: {
-    type: Object as PropType<Trip>,
-  },
-})
+const props = defineProps<{
+  trip?: Trip
+}>()
 
 const tripName = ref(props.trip ? props.trip.trip.name : '')
 const tripDates = ref<Date[]>(
@@ -74,9 +72,10 @@ const submit = async () => {
       busy.value = false
       setTimeout(() => (window.location.href = `/meals/${response.uid}`), 200)
     }
-  } catch (e: any) {
+  } catch (e) {
     console.error(e)
-    error.value = e.toString()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    error.value = (e as any).toString()
   }
 }
 
@@ -122,49 +121,54 @@ onMounted(() => updateGroups())
 </script>
 
 <template>
-  <Modal
+  <BaseModal
     :title="
       props.trip
         ? $t('trips.editModal.editTitle')
         : $t('trips.editModal.addTitle')
-    ">
+    "
+  >
     <template #body>
       <div
+        v-if="error"
         class="alert alert-danger"
         role="alert"
-        v-if="error">
+      >
         {{ error }}
       </div>
 
       <label
         class="form-label"
-        for="input-name">
+        for="input-name"
+      >
         {{ $t('trips.editModal.nameTitle') }}
       </label>
       <input
+        id="input-name"
+        v-model="tripName"
         type="text"
         class="form-control"
-        id="input-name"
         name="name"
         :placeholder="$t('trips.editModal.namePlaceholder')"
         autofocus
         autocomplete="off"
-        v-model="tripName"
         :class="{
           'is-valid': validation.name,
           'is-invalid': !validation.name,
-        }" />
+        }"
+      >
       <div class="invalid-feedback">
         {{ $t('trips.editModal.nameInvalidFeedback') }}
       </div>
 
       <label
         class="form-label mt-3"
-        for="input-date">
+        for="input-date"
+      >
         {{ $t('trips.editModal.datesTitle') }}
       </label>
 
-      <br />
+      <br>
 
       <DatePicker
         v-model:value="tripDates"
@@ -174,17 +178,20 @@ onMounted(() => updateGroups())
         input-class="form-control w-100"
         :clearable="false"
         separator=" - "
-        placeholder="Select date range" />
+        placeholder="Select date range"
+      />
 
       <label
         class="form-label mt-3"
-        for="input-attendees">
+        for="input-attendees"
+      >
         {{ $t('trips.editModal.groupConfigTitle') }}
       </label>
       <select
+        v-model="selectedGroupsCount"
         class="form-select"
         @change="updateGroups()"
-        v-model="selectedGroupsCount">
+      >
         <option value="1">
           {{ $t('trips.editModal.groupOptions.one') }}
         </option>
@@ -206,20 +213,25 @@ onMounted(() => updateGroups())
       </div>
       <UserGroup
         v-for="group in groups"
-        :group="group" />
+        :key="group.id"
+        v-model="group.count"
+        :group-id="group.id"
+      />
     </template>
 
     <template #footer>
       <button
         type="submit"
         class="btn btn-primary"
+        :disabled="!validation.name || busy"
         @click="submit"
-        :disabled="!validation.name || busy">
+      >
         <span
+          v-if="busy"
           class="spinner-border spinner-border-sm"
           role="status"
           aria-hidden="true"
-          v-if="busy"></span>
+        />
         {{
           props.trip
             ? $t('trips.editModal.submitButtonEdit')
@@ -228,9 +240,10 @@ onMounted(() => updateGroups())
       </button>
       <button
         class="btn btn-secondary"
-        data-bs-dismiss="modal">
+        data-bs-dismiss="modal"
+      >
         {{ $t('trips.editModal.closeButton') }}
       </button>
     </template>
-  </Modal>
+  </BaseModal>
 </template>

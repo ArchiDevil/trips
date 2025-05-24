@@ -7,14 +7,14 @@ import { getUsersApi } from '../backend'
 
 import AddUserDialog from '../components/AddUserDialog.vue'
 import EditUserDialog from '../components/EditUserDialog.vue'
-import Icon from '../components/Icon.vue'
+import BaseIcon from '../components/BaseIcon.vue'
 import NavigationBar from '../components/NavigationBar.vue'
 
 const usersApi = getUsersApi()
 
 const users = ref<User[]>([])
 const sortedUsers = computed(() => {
-  return users.value.sort((a, b) => {
+  return users.value.toSorted((a, b) => {
     return a.id - b.id
   })
 })
@@ -60,7 +60,9 @@ onMounted(async () => {
   <div class="container">
     <div class="row my-3">
       <div class="col">
-        <h1 class="display-4">{{ $t('users.title') }}</h1>
+        <h1 class="display-4">
+          {{ $t('users.title') }}
+        </h1>
       </div>
     </div>
 
@@ -68,8 +70,9 @@ onMounted(async () => {
       <div class="col">
         <button
           class="btn btn-primary"
-          @click="addModal.show()">
-          <Icon icon="fa-plus" />
+          @click="addModal.show()"
+        >
+          <BaseIcon icon="fa-plus" />
           {{ $t('users.add') }}
         </button>
       </div>
@@ -90,17 +93,28 @@ onMounted(async () => {
 
           <tbody>
             <tr
+              v-for="user in sortedUsers"
+              :key="user.id"
               class="showhim"
-              v-for="user in sortedUsers">
+            >
               <th
                 scope="row"
-                style="width: 5%">
+                style="width: 5%"
+              >
                 {{ user.id }}
               </th>
-              <td style="width: 20%">{{ user.login }}</td>
-              <td style="width: 20%">{{ user.displayed_name }}</td>
-              <td style="width: 10%">{{ user.access_group }}</td>
-              <td style="width: 10%">{{ user.user_type }}</td>
+              <td style="width: 20%">
+                {{ user.login }}
+              </td>
+              <td style="width: 20%">
+                {{ user.displayed_name }}
+              </td>
+              <td style="width: 10%">
+                {{ user.access_group }}
+              </td>
+              <td style="width: 10%">
+                {{ user.user_type }}
+              </td>
               <td style="width: 15%">
                 {{ new Date(user.last_logged_in).toLocaleString() }}
               </td>
@@ -108,11 +122,13 @@ onMounted(async () => {
                 <span class="text-end float-end mx-1 showme">
                   <a
                     class="showme"
+                    href="javascript:void(0)"
                     @click="showEditModal(user)"
-                    href="javascript:void(0)">
-                    <Icon
+                  >
+                    <BaseIcon
                       icon="fa-pen"
-                      :title="$t('users.edit')" />
+                      :title="$t('users.edit')"
+                    />
                   </a>
                 </span>
               </td>
@@ -126,11 +142,13 @@ onMounted(async () => {
   <AddUserDialog
     id="add-modal"
     :access-groups="accessGroups"
-    @add="onAddUser" />
+    @add="onAddUser"
+  />
 
   <EditUserDialog
     id="edit-modal"
     :access-groups="accessGroups"
     :user="currentUser"
-    @edit="onEditUser" />
+    @edit="onEditUser"
+  />
 </template>

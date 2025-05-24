@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { PropType, computed } from 'vue'
+import { computed } from 'vue'
 import { Trip } from '../../interfaces'
 import TripCard from './TripCard.vue'
 
-const props = defineProps({
-  trips: {
-    required: true,
-    type: Object as PropType<Trip[]>,
-  },
-})
+const props = defineProps<{
+  trips: Trip[]
+}>()
 
 const emit = defineEmits<{
-  (e: 'edit', trip: Trip): void
-  (e: 'share', shareLink: string): void
-  (e: 'archive', archiveLink: string): void
+  edit: [Trip]
+  share: [string]
+  archive: [string]
 }>()
 
 const activeTrips = computed(() => {
@@ -32,6 +29,7 @@ const onEdit = (uid: string) => {
 <template>
   <TripCard
     v-for="trip in activeTrips"
+    :key="trip.uid"
     :uid="trip.uid"
     :name="trip.trip.name"
     :cover-link="trip.cover_src"
@@ -45,5 +43,6 @@ const onEdit = (uid: string) => {
     :forget-link="trip.forget_link"
     @edit="(uid) => onEdit(uid)"
     @share="(shareLink) => $emit('share', shareLink)"
-    @archive="(archiveLink) => $emit('archive', archiveLink)" />
+    @archive="(archiveLink) => $emit('archive', archiveLink)"
+  />
 </template>

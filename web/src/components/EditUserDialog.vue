@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { AccessGroup, User } from '../interfaces'
 import { useI18n } from 'vue-i18n'
 import { getUsersApi } from '../backend'
-import Modal from './Modal.vue'
+import BaseModal from './BaseModal.vue'
 
 const { t } = useI18n()
 
@@ -13,15 +13,13 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'edit'): void
+  edit: []
 }>()
 
 const currentGroup = ref<string>('')
 
 const title = computed(() => {
-  return props.user
-    ? `${t('users.editModal.title')} ${props.user.login}`
-    : ''
+  return props.user ? `${t('users.editModal.title')} ${props.user.login}` : ''
 })
 
 const errorMessage = ref('')
@@ -55,26 +53,33 @@ watch(
 </script>
 
 <template>
-  <Modal :title="title">
+  <BaseModal :title="title">
     <template #body>
       <div
+        v-if="errorMessage"
         class="mb-3"
-        v-if="errorMessage">
-        <p class="text-danger">{{ errorMessage }}</p>
+      >
+        <p class="text-danger">
+          {{ errorMessage }}
+        </p>
       </div>
       <div>
         <label
           class="form-label"
-          for="input-group">
+          for="input-group"
+        >
           {{ $t('users.accessGroup') }}
         </label>
         <select
-          class="form-select"
           id="input-group"
-          v-model="currentGroup">
+          v-model="currentGroup"
+          class="form-select"
+        >
           <option
             v-for="group in accessGroups"
-            :value="group.name">
+            :key="group.id"
+            :value="group.name"
+          >
             {{ group.name }}
           </option>
         </select>
@@ -84,15 +89,17 @@ watch(
     <template #footer>
       <button
         class="btn btn-primary"
-        @click="onEdit()">
+        @click="onEdit()"
+      >
         {{ $t('users.editModal.edit') }}
       </button>
 
       <button
         class="btn btn-secondary"
-        data-bs-dismiss="modal">
+        data-bs-dismiss="modal"
+      >
         {{ $t('users.editModal.close') }}
       </button>
     </template>
-  </Modal>
+  </BaseModal>
 </template>

@@ -1,60 +1,27 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { Dropdown } from 'bootstrap'
 
-import Icon from '../Icon.vue'
+import BaseIcon from '../BaseIcon.vue';
 
-const props = defineProps({
-  uid: {
-    required: true,
-    type: String,
-  },
-  name: {
-    required: true,
-    type: String,
-  },
-  type: {
-    required: true,
-    type: String,
-  },
-  coverLink: {
-    required: true,
-    type: String,
-  },
-  attendeesCount: {
-    required: true,
-    type: Number,
-  },
-  fromDate: {
-    required: true,
-    type: String,
-  },
-  tillDate: {
-    required: true,
-    type: String,
-  },
-  openLink: {
-    required: true,
-    type: String,
-  },
-  shareLink: {
-    required: true,
-    type: String,
-  },
-  archiveLink: {
-    required: true,
-    type: String,
-  },
-  forgetLink: {
-    required: true,
-    type: String,
-  },
-})
+const props = defineProps<{
+  uid: string
+  name: string
+  type: 'user' | 'shared'
+  coverLink: string
+  attendeesCount: number
+  fromDate: string
+  tillDate: string
+  openLink: string
+  shareLink: string
+  archiveLink: string
+  forgetLink: string
+}>()
 
 defineEmits<{
-  (e: 'edit', uid: string): void
-  (e: 'share', shareLink: string): void
-  (e: 'archive', archiveLink: string): void
+  edit: [string]
+  share: [string]
+  archive: [string]
 }>()
 
 const fromDate = computed(() => {
@@ -72,7 +39,7 @@ const past = computed(() => {
 })
 
 const dropdown = ref<Dropdown | null>(null)
-const dropdownToggle = ref<HTMLButtonElement | null>(null)
+const dropdownToggle = useTemplateRef('dropdownToggle')
 
 onMounted(() => {
   const toggle = dropdownToggle.value as HTMLButtonElement
@@ -83,30 +50,33 @@ onMounted(() => {
 <template>
   <div
     class="card shadow mb-3"
-    :class="{ 'bg-light': past }">
+    :class="{ 'bg-light': past }"
+  >
     <div class="row no-gutters">
       <div class="d-none d-md-block col-md-4 col-xl-3">
         <img
           :src="coverLink"
           class="w-100 rounded-start"
           alt=""
-          :class="{ 'fade-out': past }" />
+          :class="{ 'fade-out': past }"
+        >
       </div>
       <div class="col-md-8 col-xl-9">
         <div class="card-body">
           <h4 class="card-title">
-            <Icon
+            <BaseIcon
+              v-if="type == 'shared'"
               icon="fa-share-alt"
               :title="$t('trips.sharedInfoTitle')"
-              v-if="type == 'shared'" />
+            />
             {{ name }}
           </h4>
           <p class="card-text mb-2">
-            <Icon icon="fa-calendar-day" />
+            <BaseIcon icon="fa-calendar-day" />
             {{ fromDate }} - {{ tillDate }}
           </p>
           <p class="card-text">
-            <Icon icon="fa-walking" />
+            <BaseIcon icon="fa-walking" />
             {{ $t('trips.participantsCountTitle') }}: {{ attendeesCount }}
           </p>
           <!-- <p class="card-text"><small class="text-muted">{{ $t('trips.lastUpdatePrefix') + " " + lastUpdate }}</small></p> -->
@@ -115,17 +85,19 @@ onMounted(() => {
               <a
                 :href="openLink"
                 class="btn w-100"
-                :class="{ 'btn-primary': !past, 'btn-secondary': past }">
+                :class="{ 'btn-primary': !past, 'btn-secondary': past }"
+              >
                 {{ $t('trips.openButton') }}
               </a>
             </div>
             <div class="dropdown col">
               <button
+                ref="dropdownToggle"
                 type="button"
                 class="btn btn-outline-secondary dropdown-toggle w-100"
                 data-bs-toggle="dropdown"
-                ref="dropdownToggle"
-                aria-expanded="false">
+                aria-expanded="false"
+              >
                 {{ $t('trips.optionsButton') }}
               </button>
               <ul class="dropdown-menu">
@@ -133,16 +105,18 @@ onMounted(() => {
                   <a
                     class="dropdown-item"
                     href="javascript:void(0)"
-                    @click="$emit('edit', uid)">
-                    <Icon icon="fa-pen" />
+                    @click="$emit('edit', uid)"
+                  >
+                    <BaseIcon icon="fa-pen" />
                     {{ $t('trips.editButton') }}
                   </a>
                 </li>
                 <li v-else>
                   <a
                     class="dropdown-item"
-                    :href="forgetLink">
-                    <Icon icon="fa-eye-slash" />
+                    :href="forgetLink"
+                  >
+                    <BaseIcon icon="fa-eye-slash" />
                     {{ $t('trips.hideButton') }}
                   </a>
                 </li>
@@ -151,8 +125,9 @@ onMounted(() => {
                     <a
                       class="dropdown-item"
                       href="javascript:void(0)"
-                      @click="$emit('share', shareLink)">
-                      <Icon icon="fa-share-alt" />
+                      @click="$emit('share', shareLink)"
+                    >
+                      <BaseIcon icon="fa-share-alt" />
                       {{ $t('trips.shareButton') }}
                     </a>
                   </li>
@@ -160,8 +135,9 @@ onMounted(() => {
                     <a
                       class="dropdown-item"
                       href="javascript:void(0)"
-                      @click="$emit('archive', archiveLink)">
-                      <Icon icon="fa-archive" />
+                      @click="$emit('archive', archiveLink)"
+                    >
+                      <BaseIcon icon="fa-archive" />
                       {{ $t('trips.archiveButton') }}
                     </a>
                   </li>

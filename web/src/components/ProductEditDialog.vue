@@ -1,26 +1,21 @@
 <script setup lang="ts">
-import { computed, PropType, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { isNumber, notEmpty, min, between } from '../utils'
 import { Product } from '../interfaces'
 import { mande } from 'mande'
 
-import Modal from './Modal.vue'
+import BaseModal from './BaseModal.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-const props = defineProps({
-  submitLink: {
-    type: String,
-    required: true,
-  },
-  product: {
-    type: Object as PropType<Product>,
-  },
-})
+const props = defineProps<{
+  submitLink: string
+  product?: Product
+}>()
 
 const emit = defineEmits<{
-  (e: 'update'): void
+  update: []
 }>()
 
 const productName = ref('')
@@ -145,29 +140,31 @@ watch(
 </script>
 
 <template>
-  <Modal :title="title">
+  <BaseModal :title="title">
     <template #body>
       <div class="mb-3 row">
         <label
           for="add-name-input"
-          class="col-sm-2 col-form-label">
+          class="col-sm-2 col-form-label"
+        >
           {{ $t('products.editModal.nameTitle') }}
         </label>
         <div class="col-sm-10">
           <input
+            id="add-name-input"
+            v-model="productName"
             type="text"
             class="form-control"
             name="name"
-            id="add-name-input"
             :placeholder="$t('products.editModal.namePlaceholder')"
             :class="{
               'is-valid': validation.name,
               'is-invalid': !validation.name,
             }"
-            v-model="productName"
-            @focus="selectTarget($event)"
             autocomplete="off"
-            tabindex="1" />
+            tabindex="1"
+            @focus="selectTarget($event)"
+          >
           <div class="invalid-feedback">
             {{ $t('products.editModal.errorEmptyName') }}
           </div>
@@ -176,48 +173,53 @@ watch(
       <div class="mb-3 row">
         <label
           for="add-calories-input"
-          class="col-sm-2 col-form-label">
+          class="col-sm-2 col-form-label"
+        >
           {{ $t('products.editModal.caloriesTitle') }}
         </label>
         <div class="col-sm-10">
           <div class="input-group">
             <input
+              id="add-calories-input"
+              v-model="calories"
               type="text"
               class="form-control"
               name="calories"
-              id="add-calories-input"
               :placeholder="$t('products.editModal.caloriesTitle')"
               autocomplete="off"
-              v-model="calories"
-              @focus="selectTarget($event)"
               :class="{
                 'is-valid': validation.cals,
                 'is-invalid': !validation.cals,
               }"
               :disabled="caloriesLock"
               :readonly="caloriesLock"
-              tabindex="2" />
+              tabindex="2"
+              @focus="selectTarget($event)"
+            >
           </div>
           <div
+            v-if="!validation.cals"
             class="invalid-feedback d-block"
-            v-if="!validation.cals">
+          >
             {{ $t('products.editModal.errorWrongCalories') }}
           </div>
         </div>
       </div>
       <div class="mb-3 row">
-        <div class="col-sm-2 col-form-label"></div>
+        <div class="col-sm-2 col-form-label" />
         <div class="col-sm-10 mb-3">
           <div class="form-check">
             <input
-              type="checkbox"
-              class="form-check-input"
               id="lock-calories-checkbox"
               v-model="caloriesLock"
-              tabindex="3" />
+              type="checkbox"
+              class="form-check-input"
+              tabindex="3"
+            >
             <label
               class="form-check-label"
-              for="lock-calories-checkbox">
+              for="lock-calories-checkbox"
+            >
               {{ $t('products.editModal.lockButton') }}
             </label>
           </div>
@@ -226,23 +228,25 @@ watch(
       <div class="mb-3 row">
         <label
           for="add-proteins-input"
-          class="col-sm-2 col-form-label">
+          class="col-sm-2 col-form-label"
+        >
           {{ $t('products.editModal.proteinsTitle') }}
         </label>
         <div class="col-sm-10">
           <input
+            id="add-proteins-input"
+            v-model="proteins"
             type="text"
             class="form-control"
             name="proteins"
-            id="add-proteins-input"
-            v-model="proteins"
             :class="{
               'is-valid': validation.proteins,
               'is-invalid': !validation.proteins,
             }"
             autocomplete="off"
             tabindex="4"
-            @focus="selectTarget($event)" />
+            @focus="selectTarget($event)"
+          >
           <div class="invalid-feedback">
             {{ $t('products.editModal.wrongNutrient') }}
           </div>
@@ -251,23 +255,25 @@ watch(
       <div class="mb-3 row">
         <label
           for="add-fats-input"
-          class="col-sm-2 col-form-label">
+          class="col-sm-2 col-form-label"
+        >
           {{ $t('products.editModal.fatsTitle') }}
         </label>
         <div class="col-sm-10">
           <input
+            id="add-fats-input"
+            v-model="fats"
             type="text"
             class="form-control"
             name="fats"
-            id="add-fats-input"
-            v-model="fats"
             :class="{
               'is-valid': validation.fats,
               'is-invalid': !validation.fats,
             }"
             autocomplete="off"
             tabindex="5"
-            @focus="selectTarget($event)" />
+            @focus="selectTarget($event)"
+          >
           <div class="invalid-feedback">
             {{ $t('products.editModal.wrongNutrient') }}
           </div>
@@ -276,23 +282,25 @@ watch(
       <div class="mb-3 row">
         <label
           for="add-carbs-input"
-          class="col-sm-2 col-form-label">
+          class="col-sm-2 col-form-label"
+        >
           {{ $t('products.editModal.carbsTitle') }}
         </label>
         <div class="col-sm-10">
           <input
+            id="add-carbs-input"
+            v-model="carbs"
             type="text"
             class="form-control"
             name="carbs"
-            id="add-carbs-input"
-            v-model="carbs"
             :class="{
               'is-valid': validation.carbs,
               'is-invalid': !validation.carbs,
             }"
             autocomplete="off"
             tabindex="6"
-            @focus="selectTarget($event)" />
+            @focus="selectTarget($event)"
+          >
           <div class="invalid-feedback">
             {{ $t('products.editModal.wrongNutrient') }}
           </div>
@@ -304,7 +312,8 @@ watch(
           :class="{
             'text-info': validation.nutrition,
             'text-danger': !validation.nutrition,
-          }">
+          }"
+        >
           {{ $t('products.editModal.noteTitle') }}
         </div>
         <div
@@ -312,50 +321,56 @@ watch(
           :class="{
             'text-info': validation.nutrition,
             'text-danger fw-bolder': !validation.nutrition,
-          }">
+          }"
+        >
           {{ $t('products.editModal.noteDescription') }}
         </div>
       </div>
       <div class="mb-3 row">
-        <div class="col-sm-2 col-form-label"></div>
+        <div class="col-sm-2 col-form-label" />
         <div class="col-sm-10 my-1">
           <div class="form-check">
             <input
-              type="checkbox"
-              class="form-check-input"
               id="add-custom-weight"
               v-model="custom"
-              tabindex="7" />
+              type="checkbox"
+              class="form-check-input"
+              tabindex="7"
+            >
             <label
               class="form-check-label"
-              for="add-custom-weight">
+              for="add-custom-weight"
+            >
               {{ $t('products.editModal.gramsCheckboxDescription') }}
             </label>
           </div>
         </div>
       </div>
       <div
+        v-if="custom"
         class="mb-3 row"
-        v-if="custom">
+      >
         <label
           for="add-gpp-input"
-          class="col-sm-2 col-form-label">
+          class="col-sm-2 col-form-label"
+        >
           {{ $t('products.editModal.mass') }}
         </label>
         <div class="col-sm-10">
           <input
+            id="add-gpp-input"
+            v-model="grams"
             type="text"
             class="form-control"
             name="grams"
-            id="add-gpp-input"
-            v-model="grams"
             :class="{
               'is-valid': validation.grams,
               'is-invalid': !validation.grams,
             }"
             autocomplete="off"
             tabindex="8"
-            @focus="selectTarget($event)" />
+            @focus="selectTarget($event)"
+          >
           <div class="invalid-feedback">
             {{ $t('products.editModal.errorWrong') }}
           </div>
@@ -371,14 +386,16 @@ watch(
         class="btn btn-secondary col-6 col-sm-3"
         data-bs-dismiss="modal"
         type="button"
-        tabindex="10">
+        tabindex="10"
+      >
         {{ $t('products.editModal.closeButton') }}
       </button>
       <button
         class="btn btn-primary col-6 col-sm-3"
-        @click="submitForm"
         :disabled="!formValid"
-        tabindex="9">
+        tabindex="9"
+        @click="submitForm"
+      >
         {{
           product
             ? $t('products.editModal.editButton')
@@ -386,5 +403,5 @@ watch(
         }}
       </button>
     </template>
-  </Modal>
+  </BaseModal>
 </template>
