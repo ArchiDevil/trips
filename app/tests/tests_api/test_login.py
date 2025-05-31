@@ -24,7 +24,7 @@ def test_auth_can_log_in_as_user(client: FlaskClient):
 def test_auth_updates_last_login(client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
-            user = session.query(User).filter(User.login == "Administrator").first()
+            user = session.query(User).filter(User.login == "Administrator").one()
             first_date = user.last_logged_in
 
     client.post('/api/auth/login/',
@@ -35,7 +35,7 @@ def test_auth_updates_last_login(client: FlaskClient, app: Flask):
 
     with app.app_context():
         with get_session() as session:
-            user = session.query(User).filter(User.login == "Administrator").first()
+            user = session.query(User).filter(User.login == "Administrator").one()
             second_date = user.last_logged_in
 
     assert first_date != second_date

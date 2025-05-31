@@ -1,4 +1,3 @@
-from typing import Optional
 from flask import Blueprint, abort, request
 from werkzeug.security import generate_password_hash
 
@@ -14,19 +13,19 @@ BP = Blueprint("users", __name__, url_prefix="/users")
 def index():
     if request.method == "GET":
         with get_session() as session:
-            users: list[User] = session.query(User).all()
+            users = session.query(User).all()
 
-        return [
-            {
-                "id": user.id,
-                "login": user.login,
-                "displayed_name": user.displayed_name,
-                "last_logged_in": user.last_logged_in,
-                "user_type": user.user_type.name,
-                "access_group": user.access_group.name,
-            }
-            for user in users
-        ], 200
+            return [
+                {
+                    "id": user.id,
+                    "login": user.login,
+                    "displayed_name": user.displayed_name,
+                    "last_logged_in": user.last_logged_in,
+                    "user_type": user.user_type.name,
+                    "access_group": user.access_group.name,
+                }
+                for user in users
+            ], 200
     else:
         if not request.json:
             return abort(400)
@@ -66,7 +65,7 @@ def index():
             session.add(user)
             session.commit()
 
-            created_user: User = session.query(User).where(User.login == login).one()
+            created_user = session.query(User).where(User.login == login).one()
             return {
                 "id": created_user.id,
                 "login": created_user.login,
@@ -91,7 +90,7 @@ def manage_user(user_id: int):
         return abort(400)
 
     with get_session() as session:
-        user: Optional[User] = session.query(User).where(User.id == user_id).first()
+        user = session.query(User).where(User.id == user_id).first()
 
         if not user:
             return abort(404)

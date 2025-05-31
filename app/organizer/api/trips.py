@@ -1,13 +1,14 @@
 import csv
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 import hashlib
 import io
 import secrets
-from typing import Any, List, Optional
+from typing import Any
 from uuid import uuid4
 
 from flask import Blueprint, request, send_file, url_for, abort, g
 from sentry_sdk import capture_exception
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from organizer.auth import api_login_required_group
@@ -41,13 +42,11 @@ def gen_trip_uid(session: Session):
 
 def get_trip(trip_uid: str):
     with get_session() as session:
-        trip: Optional[Trip] = None
-        shared = False
-
         trip = session.query(Trip).where(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 
+        shared = False
         if g.user.access_group != AccessGroup.Administrator:
             if trip.created_by != g.user.id:
                 shared = True
@@ -87,29 +86,28 @@ def get_trip(trip_uid: str):
 @api_login_required_group(AccessGroup.User)
 def get_trips():
     with get_session() as session:
-        user_trips: List[Trip] = []
-        shared_trips: List[Trip] = []
-
+        user_trips_req = None
+        shared_trips_req = None
         if g.user.access_group == AccessGroup.Administrator:
-            user_trips = session.query(Trip)
+            user_trips_req = select(Trip)
         else:
-            user_trips = session.query(Trip).filter(Trip.created_by == g.user.id)
-            shared_trips = (
-                session.query(Trip.uid)
+            user_trips_req = select(Trip).where(Trip.created_by == g.user.id)
+            shared_trips_req = (
+                select(Trip.uid)
                 .join(TripAccess)
-                .filter(TripAccess.user_id == g.user.id, Trip.archived == False)
-                .all()
+                .where(TripAccess.user_id == g.user.id, Trip.archived == False)
             )
-        user_trips = user_trips.filter(Trip.archived == False).all()
+        user_trips_req = user_trips_req.where(Trip.archived == False)
+
+        user_trips = session.execute(user_trips_req).scalars()
+        shared_trips = session.execute(shared_trips_req).scalars() if shared_trips_req is not None else []
 
         trips = []
-        if user_trips:
-            for trip in user_trips:
-                trips.append(trip.uid)
+        for trip in user_trips:
+            trips.append(trip.uid)
 
-        if shared_trips:
-            for trip in shared_trips:
-                trips.append(trip.uid)
+        for trip_uids in shared_trips:
+            trips.append(trip_uids)
 
         output = []
         for trip_uid in trips:
@@ -139,7 +137,7 @@ def share(trip_uid: str):
         ):
             abort(403)
 
-        link: SharingLink = (
+        link = (
             session.query(SharingLink)
             .filter(SharingLink.trip_id == trip.id, SharingLink.user_id == g.user.id)
             .first()
@@ -147,7 +145,7 @@ def share(trip_uid: str):
 
         if link:
             uuid = link.uuid
-            link.expiration_date = datetime.utcnow() + timedelta(days=3)
+            link.expiration_date = datetime.now(timezone.utc) + timedelta(days=3)
             session.commit()
         else:
             uuid = str(uuid4())
@@ -165,8 +163,6 @@ def share(trip_uid: str):
 @api_login_required_group(AccessGroup.User)
 def archive(trip_uid: str):
     with get_session() as session:
-        trip: Optional[Trip] = None
-
         trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
@@ -175,7 +171,7 @@ def archive(trip_uid: str):
             abort(403)
 
         trip.archived = True
-        trip.last_update = datetime.utcnow()
+        trip.last_update = datetime.now(timezone.utc)
         session.commit()
 
     return {'status': 'ok'}
@@ -267,7 +263,7 @@ def edit(trip_uid: str):
         for i, persons in enumerate(groups):
             trip.groups.append(Group(group_number=i, persons=persons))
 
-        trip.last_update = datetime.utcnow()
+        trip.last_update = datetime.now(timezone.utc)
         session.commit()
 
     return get_trip(trip_uid)
@@ -325,7 +321,7 @@ def copy(trip_uid: str):
     return get_trip(new_uid)
 
 
-def send_csv_file(rows: List[List[Any]]):
+def send_csv_file(rows: list[list[Any]]):
     file = io.StringIO()
     writer = csv.writer(file, dialect='excel')
     writer.writerows(rows)
@@ -366,7 +362,7 @@ def download(trip_uid: str):
     }
 
     with get_session() as session:
-        trip: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 

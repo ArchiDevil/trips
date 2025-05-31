@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 import pytest
 from flask.testing import FlaskClient
@@ -77,9 +77,9 @@ def test_reset_removes_other_dead_links(client: FlaskClient):
     uuid = uuid4()
     with client.application.app_context():
         with get_session() as session:
-            session.add(PasswordLink(uuid=str(uuid4()), user_id=1, expiration_date=(datetime.utcnow() - timedelta(days=7))))
-            session.add(PasswordLink(uuid=str(uuid4()), user_id=2, expiration_date=(datetime.utcnow() - timedelta(days=14))))
-            session.add(PasswordLink(uuid=str(uuid4()), user_id=1, expiration_date=(datetime.utcnow() - timedelta(days=21))))
+            session.add(PasswordLink(uuid=str(uuid4()), user_id=1, expiration_date=(datetime.now(timezone.utc) - timedelta(days=7))))
+            session.add(PasswordLink(uuid=str(uuid4()), user_id=2, expiration_date=(datetime.now(timezone.utc) - timedelta(days=14))))
+            session.add(PasswordLink(uuid=str(uuid4()), user_id=1, expiration_date=(datetime.now(timezone.utc) - timedelta(days=21))))
             session.commit()
 
     response = client.post('/api/auth/reset/',
@@ -99,7 +99,7 @@ def test_reset_rejects_expired_link(client: FlaskClient):
     uuid = uuid4()
     with client.application.app_context():
         with get_session() as session:
-            session.add(PasswordLink(uuid=str(uuid), user_id=1, expiration_date=(datetime.utcnow() - timedelta(days=10))))
+            session.add(PasswordLink(uuid=str(uuid), user_id=1, expiration_date=(datetime.now(timezone.utc) - timedelta(days=10))))
             session.commit()
 
     response = client.post('/api/auth/reset/',

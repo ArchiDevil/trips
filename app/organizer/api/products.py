@@ -3,6 +3,7 @@ from typing import Final
 
 from flask import Blueprint, request, url_for, abort
 from sentry_sdk import capture_exception
+from sqlalchemy import select, func
 
 from organizer.auth import api_login_required_group
 from organizer.db import get_session
@@ -64,16 +65,21 @@ def search():
     search_request = request.args.get('search', '')
 
     with get_session() as session:
-        if search_request:
-            search_pattern = f"%{search_request}%"
-            products_count = session.query(Product.id).filter(Product.name.ilike(search_pattern))
-            products = session.query(Product).filter(Product.name.ilike(search_pattern))
-        else:
-            products_count = session.query(Product.id)
-            products = session.query(Product)
+        products_selector = select(Product).where(Product.archived == False)
+        products_count_selector = select(func.count()).select_from(Product).where(Product.archived == False)
 
-        products_count = products_count.filter(Product.archived == False).count()
-        products = products.filter(Product.archived == False).order_by(Product.id).offset(page * products_per_page).limit(products_per_page).all()
+        if search_request:
+            search_pattern = Product.name.ilike(f"%{search_request}%")
+            products_selector = products_selector.where(search_pattern)
+            products_count_selector = products_count_selector.where(search_pattern)
+
+        products = session.execute(
+            products_selector
+            .order_by(Product.id)
+            .offset(page * products_per_page)
+            .limit(products_per_page)
+        ).scalars()
+        products_count = session.execute(products_count_selector).scalar_one()
 
         return {
             'page': page,
@@ -191,7 +197,8 @@ def edit(product_id: int):
         prod.proteins = proteins
         prod.fats = fats
         prod.carbs = carbs
-        prod.grams = grams
+        if grams is not None:
+            prod.grams = grams
         session.commit()
 
     return {

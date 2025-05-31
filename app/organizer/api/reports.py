@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Optional
+from typing import Any, Literal
 
 from flask import Blueprint, abort
 from sqlalchemy.sql import func
@@ -15,7 +15,7 @@ BP = Blueprint("reports", __name__, url_prefix="/reports")
 @api_login_required_group(AccessGroup.User)
 def shopping(trip_uid: str):
     with get_session() as session:
-        trip: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             return abort(404)
 
@@ -67,14 +67,22 @@ def packing(trip_uid: str):
             .all()
         )
 
-        person_groups: list[int] = [
+        person_groups = [
             group.persons
             for group in session.query(Group.persons)
             .filter(Group.trip_id == trip.id)
             .all()
         ]
 
-    products: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    products: dict[
+        int,
+        list[
+            dict[
+                Literal['name', 'meal', 'mass', 'grams'],
+                str | int | float | list[int],
+            ]
+        ]
+    ] = defaultdict(list)
     for meal in meals:
         day: int = meal.day_number
         products[day].append(

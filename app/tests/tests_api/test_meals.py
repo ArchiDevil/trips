@@ -53,6 +53,7 @@ def test_api_rejects_removing_for_non_owned_trip(org_logged_client: FlaskClient)
             session.commit()
 
             rec = session.query(MealRecord).filter(MealRecord.trip_id == 3).first()
+            assert rec
             meal_id = rec.id
 
     result = org_logged_client.delete('/api/meals/remove', json={'meal_id': meal_id})

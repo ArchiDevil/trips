@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-from typing import List
+from datetime import datetime, timedelta, timezone
 
 from flask.testing import FlaskClient
 
@@ -26,11 +25,11 @@ def test_forgot_adds_restoration_link_to_db(client: FlaskClient):
 
     with client.application.app_context():
         with get_session() as session:
-            links: List[PasswordLink] = session.query(PasswordLink).all()
+            links = session.query(PasswordLink).all()
             assert len(links) == 1
             assert links[0].user_id == 1
             assert links[0].expiration_date.day == (
-                datetime.utcnow() + timedelta(days=3)).day
+                datetime.now(timezone.utc) + timedelta(days=3)).day
 
 
 def test_forgot_rejects_incorrect_username(client: FlaskClient):

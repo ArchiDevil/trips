@@ -1,8 +1,9 @@
 from collections import defaultdict
-import datetime
-from typing import Optional, Dict, Any
+from datetime import datetime, date, timedelta, timezone
+from typing import Any
 
 from flask import Blueprint, abort, request, url_for, g
+from sqlalchemy import update
 
 from organizer.auth import api_login_required_group
 from organizer.db import get_session
@@ -12,14 +13,14 @@ from organizer.utils.auth import user_has_trip_access
 BP = Blueprint('meals', __name__, url_prefix='/meals')
 
 
-def format_date(first_day: datetime.date, current_day_number: int):
-    return (first_day + datetime.timedelta(days=current_day_number - 1)).strftime('%d/%m')
+def format_date(first_day: date, current_day_number: int):
+    return (first_day + timedelta(days=current_day_number - 1)).strftime('%d/%m')
 
 
 @BP.post('/add')
 @api_login_required_group(AccessGroup.User)
 def meals_add():
-    json: Dict[str, Any] = request.json
+    json: dict[str, Any] = request.json # type: ignore
     trip_uid = json['trip_uid']
     meal_name = json['meal_name']
     day_number = json['day_number']
@@ -80,10 +81,10 @@ def meals_add():
 
         meal_number = meals_map[meal_name]
 
-        existing_record: MealRecord = session.query(MealRecord).filter(MealRecord.trip_id == trip.id,
-                                                                       MealRecord.product_id == product.id,
-                                                                       MealRecord.day_number == day_number,
-                                                                       MealRecord.meal_number == meal_number).first()
+        existing_record = session.query(MealRecord).filter(MealRecord.trip_id == trip.id,
+                                                           MealRecord.product_id == product.id,
+                                                           MealRecord.day_number == day_number,
+                                                           MealRecord.meal_number == meal_number).first()
         if existing_record:
             existing_record.mass += mass
         else:
@@ -95,9 +96,11 @@ def meals_add():
         session.commit()
 
         # update the last time trip was touched
-        session.query(Trip).filter(Trip.id == trip.id).update({
-            'last_update': datetime.datetime.utcnow()
-        })
+        session.execute(
+            update(Trip)
+            .where(Trip.id == trip.id)
+            .values(last_update=datetime.now(timezone.utc))
+        )
         session.commit()
         return {'result': True}
 
@@ -105,11 +108,11 @@ def meals_add():
 @BP.delete('/remove')
 @api_login_required_group(AccessGroup.User)
 def meals_remove():
-    if not 'meal_id' in request.json:
+    if 'meal_id' not in request.json: # type: ignore
         abort(400)
 
     try:
-        meal_id = int(request.json['meal_id'])
+        meal_id = int(request.json['meal_id']) # type: ignore
     except ValueError:
         abort(400)
 
@@ -131,9 +134,7 @@ def meals_remove():
         session.query(MealRecord).filter(MealRecord.id == meal_id).delete()
         session.commit()
 
-        session.query(Trip).filter(Trip.id == meal_info.trip_id).update({
-            'last_update': datetime.datetime.utcnow()
-        })
+        trip.last_update = datetime.now(timezone.utc)
         session.commit()
         return {'result': True}
 
@@ -142,7 +143,7 @@ def meals_remove():
 @api_login_required_group(AccessGroup.User)
 def meals_clear():
     json: Any = request.json
-    if not 'trip_uid' in json or not 'day_number' in json:
+    if 'trip_uid' not in json or 'day_number' not in json:
         abort(400)
 
     try:
@@ -152,7 +153,7 @@ def meals_clear():
         abort(400)
 
     with get_session() as session:
-        trip: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 
@@ -164,7 +165,7 @@ def meals_clear():
 
         session.query(MealRecord).filter(MealRecord.trip_id == trip.id,
                                          MealRecord.day_number == day_number).delete()
-        trip.last_update = datetime.datetime.utcnow()
+        trip.last_update = datetime.now(timezone.utc)
         session.commit()
 
     return {'result': True}
@@ -190,7 +191,7 @@ def extract_meals(trip_id: int, day_number: int):
             3: 'snacks'
         }
 
-        output = {}
+        output: dict[str, list[Any]] = {}
         for val in meals_map.values():
             output[val] = []
 
@@ -212,11 +213,11 @@ def extract_meals(trip_id: int, day_number: int):
 @api_login_required_group(AccessGroup.User)
 def get_meals(trip_uid: str):
     with get_session() as session:
-        trip: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 
-        days_count: int = (trip.till_date - trip.from_date).days + 1
+        days_count = (trip.till_date - trip.from_date).days + 1
 
     days = [
         {
@@ -233,11 +234,11 @@ def get_meals(trip_uid: str):
 @api_login_required_group(AccessGroup.User)
 def get_day_meals(trip_uid: str, day_number: int):
     with get_session() as session:
-        trip: Optional[Trip] = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 
-        days_count: int = (trip.till_date - trip.from_date).days + 1
+        days_count = (trip.till_date - trip.from_date).days + 1
         if day_number > days_count or day_number < 1:
             abort(404)
 
@@ -255,12 +256,11 @@ def get_day_meals(trip_uid: str, day_number: int):
 @api_login_required_group(AccessGroup.User)
 def cycle(trip_uid: str):
     with get_session() as session:
-        trip_info: Optional[Trip] = None
-        trip_info = session.query(Trip).filter(Trip.uid == trip_uid).first()
-        if not trip_info:
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        if not trip:
             return abort(404)
 
-        if not user_has_trip_access(trip_info,
+        if not user_has_trip_access(trip,
                                     g.user.id,
                                     g.user.access_group == AccessGroup.Administrator,
                                     session):
@@ -270,10 +270,10 @@ def cycle(trip_uid: str):
     if not data:
         return abort(400)
 
-    if not 'src-start' in data or not 'src-end' in data:
+    if 'src-start' not in data or 'src-end' not in data:
         return abort(400)
 
-    if not 'dst-start' in data or not 'dst-end' in data:
+    if 'dst-start' not in data or 'dst-end' not in data:
         return abort(400)
 
     try:
@@ -304,13 +304,13 @@ def cycle(trip_uid: str):
 
     with get_session() as session:
         if 'overwrite' in data and data['overwrite'] is True:
-            session.query(MealRecord).filter(MealRecord.trip_id == trip_info.id,
+            session.query(MealRecord).filter(MealRecord.trip_id == trip.id,
                                              MealRecord.day_number >= dst_start,
                                              MealRecord.day_number <= dst_end).delete()
             session.commit()
 
         meals_info = session.query(MealRecord).filter(
-            MealRecord.trip_id == trip_info.id,
+            MealRecord.trip_id == trip.id,
             MealRecord.day_number >= src_start,
             MealRecord.day_number <= src_start + src_days_count).order_by(
                 MealRecord.day_number).all()
@@ -319,7 +319,7 @@ def cycle(trip_uid: str):
         for meal in meals_info:
             meals_per_day[meal.day_number - src_start].append(meal)
 
-        trip_duration = (trip_info.till_date - trip_info.from_date).days + 1
+        trip_duration = (trip.till_date - trip.from_date).days + 1
 
         if src_end > trip_duration or dst_end > trip_duration:
             return abort(400)
@@ -327,7 +327,7 @@ def cycle(trip_uid: str):
         for day_number in range(dst_start, dst_end + 1):
             idx = (day_number - dst_start) % src_days_count
             for meal in meals_per_day[idx]:
-                new_record = MealRecord(trip_id=trip_info.id,
+                new_record = MealRecord(trip_id=trip.id,
                                         product_id=meal.product_id,
                                         day_number=day_number,
                                         meal_number=meal.meal_number,

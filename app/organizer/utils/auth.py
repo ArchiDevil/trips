@@ -1,5 +1,6 @@
 import requests
 from flask import current_app
+from sqlalchemy.orm import Session
 
 from organizer.schema import Trip, TripAccess
 
@@ -21,7 +22,7 @@ def check_captcha(response: str) -> bool:
     return answer.json()['success']
 
 
-def user_has_trip_access(trip: Trip, user_id: int, admin, session):
+def user_has_trip_access(trip: Trip, user_id: int, admin: bool, session: Session) -> bool:
     if trip.created_by == user_id or admin:
         return True
 

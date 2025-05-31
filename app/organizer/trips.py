@@ -1,5 +1,4 @@
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, timezone
 
 from flask import Blueprint, redirect, abort, g
 from organizer.auth import login_required_group
@@ -13,8 +12,7 @@ bp = Blueprint('trips', __name__, url_prefix='/trips')
 @login_required_group(AccessGroup.User)
 def forget(trip_uid: str):
     with get_session() as session:
-        trip: Optional[Trip] = session.query(Trip).filter(
-            Trip.uid == trip_uid).first()
+        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 
@@ -34,19 +32,19 @@ def forget(trip_uid: str):
 @login_required_group(AccessGroup.User)
 def access(uuid):
     with get_session() as session:
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         # clean up dead links
         session.query(SharingLink).filter(SharingLink.expiration_date < current_time).delete()
         session.commit()
 
-        link: Optional[SharingLink] = session.query(SharingLink).filter(SharingLink.uuid == uuid).first()
+        link = session.query(SharingLink).filter(SharingLink.uuid == uuid).first()
         if not link:
             return redirect('/trips/incorrect')
 
-        access: Optional[TripAccess] = session.query(TripAccess).filter(
+        trip_access = session.query(TripAccess).filter(
             TripAccess.trip_id == link.trip_id,
             TripAccess.user_id == g.user.id).first()
-        if not access:
+        if not trip_access:
             session.add(TripAccess(trip_id=link.trip_id, user_id=g.user.id))
             session.commit()
 

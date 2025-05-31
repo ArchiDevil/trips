@@ -1,9 +1,8 @@
 import datetime
 from enum import Enum as PyEnum
 
-from sqlalchemy import Column, Integer, String, Float, Date, \
-                       DateTime, Boolean, Enum as AlchemyEnum, ForeignKey
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, declarative_base, Mapped, mapped_column
 
 
 BASE = declarative_base()
@@ -30,126 +29,128 @@ class User(BASE):
     '''Describes a native user'''
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True)
-    login = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    login: Mapped[str] = mapped_column(nullable=False)
     # is nullable due to ability to use OAuth instead of raw password
-    password = Column(String)
-    displayed_name = Column(String)
-    access_group = Column(AlchemyEnum(AccessGroup), nullable=False)
-    user_type = Column(AlchemyEnum(UserType),
-                       nullable=False, default=UserType.Native)
-    last_logged_in = Column(DateTime, default=datetime.datetime.utcnow)
+    password: Mapped[str] = mapped_column(nullable=True)
+    displayed_name: Mapped[str] = mapped_column(nullable=True)
+    access_group: Mapped[AccessGroup] = mapped_column(nullable=False)
+    user_type: Mapped[UserType] = mapped_column(nullable=False, default=UserType.Native)
+    last_logged_in: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow, nullable=True)
 
-    trips = relationship('Trip', back_populates='user')
-    shared_trips = relationship('Trip', secondary='tripaccess')
+    trips: Mapped[list['Trip']] = relationship(back_populates='user')
+    shared_trips: Mapped[list['Trip']] = relationship(secondary='tripaccess')
 
 
 class Trip(BASE):
     '''Describes a trip'''
     __tablename__ = 'trips'
 
-    id = Column(Integer, primary_key=True)
-    uid = Column(String, nullable=False, unique=True)
-    name = Column(String, nullable=False)
-    from_date = Column(Date, nullable=False)
-    till_date = Column(Date, nullable=False)
-    created_by = Column(Integer, ForeignKey(User.__tablename__ + '.id'),
-                        nullable=False)
-    last_update = Column(DateTime, nullable=False,
-                         default=datetime.datetime.utcnow)
-    archived = Column(Boolean, default=False, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    uid: Mapped[str] = mapped_column(nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(nullable=False)
+    from_date: Mapped[datetime.date] = mapped_column(nullable=False)
+    till_date: Mapped[datetime.date] = mapped_column(nullable=False)
+    created_by: Mapped[int] = mapped_column(
+        ForeignKey(User.__tablename__ + '.id'), nullable=False
+    )
+    last_update: Mapped[datetime.datetime] = mapped_column(
+        nullable=False, default=datetime.datetime.utcnow
+    )
+    archived: Mapped[bool] = mapped_column(default=False, nullable=False)
 
-    user = relationship('User', back_populates='trips')
-    groups = relationship('Group')
+    user: Mapped['User'] = relationship(back_populates='trips')
+    groups: Mapped[list['Group']] = relationship()
 
 
 class Group(BASE):
     '''Describes a separate group in a trip'''
     __tablename__ = 'groups'
 
-    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'),
-                     primary_key=True)
-    group_number = Column(Integer, primary_key=True)
-    persons = Column(Integer, nullable=False)
+    trip_id: Mapped[int] = mapped_column(ForeignKey(Trip.__tablename__ + '.id'),
+                                         primary_key=True)
+    group_number: Mapped[int] = mapped_column(primary_key=True)
+    persons: Mapped[int] = mapped_column(nullable=False)
 
-    trip = relationship('Trip', back_populates='groups')
+    trip: Mapped['Trip'] = relationship(back_populates='groups')
 
 
 class Product(BASE):
     '''Describes a product'''
     __tablename__ = 'products'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    calories = Column(Float, nullable=False)
-    proteins = Column(Float, nullable=False)
-    fats = Column(Float, nullable=False)
-    carbs = Column(Float, nullable=False)
-    grams = Column(Float)
-    archived = Column(Boolean, default=False, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=False)
+    calories: Mapped[float] = mapped_column(nullable=False)
+    proteins: Mapped[float] = mapped_column(nullable=False)
+    fats: Mapped[float] = mapped_column(nullable=False)
+    carbs: Mapped[float] = mapped_column(nullable=False)
+    grams: Mapped[float] = mapped_column(nullable=True)
+    archived: Mapped[bool] = mapped_column(default=False, nullable=False)
 
 
 class MealRecord(BASE):
     '''Describes a meal record in a specific trip on a specific day'''
     __tablename__ = 'meal_records'
 
-    id = Column(Integer, primary_key=True)
-    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'),
-                     nullable=False)
-    product_id = Column(Integer, ForeignKey(Product.__tablename__ + '.id'),
-                        nullable=False)
-    day_number = Column(Integer, nullable=False)
-    meal_number = Column(Integer, nullable=False)
-    mass = Column(Integer, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    trip_id: Mapped[int] = mapped_column(
+        ForeignKey(Trip.__tablename__ + '.id'), nullable=False
+    )
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey(Product.__tablename__ + '.id'), nullable=False
+    )
+    day_number: Mapped[int] = mapped_column(nullable=False)
+    meal_number: Mapped[int] = mapped_column(nullable=False)
+    mass: Mapped[int] = mapped_column(nullable=False)
 
 
 class VkUser(BASE):
     '''Describes a Vk registered user'''
     __tablename__ = 'vkusers'
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'),
-                     primary_key=True)
-    user_token = Column(String, nullable=False)
-    token_exp_time = Column(DateTime, nullable=False)
-    photo_url = Column(String)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey(User.__tablename__ + '.id'), primary_key=True
+    )
+    user_token: Mapped[str] = mapped_column(nullable=False)
+    token_exp_time: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    photo_url: Mapped[str] = mapped_column(nullable=True)
 
 
 class TripAccess(BASE):
     '''Describes what users can access what trips'''
     __tablename__ = 'tripaccess'
 
-    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'),
-                     primary_key=True)
-    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'),
-                     primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey(User.__tablename__ + '.id'), primary_key=True
+    )
+    trip_id: Mapped[int] = mapped_column(
+        ForeignKey(Trip.__tablename__ + '.id'), primary_key=True
+    )
+
+
+def make_expiration_date():
+    return datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=3)
 
 
 class SharingLink(BASE):
     '''Describes a link the user shared'''
     __tablename__ = 'sharinglinks'
 
-    @staticmethod
-    def make_expiration_date():
-        return datetime.datetime.utcnow() + datetime.timedelta(days=3)
-
-    uuid = Column(String, nullable=False, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'))
-    trip_id = Column(Integer, ForeignKey(Trip.__tablename__ + '.id'))
-    expiration_date = Column(DateTime, nullable=False, default=make_expiration_date)
+    uuid: Mapped[str] = mapped_column(nullable=False, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.__tablename__ + '.id'))
+    trip_id: Mapped[int] = mapped_column(ForeignKey(Trip.__tablename__ + '.id'))
+    expiration_date: Mapped[datetime.datetime] = mapped_column(nullable=False, default=make_expiration_date)
 
 
 class PasswordLink(BASE):
     '''Describes a record to restore a password'''
     __tablename__ = 'passwordlinks'
 
-    @staticmethod
-    def make_expiration_date():
-        return datetime.datetime.utcnow() + datetime.timedelta(days=3)
-
-    uuid = Column(String, nullable=False, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.__tablename__ + '.id'))
-    expiration_date = Column(DateTime, nullable=False, default=make_expiration_date)
+    uuid: Mapped[str] = mapped_column(nullable=False, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.__tablename__ + '.id'))
+    expiration_date: Mapped[datetime.datetime] = mapped_column(nullable=False, default=make_expiration_date)
 
 
 def init_schema(engine):

@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from flask.testing import FlaskClient
 import pytest
@@ -162,10 +162,10 @@ def test_trips_share_stores_link_info(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            link2: SharingLink = session.query(SharingLink).one()
+            link2 = session.query(SharingLink).one()
             assert link2.uuid == uuid
             assert (
-                link2.expiration_date.day == (datetime.utcnow() + timedelta(days=3)).day
+                link2.expiration_date.day == (datetime.now(timezone.utc) + timedelta(days=3)).day
             )
 
 
@@ -193,7 +193,7 @@ def test_trips_share_updates_expiration_time(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            link: SharingLink = (
+            link = (
                 session.query(SharingLink)
                 .where(SharingLink.uuid == response.json['uuid'])
                 .one()
@@ -206,7 +206,7 @@ def test_trips_share_updates_expiration_time(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            link: SharingLink = (
+            link = (
                 session.query(SharingLink)
                 .where(SharingLink.uuid == response.json['uuid'])
                 .one()
@@ -332,7 +332,7 @@ def test_trips_add_rejects_incorrect_data(org_logged_client: FlaskClient, json_d
     if json_data.get('name'):
         with org_logged_client.application.app_context():
             with get_session() as session:
-                trip: Trip = session.query(Trip).where(Trip.name == json_data.get('name')).first()
+                trip = session.query(Trip).where(Trip.name == json_data.get('name')).first()
                 assert not trip
 
 
@@ -355,7 +355,7 @@ def test_trips_edit_rejects_insufficient_privileges(org_logged_client: FlaskClie
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).where(Trip.name == 'Test trip').first()
+            trip = session.query(Trip).where(Trip.name == 'Test trip').first()
             assert not trip
 
 
@@ -388,7 +388,7 @@ def test_trips_can_edit_trip(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).where(Trip.name == 'Test trip').one()
+            trip = session.query(Trip).where(Trip.name == 'Test trip').one()
             assert trip.from_date == date(2019, 10, 9)
             assert trip.till_date == date(2019, 10, 12)
             assert trip.groups[0].persons == 3
@@ -416,7 +416,7 @@ def test_trips_can_edit_shared_trip(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).where(Trip.name == 'Test trip').one()
+            trip = session.query(Trip).where(Trip.name == 'Test trip').one()
             assert trip.from_date == date(2019, 10, 9)
             assert trip.till_date == date(2019, 10, 12)
             assert trip.groups[0].persons == 3
@@ -439,7 +439,7 @@ def test_trips_admin_can_edit_any_trip(admin_logged_client: FlaskClient):
 
     with admin_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).where(Trip.name == 'Test trip').one()
+            trip = session.query(Trip).where(Trip.name == 'Test trip').one()
             assert trip.from_date == date(2019, 10, 9)
             assert trip.till_date == date(2019, 10, 12)
             assert trip.groups[0].persons == 3
@@ -503,7 +503,7 @@ def test_trips_edit_rejects_incorrect_data(org_logged_client: FlaskClient, json_
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            trip: Trip = session.query(Trip).where(Trip.name == 'Taganay trip').one()
+            trip = session.query(Trip).where(Trip.name == 'Taganay trip').one()
             assert trip.from_date == date(2019, 1, 1)
             assert trip.till_date == date(2019, 1, 5)
             assert trip.groups[0].persons == 2
@@ -628,6 +628,6 @@ def test_trips_can_copy(org_logged_client: FlaskClient):
 
     with org_logged_client.application.app_context():
         with get_session() as session:
-            old_records: list[MealRecord] = session.query(MealRecord).where(MealRecord.trip_id == 1).all()
-            new_records: list[MealRecord] = session.query(MealRecord).where(MealRecord.trip_id == 4).all()
+            old_records = session.query(MealRecord).where(MealRecord.trip_id == 1).all()
+            new_records = session.query(MealRecord).where(MealRecord.trip_id == 4).all()
             assert len(old_records) == len(new_records)

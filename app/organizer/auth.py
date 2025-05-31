@@ -1,7 +1,7 @@
 import functools
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
-from typing import Optional
+from typing import Any
 import requests
 
 from flask import Blueprint, render_template, request, g, redirect, url_for, \
@@ -33,8 +33,8 @@ def login_required_group(group):
 
             # update last user login/access
             with get_session() as sql_session:
-                user = sql_session.query(User).where(User.id == g.user.id).first()
-                user.last_logged_in = datetime.utcnow()
+                user = sql_session.query(User).where(User.id == g.user.id).one()
+                user.last_logged_in = datetime.now(timezone.utc)
                 sql_session.commit()
 
             return view(**kwargs)
@@ -53,8 +53,8 @@ def api_login_required_group(group=None):
 
             # update last user login/access
             with get_session() as sql_session:
-                user = sql_session.query(User).where(User.id == g.user.id).first()
-                user.last_logged_in = datetime.utcnow()
+                user = sql_session.query(User).where(User.id == g.user.id).one()
+                user.last_logged_in = datetime.now(timezone.utc)
                 sql_session.commit()
 
             return view(**kwargs)
@@ -98,12 +98,9 @@ def reset(token):
     if 'user' in g and g.user is not None:
         return redirect('/trips/')
 
-    with get_session() as session:
-        link: Optional[PasswordLink] = session.query(PasswordLink).filter(PasswordLink.uuid == str(token)).first()
-        if not link:
-            abort(404)
-
-        if link.expiration_date < datetime.utcnow():
+    with get_session() as sql_session:
+        link = sql_session.query(PasswordLink).filter(PasswordLink.uuid == str(token)).first()
+        if not link or link.expiration_date < datetime.utcnow():
             abort(404)
 
     return render_template('auth/reset.html', token=str(token))
@@ -141,7 +138,7 @@ def create_vk_user(sql_session, login, user_id, displayed_name, access_token, ex
     vk_user = VkUser(id=user_id,
                      user_id=added_user.id,
                      user_token=access_token,
-                     token_exp_time=datetime.utcnow() + timedelta(seconds=expires_in),
+                     token_exp_time=datetime.now(timezone.utc) + timedelta(seconds=expires_in),
                      photo_url=photo_url)
     sql_session.add(vk_user)
     sql_session.commit()
@@ -162,7 +159,7 @@ def login_as_vk_user(login, access_token, vk_user_id, displayed_name, expires_in
             vk_user = sql_session.query(VkUser).filter(VkUser.id == vk_user_id,
                                                        VkUser.user_id == native_user.id).one()
             vk_user.user_token = access_token
-            vk_user.token_exp_time = datetime.utcnow() + timedelta(seconds=expires_in)
+            vk_user.token_exp_time = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
             vk_user.photo_url = photo_url
             sql_session.commit()
 
@@ -170,7 +167,7 @@ def login_as_vk_user(login, access_token, vk_user_id, displayed_name, expires_in
         session['user_id'] = native_user_id
 
 
-def request_vk_access_token(code):
+def request_vk_access_token(code) -> tuple[str, Any, Any]:
     result = requests.get('https://oauth.vk.com/access_token',
                           params={
                               'client_id': current_app.config['VK_CLIENT_ID'],
@@ -187,7 +184,7 @@ def request_vk_access_token(code):
     return json_result['access_token'], json_result['expires_in'], json_result['user_id']
 
 
-def request_vk_user_name_and_photo(access_token):
+def request_vk_user_name_and_photo(access_token: str) -> tuple[str, str]:
     result = requests.get('https://api.vk.com/method/users.get',
                           params={
                               'fields': 'photo_50',

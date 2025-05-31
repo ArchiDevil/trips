@@ -2,7 +2,7 @@ import re
 import json
 from datetime import datetime
 from uuid import uuid4
-from typing import Optional, Final
+from typing import Final
 
 from flask import Blueprint, current_app, g, render_template, request, \
                   abort, url_for, session
@@ -29,7 +29,7 @@ def user():
         'displayed_name': g.user.displayed_name,
         'access_group': g.user.access_group.name,
         'user_type': g.user.user_type.name,
-        'photo_url': g.user.photo_url if 'photo_url' in g.user.keys() else None
+        'photo_url': g.user.photo_url if 'photo_url' in g.user._fields else None
     }
 
 
@@ -153,14 +153,14 @@ def reset():
         session.query(PasswordLink).filter(PasswordLink.expiration_date < current_time).delete()
         session.commit()
 
-        link: Optional[PasswordLink] = session.query(PasswordLink).filter(PasswordLink.uuid == token).first()
+        link = session.query(PasswordLink).filter(PasswordLink.uuid == token).first()
         if not link:
             abort(400)
 
         session.delete(link)
         session.commit()
 
-        user: User = session.query(User).filter(User.id == link.user_id).one()
+        user = session.query(User).filter(User.id == link.user_id).one()
         user.password = generate_password_hash(password)
         session.commit()
 
