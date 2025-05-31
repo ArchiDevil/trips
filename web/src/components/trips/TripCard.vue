@@ -127,7 +127,7 @@ onMounted(() => {
                     class="dropdown-item"
                     href="javascript:void(0)"
                     @click="$emit('copy', copyLink)">
-                    <Icon icon="fa-copy" />
+                    <BaseIcon icon="fa-copy" />
                     {{ $t('trips.copyButton') }}
                   </a>
                 </li>
