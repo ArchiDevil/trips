@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import BaseIcon from './BaseIcon.vue'
+import { computed } from 'vue'
 import { Trip } from '../interfaces'
+import { useTripCover } from '../composables/tripCover'
 
-defineProps<{
+import BaseIcon from './BaseIcon.vue'
+
+const props = defineProps<{
   fromDate: string
   tillDate: string
   trip: Trip
 }>()
+
+const coverLink = computed(() => useTripCover(props.trip.trip.name))
 </script>
 
 <template>
@@ -15,7 +20,7 @@ defineProps<{
     style="width: 18rem"
   >
     <img
-      :src="trip.cover_src"
+      :src="coverLink"
       class="card-img-top"
       alt=""
     >

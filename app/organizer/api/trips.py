@@ -1,6 +1,5 @@
 import csv
 from datetime import datetime, timedelta, date, timezone
-import hashlib
 import io
 import secrets
 from typing import Any
@@ -26,10 +25,6 @@ from organizer.strings import STRING_TABLE
 from organizer.utils.auth import user_has_trip_access
 
 BP = Blueprint('trips', __name__, url_prefix='/trips')
-
-
-def get_magic(name: str) -> int:
-    return int(hashlib.sha1(name.encode()).hexdigest(), 16) % 8 + 1
 
 
 def gen_trip_uid(session: Session):
@@ -74,9 +69,6 @@ def get_trip(trip_uid: str):
             },
             'type': 'shared' if shared else 'user',
             'attendees': sum(group.persons for group in trip.groups),
-            'cover_src': url_for(
-                'static', filename=f'img/trips/{get_magic(trip.name)}.png'
-            ),
             'open_link': f'/meals/{trip.uid}',
             'forget_link': url_for('trips.forget', trip_uid=trip.uid),
         }

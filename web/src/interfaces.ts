@@ -63,7 +63,6 @@ export interface Trip {
   }
   type: 'user' | 'shared'
   attendees: number
-  cover_src: string
   open_link: string
   forget_link: string
 }

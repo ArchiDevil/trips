@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { Dropdown } from 'bootstrap'
+import { useTripCover } from '../../composables/tripCover'
 
-import BaseIcon from '../BaseIcon.vue';
+import BaseIcon from '../BaseIcon.vue'
 
 const props = defineProps<{
   uid: string
   name: string
   type: 'user' | 'shared'
-  coverLink: string
   attendeesCount: number
   fromDate: string
   tillDate: string
@@ -39,6 +39,8 @@ const past = computed(() => {
   now.setHours(0, 0, 0, 0) // to avoid rounding issues for the same day
   return now > new Date(props.tillDate)
 })
+
+const coverLink = computed(() => useTripCover(props.name))
 
 const dropdown = ref<Dropdown | null>(null)
 const dropdownToggle = useTemplateRef('dropdownToggle')
@@ -126,7 +128,8 @@ onMounted(() => {
                   <a
                     class="dropdown-item"
                     href="javascript:void(0)"
-                    @click="$emit('copy', copyLink)">
+                    @click="$emit('copy', copyLink)"
+                  >
                     <BaseIcon icon="fa-copy" />
                     {{ $t('trips.copyButton') }}
                   </a>

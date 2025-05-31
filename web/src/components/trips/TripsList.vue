@@ -33,7 +33,6 @@ const onEdit = (uid: string) => {
     :key="trip.uid"
     :uid="trip.uid"
     :name="trip.trip.name"
-    :cover-link="trip.cover_src"
     :type="trip.type"
     :attendees-count="trip.attendees"
     :from-date="trip.trip.from_date"
