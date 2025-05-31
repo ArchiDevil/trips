@@ -9,6 +9,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   edit: [Trip]
+  copy: [string]
   share: [string]
   archive: [string]
 }>()
@@ -38,10 +39,12 @@ const onEdit = (uid: string) => {
     :from-date="trip.trip.from_date"
     :till-date="trip.trip.till_date"
     :open-link="trip.open_link"
+    :copy-link="trip.trip.copy_link"
     :share-link="trip.trip.share_link"
     :archive-link="trip.trip.archive_link"
     :forget-link="trip.forget_link"
     @edit="(uid) => onEdit(uid)"
+    @copy="(copyLink) => $emit('copy', copyLink)"
     @share="(shareLink) => $emit('share', shareLink)"
     @archive="(archiveLink) => $emit('archive', archiveLink)"
   />

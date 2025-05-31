@@ -53,6 +53,7 @@ export interface Trip {
     groups: number[]
     user: string
     edit_link: string
+    copy_link: string
     share_link: string
     archive_link: string
     packing_link: string

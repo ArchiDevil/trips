@@ -17,6 +17,7 @@ import ShareTripDialog from '../components/trips/ShareTripDialog.vue'
 import TripsList from '../components/trips/TripsList.vue'
 import TripEditorModal from '../components/trips/TripEditorModal.vue'
 import BaseIcon from '../components/BaseIcon.vue'
+import TripCopyModal from '../components/trips/TripCopyModal.vue'
 
 const { t } = useI18n()
 
@@ -58,10 +59,24 @@ const showEditModal = (trip: Trip) => {
   modal.show()
 }
 
+const copyLink = ref('')
+const copyModal = ref<Modal | undefined>(undefined)
+const showCopyModal = (copyLink_: string) => {
+  copyLink.value = copyLink_
+  const modalElem = document.getElementById('copy-modal')
+  if (!modalElem) {
+    return
+  }
+  copyModal.value = new Modal(modalElem, {
+    keyboard: false,
+  })
+  copyModal.value.show()
+}
+
 const linkText = ref(t('trips.shareModal.linkPlaceholder'))
 const copyStatus = ref<string | undefined>('')
 
-const copyLink = () => {
+const doCopyLink = () => {
   navigator.clipboard.writeText(linkText.value)
   copyStatus.value = t('trips.shareModal.copiedStatus')
 }
@@ -204,6 +219,7 @@ onMounted(async () => {
         <TripsList
           :trips="sortedTrips"
           @edit="(trip) => showEditModal(trip)"
+          @copy="(copyLink) => showCopyModal(copyLink)"
           @share="(shareLink) => showShareModal(shareLink)"
           @archive="(archiveLink) => showArchiveModal(archiveLink)"
         />
@@ -220,7 +236,7 @@ onMounted(async () => {
     id="share-modal"
     :link-text="linkText"
     :copy-status="copyStatus"
-    @copy-link="copyLink()"
+    @copy-link="doCopyLink()"
   />
 
   <ArchiveTripDialog
@@ -231,6 +247,12 @@ onMounted(async () => {
 
   <TripEditorModal
     id="edit-modal"
+    :trip="currentTrip"
+  />
+
+  <TripCopyModal
+    id="copy-modal"
+    :copy-link="copyLink"
     :trip="currentTrip"
   />
 </template>

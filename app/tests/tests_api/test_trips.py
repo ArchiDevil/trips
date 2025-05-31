@@ -1,11 +1,10 @@
 from datetime import date, datetime, timedelta
-from typing import Any
 
 from flask.testing import FlaskClient
 import pytest
 
 from organizer.db import get_session
-from organizer.schema import SharingLink, Trip, TripAccess
+from organizer.schema import SharingLink, Trip, TripAccess, MealRecord
 from organizer.strings import STRING_TABLE
 
 
@@ -590,3 +589,45 @@ def test_trips_download_returns_empty_csv(admin_logged_client: FlaskClient):
 def test_trips_download_returns_404_for_non_existing_trip(org_logged_client: FlaskClient):
     response = org_logged_client.get('/api/trips/download/uid42')
     assert response.status_code == 404
+
+
+def test_trips_copy_rejects_not_logged_in(client: FlaskClient):
+    response = client.post('/api/trips/copy/uid1')
+    assert response.status_code == 401
+
+
+def test_trips_copy_rejects_empty_json(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/copy/uid1', json={})
+    assert response.status_code == 400
+
+
+def test_trips_copy_rejects_empty_name(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/copy/uid1', json={'name': ''})
+    assert response.status_code == 400
+
+
+def test_trips_copy_rejects_missing_name(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/copy/uid1', json={'nonexisting': 'field'})
+    assert response.status_code == 400
+
+
+def test_trips_copy_rejects_non_existing_trip_id(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/copy/uid100', json={'name': 'New trip'})
+    assert response.status_code == 404
+
+
+def test_trips_copy_rejects_not_owned_trip(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/copy/uid3', json={'name': 'New trip'})
+    assert response.status_code == 403
+
+
+def test_trips_can_copy(org_logged_client: FlaskClient):
+    response = org_logged_client.post('/api/trips/copy/uid1', json={'name': 'New trip'})
+    assert response.status_code == 200
+    assert response.json and response.json['uid'] is not None
+
+    with org_logged_client.application.app_context():
+        with get_session() as session:
+            old_records: list[MealRecord] = session.query(MealRecord).where(MealRecord.trip_id == 1).all()
+            new_records: list[MealRecord] = session.query(MealRecord).where(MealRecord.trip_id == 4).all()
+            assert len(old_records) == len(new_records)

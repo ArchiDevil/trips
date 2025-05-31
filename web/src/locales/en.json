@@ -133,6 +133,7 @@
     "lastUpdatePrefix": "Last updated",
     "optionsButton": "More...",
     "archiveButton": "Archive",
+    "copyButton": "Copy",
     "shareButton": "Share",
     "shareModal": {
       "title": "Share a trip",
@@ -165,6 +166,14 @@
       "groupNamePrefix": "Group",
       "groupErrorMessage": "Enter a positive number higher than 0",
       "archiveButtonTitle": "Archive"
+    },
+    "copyModal": {
+      "title": "Copy a trip",
+      "nameTitle": "New trip name",
+      "namePlaceholder": "Enter a name",
+      "nameInvalidFeedback": "Trip name must not be empty and not longer than 50 characters.",
+      "copyButton": "Copy",
+      "closeButton": "Close"
     },
     "archiveModal": {
       "title": "Archive a trip",

@@ -13,6 +13,7 @@ const props = defineProps<{
   fromDate: string
   tillDate: string
   openLink: string
+  copyLink: string
   shareLink: string
   archiveLink: string
   forgetLink: string
@@ -20,6 +21,7 @@ const props = defineProps<{
 
 defineEmits<{
   edit: [string]
+  copy: [string]
   share: [string]
   archive: [string]
 }>()
@@ -42,7 +44,7 @@ const dropdown = ref<Dropdown | null>(null)
 const dropdownToggle = useTemplateRef('dropdownToggle')
 
 onMounted(() => {
-  const toggle = dropdownToggle.value as HTMLButtonElement
+  const toggle = dropdownToggle.value!
   dropdown.value = new Dropdown(toggle)
 })
 </script>
@@ -101,7 +103,7 @@ onMounted(() => {
                 {{ $t('trips.optionsButton') }}
               </button>
               <ul class="dropdown-menu">
-                <li v-if="type == 'user'">
+                <li v-if="type === 'user'">
                   <a
                     class="dropdown-item"
                     href="javascript:void(0)"
@@ -118,6 +120,15 @@ onMounted(() => {
                   >
                     <BaseIcon icon="fa-eye-slash" />
                     {{ $t('trips.hideButton') }}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="javascript:void(0)"
+                    @click="$emit('copy', copyLink)">
+                    <Icon icon="fa-copy" />
+                    {{ $t('trips.copyButton') }}
                   </a>
                 </li>
                 <template v-if="type === 'user'">

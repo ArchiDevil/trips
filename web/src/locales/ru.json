@@ -133,6 +133,7 @@
     "lastUpdatePrefix": "Последнее обновление",
     "optionsButton": "Дополнительно",
     "archiveButton": "Архивировать",
+    "copyButton": "Скопировать",
     "shareButton": "Поделиться",
     "shareModal": {
       "title": "Поделиться походом",
@@ -165,6 +166,14 @@
       "groupNamePrefix": "Группа",
       "groupErrorMessage": "Введите целое число больше 0",
       "archiveButtonTitle": "Архивировать"
+    },
+    "copyModal": {
+      "title": "Скопировать поход",
+      "nameTitle": "Название нового похода",
+      "namePlaceholder": "Введите название",
+      "nameInvalidFeedback": "Название похода должно быть не пустым и не длиннее 50 символов.",
+      "copyButton": "Скопировать",
+      "closeButton": "Закрыть"
     },
     "archiveModal": {
       "title": "Архивировать поход",

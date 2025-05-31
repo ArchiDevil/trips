@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from flask import Blueprint, request, send_file, url_for, abort, g
 from sentry_sdk import capture_exception
+from sqlalchemy.orm import Session
 
 from organizer.auth import api_login_required_group
 from organizer.db import get_session
@@ -30,12 +31,20 @@ def get_magic(name: str) -> int:
     return int(hashlib.sha1(name.encode()).hexdigest(), 16) % 8 + 1
 
 
+def gen_trip_uid(session: Session):
+    while True:
+        new_uid = secrets.token_urlsafe(8)
+        existing = session.query(Trip).where(Trip.uid == new_uid).first()
+        if not existing:
+            return new_uid
+
+
 def get_trip(trip_uid: str):
     with get_session() as session:
         trip: Optional[Trip] = None
         shared = False
 
-        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        trip = session.query(Trip).where(Trip.uid == trip_uid).first()
         if not trip:
             abort(404)
 
@@ -56,6 +65,7 @@ def get_trip(trip_uid: str):
                 'groups': [group.persons for group in trip.groups],
                 'user': trip.user.login,
                 'edit_link': url_for('api.trips.edit', trip_uid=trip.uid),
+                'copy_link': url_for('api.trips.copy', trip_uid=trip.uid),
                 'share_link': url_for('api.trips.share', trip_uid=trip.uid),
                 'archive_link': url_for('api.trips.archive', trip_uid=trip.uid),
                 'packing_link': f'/reports/packing/{trip.uid}',
@@ -171,8 +181,8 @@ def archive(trip_uid: str):
     return {'status': 'ok'}
 
 
-def validate_input_data(data: dict[str, Any]):
-    name = data['name']
+def validate_edit_input_data(data: dict[str, Any]):
+    name: str = data['name']
     if not name or len(name) > 50:
         raise RuntimeError(STRING_TABLE['Trips edit error incorrect name'])
 
@@ -188,11 +198,9 @@ def validate_input_data(data: dict[str, Any]):
     except ValueError:
         raise RuntimeError(STRING_TABLE['Trips edit error incorrect groups'])
 
-    from_date = data['from_date']
-    till_date = data['till_date']
     try:
-        from_date = date.fromisoformat(from_date)
-        till_date = date.fromisoformat(till_date)
+        from_date = date.fromisoformat(data['from_date'])
+        till_date = date.fromisoformat(data['till_date'])
         if till_date < from_date:
             raise ValueError
     except ValueError:
@@ -206,18 +214,13 @@ def add():
     try:
         if not request.json:
             raise RuntimeError('No JSON provided')
-        name, groups, from_date, till_date = validate_input_data(request.json)
+        name, groups, from_date, till_date = validate_edit_input_data(request.json)
     except RuntimeError as exc:
         capture_exception(exc)
         return abort(400)
 
     with get_session() as session:
-        while True:
-            new_uid = secrets.token_urlsafe(8)
-            existing = session.query(Trip).filter(Trip.uid == new_uid).first()
-            if not existing:
-                break
-
+        new_uid = gen_trip_uid(session)
         new_trip = Trip(
             uid=new_uid,
             name=name,
@@ -241,7 +244,7 @@ def edit(trip_uid: str):
     try:
         if not request.json:
             raise RuntimeError('No JSON provided')
-        name, groups, from_date, till_date = validate_input_data(request.json)
+        name, groups, from_date, till_date = validate_edit_input_data(request.json)
     except RuntimeError as exc:
         capture_exception(exc)
         return abort(400)
@@ -268,6 +271,58 @@ def edit(trip_uid: str):
         session.commit()
 
     return get_trip(trip_uid)
+
+
+@BP.post('/copy/<trip_uid>')
+@api_login_required_group(AccessGroup.User)
+def copy(trip_uid: str):
+    if not request.json or 'name' not in request.json:
+        abort(400)
+
+    new_name = request.json['name']
+    if not new_name:
+        abort(400)
+
+    with get_session() as session:
+        existing_trip = session.query(Trip).where(Trip.uid == trip_uid).first()
+        if not existing_trip:
+            abort(404)
+
+        if not user_has_trip_access(
+            existing_trip, g.user.id, g.user.access_group == AccessGroup.Administrator, session
+        ):
+            abort(403)
+
+        new_uid = gen_trip_uid(session)
+        new_trip = Trip(
+            uid=new_uid,
+            name=new_name,
+            from_date=existing_trip.from_date,
+            till_date=existing_trip.till_date,
+            created_by=g.user.id,
+        )
+
+        for i, group in enumerate(existing_trip.groups):
+            new_trip.groups.append(Group(group_number=i, persons=group.persons))
+
+        session.add(new_trip)
+        session.commit()
+
+        new_id = new_trip.id
+
+        meal_records = session.query(MealRecord).where(MealRecord.trip_id == existing_trip.id).all()
+        for meal in meal_records:
+            session.add(MealRecord(
+                trip_id=new_id,
+                product_id=meal.product_id,
+                day_number = meal.day_number,
+                meal_number=meal.meal_number,
+                mass=meal.mass
+            ))
+        session.commit()
+
+
+    return get_trip(new_uid)
 
 
 def send_csv_file(rows: List[List[Any]]):
