@@ -31,9 +31,10 @@ const submit = async () => {
     const response = await api.post<Trip>(data)
     busy.value = false
     setTimeout(() => (window.location.href = `/meals/${response.uid}`), 200)
-  } catch (e: any) {
+  } catch (e) {
     console.error(e)
-    error.value = e.toString()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    error.value = (e as any).toString()
   }
 }
 </script>
@@ -44,28 +45,31 @@ const submit = async () => {
       <div
         v-if="error"
         class="alert alert-danger"
-        role="alert">
+        role="alert"
+      >
         {{ error }}
       </div>
 
       <label
         class="form-label"
-        for="input-name">
+        for="input-name"
+      >
         {{ $t('trips.copyModal.nameTitle') }}
       </label>
       <input
+        id="input-name"
+        v-model="tripName"
         type="text"
         class="form-control"
-        id="input-name"
         name="name"
         :placeholder="$t('trips.copyModal.namePlaceholder')"
         autofocus
         autocomplete="off"
-        v-model="tripName"
         :class="{
           'is-valid': validation.name,
           'is-invalid': !validation.name,
-        }" />
+        }"
+      >
       <div class="invalid-feedback">
         {{ $t('trips.copyModal.nameInvalidFeedback') }}
       </div>
@@ -75,18 +79,21 @@ const submit = async () => {
       <button
         type="submit"
         class="btn btn-primary"
+        :disabled="!validation.name || busy"
         @click="submit"
-        :disabled="!validation.name || busy">
+      >
         <span
+          v-if="busy"
           class="spinner-border spinner-border-sm"
           role="status"
           aria-hidden="true"
-          v-if="busy" />
+        />
         {{ $t('trips.copyModal.copyButton') }}
       </button>
       <button
         class="btn btn-secondary"
-        data-bs-dismiss="modal">
+        data-bs-dismiss="modal"
+      >
         {{ $t('trips.copyModal.closeButton') }}
       </button>
     </template>
