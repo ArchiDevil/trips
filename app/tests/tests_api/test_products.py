@@ -393,9 +393,10 @@ def test_api_edit_edits(admin_logged_client: FlaskClient):
             assert prod.proteins == 16.6
             assert prod.fats == 71.9
             assert prod.carbs == 41.9
+            assert prod.grams is None
 
 
-def test_api_edit_edits_with_grams(admin_logged_client: FlaskClient):
+def test_api_edit_adds_grams(admin_logged_client: FlaskClient):
     result = admin_logged_client.post('/api/products/1/edit',
                                       json={
                                           'name': 'Test product',
@@ -418,6 +419,30 @@ def test_api_edit_edits_with_grams(admin_logged_client: FlaskClient):
             assert prod.fats == 71.9
             assert prod.carbs == 41.9
             assert prod.grams == 250.0
+
+
+def test_api_edit_removes_grams(admin_logged_client: FlaskClient):
+    result = admin_logged_client.post('/api/products/9/edit',
+                                      json={
+                                          'name': 'Test product',
+                                          'calories': '249.6',
+                                          'proteins': '16.6',
+                                          'fats': '71.9',
+                                          'carbs': '41.9',
+                                      })
+    assert result.status_code == 200
+    assert result.json
+    assert result.json['result']
+
+    with admin_logged_client.application.app_context():
+        with get_session() as session:
+            prod = session.query(Product).filter(
+                Product.name == 'Test product').one()
+            assert prod.calories == 249.6
+            assert prod.proteins == 16.6
+            assert prod.fats == 71.9
+            assert prod.carbs == 41.9
+            assert prod.grams is None
 
 
 def test_api_edit_rejects_no_data(admin_logged_client: FlaskClient):

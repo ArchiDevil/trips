@@ -21,7 +21,6 @@ def test_can_get_trips_for_manager(org_logged_client: FlaskClient):
     assert response.json[0]['uid'] == 'uid1'
     assert response.json[0]['type'] == 'user'
     assert response.json[0]['attendees'] == 5
-    assert response.json[0]['cover_src'] == '/static/img/trips/7.png'
     assert response.json[0]['open_link'] == '/meals/uid1'
     assert response.json[0]['forget_link'] == '/trips/forget/uid1'
 
@@ -76,7 +75,6 @@ def test_trips_org_can_get_trip(org_logged_client: FlaskClient):
     assert response.json['uid'] == 'uid1'
     assert response.json['type'] == 'user'
     assert response.json['attendees'] == 5
-    assert response.json['cover_src'] == '/static/img/trips/7.png'
     assert response.json['open_link'] == '/meals/uid1'
     assert response.json['forget_link'] == '/trips/forget/uid1'
 

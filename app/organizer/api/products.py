@@ -66,7 +66,9 @@ def search():
 
     with get_session() as session:
         products_selector = select(Product).where(Product.archived == False)
-        products_count_selector = select(func.count()).select_from(Product).where(Product.archived == False)
+        products_count_selector = (
+            select(func.count()).select_from(Product).where(Product.archived == False)
+        )
 
         if search_request:
             search_pattern = Product.name.ilike(f"%{search_request}%")
@@ -197,8 +199,7 @@ def edit(product_id: int):
         prod.proteins = proteins
         prod.fats = fats
         prod.carbs = carbs
-        if grams is not None:
-            prod.grams = grams
+        prod.grams = grams
         session.commit()
 
     return {

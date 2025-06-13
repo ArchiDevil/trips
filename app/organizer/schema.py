@@ -32,11 +32,11 @@ class User(BASE):
     id: Mapped[int] = mapped_column(primary_key=True)
     login: Mapped[str] = mapped_column(nullable=False)
     # is nullable due to ability to use OAuth instead of raw password
-    password: Mapped[str] = mapped_column(nullable=True)
-    displayed_name: Mapped[str] = mapped_column(nullable=True)
+    password: Mapped[str | None] = mapped_column(nullable=True)
+    displayed_name: Mapped[str | None] = mapped_column(nullable=True)
     access_group: Mapped[AccessGroup] = mapped_column(nullable=False)
     user_type: Mapped[UserType] = mapped_column(nullable=False, default=UserType.Native)
-    last_logged_in: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow, nullable=True)
+    last_logged_in: Mapped[datetime.datetime | None] = mapped_column(default=datetime.datetime.utcnow, nullable=True)
 
     trips: Mapped[list['Trip']] = relationship(back_populates='user')
     shared_trips: Mapped[list['Trip']] = relationship(secondary='tripaccess')
@@ -85,7 +85,7 @@ class Product(BASE):
     proteins: Mapped[float] = mapped_column(nullable=False)
     fats: Mapped[float] = mapped_column(nullable=False)
     carbs: Mapped[float] = mapped_column(nullable=False)
-    grams: Mapped[float] = mapped_column(nullable=True)
+    grams: Mapped[float | None] = mapped_column(nullable=True)
     archived: Mapped[bool] = mapped_column(default=False, nullable=False)
 
 
@@ -115,7 +115,7 @@ class VkUser(BASE):
     )
     user_token: Mapped[str] = mapped_column(nullable=False)
     token_exp_time: Mapped[datetime.datetime] = mapped_column(nullable=False)
-    photo_url: Mapped[str] = mapped_column(nullable=True)
+    photo_url: Mapped[str | None] = mapped_column(nullable=True)
 
 
 class TripAccess(BASE):

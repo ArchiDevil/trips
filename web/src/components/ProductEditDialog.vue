@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { isNumber, notEmpty, min, between } from '../utils'
+import { computed, ref, watch, h, FunctionalComponent } from 'vue'
+import { notEmpty, min, between } from '../utils'
 import { Product } from '../interfaces'
 import { mande } from 'mande'
 
@@ -29,30 +29,30 @@ const caloriesLock = ref(false)
 
 const validation = computed(() => {
   const nutrientOk = (nutrient: number) => {
-    return isNumber(nutrient) && notEmpty(nutrient) && between(nutrient, 0, 100)
+    return !isNaN(nutrient) && between(nutrient, 0, 100)
   }
+  const pcals = Number.parseFloat(calories.value)
+  const pproteins = Number.parseFloat(proteins.value)
+  const pfats = Number.parseFloat(fats.value)
+  const pcarbs = Number.parseFloat(carbs.value)
+
   return {
-    name:
-      productName.value &&
-      productName.value.length > 0 &&
-      productName.value.length < 101,
-    cals:
-      isNumber(calories.value) &&
-      notEmpty(calories.value) &&
-      min(Number.parseFloat(calories.value), 0),
-    proteins: nutrientOk(Number.parseFloat(proteins.value)),
-    fats: nutrientOk(Number.parseFloat(fats.value)),
-    carbs: nutrientOk(Number.parseFloat(carbs.value)),
+    name: productName.value.length > 0 && productName.value.length < 101,
+    cals: !isNaN(pcals) && min(pcals, 0),
+    proteins: nutrientOk(pproteins),
+    fats: nutrientOk(pfats),
+    carbs: nutrientOk(pcarbs),
     grams:
-      isNumber(grams.value) &&
+      grams.value &&
+      !isNaN(grams.value) &&
       notEmpty(grams.value) &&
-      min(grams.value ? grams.value : 0.0, 0.1),
-    nutrition: +proteins.value + +fats.value + +carbs.value <= 100,
+      min(grams.value || 0.0, 0.1),
+    nutrition: pproteins + pfats + pcarbs <= 100,
   }
 })
 
-const formValid = computed(() => {
-  return (
+const formValid = computed(
+  () =>
     validation.value.name &&
     validation.value.cals &&
     validation.value.proteins &&
@@ -60,36 +60,33 @@ const formValid = computed(() => {
     validation.value.carbs &&
     validation.value.nutrition &&
     (custom.value ? validation.value.grams : true)
-  )
-})
+)
 
-const modalTitle = computed(() => {
-  return props.product
+const modalTitle = computed(() =>
+  props.product
     ? t('products.editModal.editTitle')
     : t('products.editModal.addTitle')
-})
+)
 
-const title = computed(() => {
-  return props.product
+const title = computed(() =>
+  props.product
     ? `${modalTitle.value}: ${props.product.name}`
     : modalTitle.value
-})
+)
 
 const calories = computed<string>({
   get(): string {
     if (caloriesLock.value === false) {
-      return caloriesInternal.value.toString()
+      return caloriesInternal.value
     }
 
     const value =
       Number.parseFloat(proteins.value) * 4.0 +
       Number.parseFloat(fats.value) * 9.0 +
       Number.parseFloat(carbs.value) * 4.0
-    return Number.parseFloat(value.toFixed(1)).toString()
+    return isNaN(value) ? '0.0' : value.toFixed(1)
   },
-  set(v: string) {
-    caloriesInternal.value = v
-  },
+  set: (v: string) => (caloriesInternal.value = v),
 })
 
 const submitForm = async () => {
@@ -100,7 +97,7 @@ const submitForm = async () => {
     proteins: proteins.value,
     fats: fats.value,
     carbs: carbs.value,
-    grams: grams.value,
+    grams: custom.value ? grams.value : undefined,
   })
   if (response.result == true) {
     emit('update')
@@ -118,7 +115,7 @@ watch(
   () => props.product,
   async (newProduct: Product | undefined) => {
     caloriesLock.value = false
-    if (newProduct === undefined) {
+    if (!newProduct) {
       productName.value = ''
       caloriesInternal.value = '0'
       proteins.value = '0'
@@ -137,25 +134,43 @@ watch(
     }
   }
 )
+
+const RowLabel = (props: { whatFor: string; label: string }) => {
+  return h(
+    'label',
+    { class: 'col-sm-2 col-form-label', for: props.whatFor },
+    props.label
+  )
+}
+
+RowLabel.props = {
+  whatFor: { type: String, required: true },
+  label: { type: String, required: true },
+}
+
+const InvalidNutrientFeedback: FunctionalComponent = () => {
+  return h(
+    'div',
+    { class: 'invalid-feedback' },
+    t('products.editModal.wrongNutrient')
+  )
+}
 </script>
 
 <template>
   <BaseModal :title="title">
     <template #body>
       <div class="mb-3 row">
-        <label
-          for="add-name-input"
-          class="col-sm-2 col-form-label"
-        >
-          {{ $t('products.editModal.nameTitle') }}
-        </label>
+        <RowLabel
+          what-for="add-name-input"
+          :label="$t('products.editModal.nameTitle')"
+        />
         <div class="col-sm-10">
           <input
             id="add-name-input"
             v-model="productName"
             type="text"
             class="form-control"
-            name="name"
             :placeholder="$t('products.editModal.namePlaceholder')"
             :class="{
               'is-valid': validation.name,
@@ -171,12 +186,10 @@ watch(
         </div>
       </div>
       <div class="mb-3 row">
-        <label
-          for="add-calories-input"
-          class="col-sm-2 col-form-label"
-        >
-          {{ $t('products.editModal.caloriesTitle') }}
-        </label>
+        <RowLabel
+          what-for="add-calories-input"
+          :label="$t('products.editModal.caloriesTitle')"
+        />
         <div class="col-sm-10">
           <div class="input-group">
             <input
@@ -184,7 +197,6 @@ watch(
               v-model="calories"
               type="text"
               class="form-control"
-              name="calories"
               :placeholder="$t('products.editModal.caloriesTitle')"
               autocomplete="off"
               :class="{
@@ -226,19 +238,16 @@ watch(
         </div>
       </div>
       <div class="mb-3 row">
-        <label
-          for="add-proteins-input"
-          class="col-sm-2 col-form-label"
-        >
-          {{ $t('products.editModal.proteinsTitle') }}
-        </label>
+        <RowLabel
+          what-for="add-proteins-input"
+          :label="$t('products.editModal.proteinsTitle')"
+        />
         <div class="col-sm-10">
           <input
             id="add-proteins-input"
             v-model="proteins"
             type="text"
             class="form-control"
-            name="proteins"
             :class="{
               'is-valid': validation.proteins,
               'is-invalid': !validation.proteins,
@@ -247,25 +256,20 @@ watch(
             tabindex="4"
             @focus="selectTarget($event)"
           >
-          <div class="invalid-feedback">
-            {{ $t('products.editModal.wrongNutrient') }}
-          </div>
+          <InvalidNutrientFeedback />
         </div>
       </div>
       <div class="mb-3 row">
-        <label
-          for="add-fats-input"
-          class="col-sm-2 col-form-label"
-        >
-          {{ $t('products.editModal.fatsTitle') }}
-        </label>
+        <RowLabel
+          what-for="add-fats-input"
+          :label="$t('products.editModal.fatsTitle')"
+        />
         <div class="col-sm-10">
           <input
             id="add-fats-input"
             v-model="fats"
             type="text"
             class="form-control"
-            name="fats"
             :class="{
               'is-valid': validation.fats,
               'is-invalid': !validation.fats,
@@ -274,25 +278,20 @@ watch(
             tabindex="5"
             @focus="selectTarget($event)"
           >
-          <div class="invalid-feedback">
-            {{ $t('products.editModal.wrongNutrient') }}
-          </div>
+          <InvalidNutrientFeedback />
         </div>
       </div>
       <div class="mb-3 row">
-        <label
-          for="add-carbs-input"
-          class="col-sm-2 col-form-label"
-        >
-          {{ $t('products.editModal.carbsTitle') }}
-        </label>
+        <RowLabel
+          what-for="add-carbs-input"
+          :label="$t('products.editModal.carbsTitle')"
+        />
         <div class="col-sm-10">
           <input
             id="add-carbs-input"
             v-model="carbs"
             type="text"
             class="form-control"
-            name="carbs"
             :class="{
               'is-valid': validation.carbs,
               'is-invalid': !validation.carbs,
@@ -301,9 +300,7 @@ watch(
             tabindex="6"
             @focus="selectTarget($event)"
           >
-          <div class="invalid-feedback">
-            {{ $t('products.editModal.wrongNutrient') }}
-          </div>
+          <InvalidNutrientFeedback />
         </div>
       </div>
       <div class="mb-3 row">
@@ -350,19 +347,16 @@ watch(
         v-if="custom"
         class="mb-3 row"
       >
-        <label
-          for="add-gpp-input"
-          class="col-sm-2 col-form-label"
-        >
-          {{ $t('products.editModal.mass') }}
-        </label>
+        <RowLabel
+          what-for="add-gpp-input"
+          :label="$t('products.editModal.mass')"
+        />
         <div class="col-sm-10">
           <input
             id="add-gpp-input"
             v-model="grams"
             type="text"
             class="form-control"
-            name="grams"
             :class="{
               'is-valid': validation.grams,
               'is-invalid': !validation.grams,
