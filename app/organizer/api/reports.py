@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Any, Literal
 
 from flask import Blueprint, abort
+from sqlalchemy import select
 from sqlalchemy.sql import func
 
 from organizer.auth import api_login_required_group
@@ -15,21 +16,22 @@ BP = Blueprint("reports", __name__, url_prefix="/reports")
 @api_login_required_group(AccessGroup.User)
 def shopping(trip_uid: str):
     with get_session() as session:
-        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        trip = session.execute(select(Trip).where(Trip.uid == trip_uid)).scalar()
         if not trip:
             return abort(404)
 
-        persons_count = (
-            session.query(func.sum(Group.persons))
-            .filter(Group.trip_id == trip.id)
-            .scalar()
-        )
-        meals = (
-            session.query(MealRecord.mass, Product.id, Product.name, Product.grams)
+        days_count = (trip.till_date - trip.from_date).days + 1
+
+        persons_count = session.execute(
+            select(func.sum(Group.persons)).where(Group.trip_id == trip.id)
+        ).scalar()
+
+        meals = session.execute(
+            select(MealRecord.mass, Product.id, Product.name, Product.grams)
             .join(Product)
-            .filter(MealRecord.trip_id == trip.id)
-            .all()
-        )
+            .where(MealRecord.trip_id == trip.id)
+            .where(MealRecord.day_number <= days_count)
+        ).all()
 
     products: dict[int, dict[str, Any]] = {}
     for meal in meals:
@@ -49,12 +51,14 @@ def shopping(trip_uid: str):
 @api_login_required_group(AccessGroup.User)
 def packing(trip_uid: str):
     with get_session() as session:
-        trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
+        trip = session.execute(select(Trip).where(Trip.uid == trip_uid)).scalar()
         if not trip:
             abort(404)
 
-        meals = (
-            session.query(
+        days_count = (trip.till_date - trip.from_date).days + 1
+
+        meals = session.execute(
+            select(
                 MealRecord.day_number,
                 MealRecord.meal_number,
                 MealRecord.mass,
@@ -62,26 +66,25 @@ def packing(trip_uid: str):
                 Product.grams,
             )
             .join(Product)
-            .filter(MealRecord.trip_id == trip.id)
+            .where(MealRecord.trip_id == trip.id)
+            .where(MealRecord.day_number <= days_count)
             .order_by(MealRecord.day_number)
-            .all()
-        )
+        ).all()
 
-        person_groups = [
-            group.persons
-            for group in session.query(Group.persons)
-            .filter(Group.trip_id == trip.id)
-            .all()
-        ]
+        person_groups = (
+            session.execute(select(Group.persons).where(Group.trip_id == trip.id))
+            .scalars()
+            .fetchall()
+        )
 
     products: dict[
         int,
         list[
             dict[
-                Literal['name', 'meal', 'mass', 'grams'],
+                Literal["name", "meal", "mass", "grams"],
                 str | int | float | list[int],
             ]
-        ]
+        ],
     ] = defaultdict(list)
     for meal in meals:
         day: int = meal.day_number

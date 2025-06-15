@@ -92,7 +92,11 @@ def get_trips():
         user_trips_req = user_trips_req.where(Trip.archived == False)
 
         user_trips = session.execute(user_trips_req).scalars()
-        shared_trips = session.execute(shared_trips_req).scalars() if shared_trips_req is not None else []
+        shared_trips = (
+            session.execute(shared_trips_req).scalars()
+            if shared_trips_req is not None
+            else []
+        )
 
         trips = []
         for trip in user_trips:
@@ -277,7 +281,10 @@ def copy(trip_uid: str):
             abort(404)
 
         if not user_has_trip_access(
-            existing_trip, g.user.id, g.user.access_group == AccessGroup.Administrator, session
+            existing_trip,
+            g.user.id,
+            g.user.access_group == AccessGroup.Administrator,
+            session,
         ):
             abort(403)
 
@@ -298,17 +305,22 @@ def copy(trip_uid: str):
 
         new_id = new_trip.id
 
-        meal_records = session.query(MealRecord).where(MealRecord.trip_id == existing_trip.id).all()
+        meal_records = (
+            session.query(MealRecord)
+            .where(MealRecord.trip_id == existing_trip.id)
+            .all()
+        )
         for meal in meal_records:
-            session.add(MealRecord(
-                trip_id=new_id,
-                product_id=meal.product_id,
-                day_number = meal.day_number,
-                meal_number=meal.meal_number,
-                mass=meal.mass
-            ))
+            session.add(
+                MealRecord(
+                    trip_id=new_id,
+                    product_id=meal.product_id,
+                    day_number=meal.day_number,
+                    meal_number=meal.meal_number,
+                    mass=meal.mass,
+                )
+            )
         session.commit()
-
 
     return get_trip(new_uid)
 
@@ -358,8 +370,10 @@ def download(trip_uid: str):
         if not trip:
             abort(404)
 
-        data = (
-            session.query(
+        days_count = (trip.till_date - trip.from_date).days + 1
+
+        data = session.execute(
+            select(
                 MealRecord.mass,
                 MealRecord.day_number,
                 MealRecord.meal_number,
@@ -367,10 +381,10 @@ def download(trip_uid: str):
                 Product.calories,
             )
             .join(Product)
+            .where(MealRecord.trip_id == trip.id)
+            .where(MealRecord.day_number <= days_count)
             .order_by(MealRecord.day_number, MealRecord.meal_number)
-            .filter(MealRecord.trip_id == trip.id)
-            .all()
-        )
+        ).all()
         for record in data:
             csv_content.append(
                 [

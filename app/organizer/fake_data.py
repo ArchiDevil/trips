@@ -88,4 +88,7 @@ def init_fake_data_internal(session):
                 MealRecord(trip_id=1, day_number=x + 1, meal_number=3, product_id=14, mass=60)
             ])
     session.add(MealRecord(trip_id=3, day_number=1, meal_number=0, product_id=1, mass=60))
+
+    # to check whether reports ignore days way later than the last day
+    session.add(MealRecord(trip_id=1, day_number=100, meal_number=0, product_id=2, mass=6000))
     session.commit()
