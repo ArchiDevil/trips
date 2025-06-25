@@ -1,5 +1,5 @@
 # Build web part
-FROM node:20 AS build
+FROM node:20-alpine AS build
 
 COPY ./web /web
 WORKDIR /web
@@ -7,10 +7,7 @@ WORKDIR /web
 RUN npm install && npm run build
 
 # Make proxy
-FROM nginx:1.23 AS proxy
-
-# install acme-nginx
-RUN apt update -y; apt install python3-pip -y; pip3 install acme-nginx
+FROM nginx:1.29-alpine-slim AS proxy
 
 RUN /bin/sh -c 'mkdir -p /etc/nginx/sites-enabled /var/www/hikehub.ru && rm /etc/nginx/conf.d/default.conf'
 COPY ./nginx/ /etc/nginx/

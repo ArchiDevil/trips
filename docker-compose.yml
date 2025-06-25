@@ -8,13 +8,18 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 2s
+      start_interval: 2s
 
   app:
     build:
       context: .
       dockerfile: app.Dockerfile
-    links:
-      - db
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
       SECRET_KEY: ${SECRET_KEY}
@@ -24,6 +29,9 @@ services:
       VK_CLIENT_ID: ${VK_CLIENT_ID}
       BREVO_API_KEY: ${BREVO_API_KEY}
     restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
 
   proxy:
     build:
@@ -31,8 +39,9 @@ services:
       dockerfile: proxy.Dockerfile
     ports:
       - "6161:6161"
-    links:
-      - app
+    depends_on:
+      app:
+        condition: service_started
     restart: on-failure
 
 volumes:
