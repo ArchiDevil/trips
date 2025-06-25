@@ -3,7 +3,7 @@ import { mande } from 'mande'
 import { computed, ref } from 'vue'
 
 import { Meal } from '../interfaces'
-import BaseIcon from './BaseIcon.vue';
+import BaseIcon from './BaseIcon.vue'
 
 const props = defineProps<{
   colorStyle: 'success' | 'warning' | 'danger' | 'info' | 'secondary'
@@ -15,6 +15,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   reload: []
   add: []
+  edit: [Meal]
   error: []
 }>()
 
@@ -28,41 +29,21 @@ const tableStyle = computed(() => {
   return `table-${props.colorStyle}`
 })
 
-const totalMass = computed(() => {
-  return props.meals
-    .reduce((total: number, meal: Meal) => total + meal.mass, 0)
-    .toFixed(0)
-})
-
-const totalProteins = computed(() => {
-  return props.meals
-    .reduce((total: number, meal: Meal) => total + meal.proteins, 0)
-    .toFixed(1)
-})
-
-const totalFats = computed(() => {
-  return props.meals
-    .reduce((total: number, meal: Meal) => total + meal.fats, 0)
-    .toFixed(1)
-})
-
-const totalCarbs = computed(() => {
-  return props.meals
-    .reduce((total: number, meal: Meal) => total + meal.carbs, 0)
-    .toFixed(1)
-})
-
-const totalCalories = computed(() => {
-  return props.meals
-    .reduce((total: number, meal: Meal) => total + meal.calories, 0)
-    .toFixed(1)
+const totalNutrients = computed(() => {
+  return {
+    mass: props.meals.reduce((total, meal) => total + meal.mass, 0),
+    proteins: props.meals.reduce((total, meal) => total + meal.proteins, 0),
+    fats: props.meals.reduce((total, meal) => total + meal.fats, 0),
+    carbs: props.meals.reduce((total, meal) => total + meal.carbs, 0),
+    calories: props.meals.reduce((total, meal) => total + meal.calories, 0),
+  }
 })
 
 const removeMeal = async (mealId: number) => {
   mealDeleting.value = true
-  const api = mande('/api/meals/remove')
+  const api = mande('/api/meals')
   try {
-    await api.delete('', {
+    await api.delete('/remove', {
       body: JSON.stringify({
         meal_id: mealId.toString(),
       }),
@@ -120,25 +101,43 @@ const removeMeal = async (mealId: number) => {
         <td class="name-col">
           <span>{{ meal.name }}</span>
         </td>
-        <td style="width: 4%">
-          <span
+        <td style="width: 5%">
+          <button
             v-if="editor"
-            class="text-end showme"
+            ref="dropdownToggle"
+            type="button"
+            class="btn btn-secondary btn-sm float-end dropdown-toggle showme"
+            style="
+              --bs-btn-padding-y: 0.1rem;
+              --bs-btn-padding-x: 0.5rem;
+              --bs-btn-font-size: 0.75rem;
+            "
+            aria-expanded="false"
+            data-bs-toggle="dropdown"
           >
-            <a
-              href="javascript:void(0);"
-              @click="removeMeal(meal.id)"
-            >
-              <BaseIcon
-                icon="fa-trash"
-                class="text-danger"
-                :title="$t('meals.day.tableDeleteRecord')"
-              />
-            </a>
-          </span>
+            <BaseIcon icon="fa-ellipsis-v" />
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a
+                class="dropdown-item"
+                href="javascript:void(0);"
+                @click="emit('edit', meal)"
+              >
+                {{ $t('meals.day.tableEditRecord') }}
+              </a>
+              <a
+                class="dropdown-item"
+                href="javascript:void(0);"
+                @click="removeMeal(meal.id)"
+              >
+                {{ $t('meals.day.tableDeleteRecord') }}
+              </a>
+            </li>
+          </ul>
         </td>
         <td class="text-end text-truncate value-col">
-          {{ meal.mass }}
+          {{ meal.mass.toFixed(0) }}
         </td>
         <td class="text-end text-truncate d-none d-sm-table-cell value-col">
           {{ meal.proteins.toFixed(1) }}
@@ -164,19 +163,19 @@ const removeMeal = async (mealId: number) => {
           {{ $t('meals.day.tableTotalRecord') }}
         </td>
         <td class="text-end text-truncate value-col">
-          {{ totalMass }}
+          {{ totalNutrients.mass.toFixed(0) }}
         </td>
         <td class="text-end text-truncate d-none d-sm-table-cell value-col">
-          {{ totalProteins }}
+          {{ totalNutrients.proteins.toFixed(1) }}
         </td>
         <td class="text-end text-truncate d-none d-sm-table-cell value-col">
-          {{ totalFats }}
+          {{ totalNutrients.fats.toFixed(1) }}
         </td>
         <td class="text-end text-truncate d-none d-sm-table-cell value-col">
-          {{ totalCarbs }}
+          {{ totalNutrients.carbs.toFixed(1) }}
         </td>
         <td class="text-end text-truncate value-col">
-          {{ totalCalories }}
+          {{ totalNutrients.calories.toFixed(1) }}
         </td>
       </tr>
     </tfoot>

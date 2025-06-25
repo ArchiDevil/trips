@@ -197,7 +197,7 @@ const InvalidNutrientFeedback: FunctionalComponent = () => {
               v-model="calories"
               type="text"
               class="form-control"
-              :placeholder="$t('products.editModal.caloriesTitle')"
+              :placeholder="$t('products.editModal.caloriesPlaceholder')"
               autocomplete="off"
               :class="{
                 'is-valid': validation.cals,

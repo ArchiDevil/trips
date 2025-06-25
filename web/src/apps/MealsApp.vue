@@ -3,12 +3,13 @@ import { computed, onMounted, ref } from 'vue'
 import { mande } from 'mande'
 import { Modal } from 'bootstrap'
 
-import { Trip, Day, MealName } from '../interfaces'
+import { Trip, Day, MealName, Meal } from '../interfaces'
 
 import DayCard from '../components/DayCard.vue'
 import TripHandlingCard from '../components/TripHandlingCard.vue'
 import BaseIcon from '../components/BaseIcon.vue'
-import AddProductModal from '../components/AddProductModal.vue'
+import AddMealModal from '../components/AddMealModal.vue'
+import EditMealModal from '../components/EditMealModal.vue'
 import CycleDaysModal from '../components/CycleDaysModal.vue'
 import FatalErrorModal from '../components/FatalErrorModal.vue'
 
@@ -103,10 +104,7 @@ const fetchMealsInfo = async () => {
 
 const currentDay = ref<Day>()
 const currentMealName = ref<MealName>()
-const showAddProductModal = (
-  dayNumber: number,
-  datatype: MealName
-) => {
+const showAddMealModal = (dayNumber: number, datatype: MealName) => {
   currentDay.value = days.value.find((val) => val.number == dayNumber)
   currentMealName.value = datatype
 
@@ -119,6 +117,27 @@ const showAddProductModal = (
     keyboard: false,
   })
   modal.show()
+}
+
+const currentMeal = ref<Meal>()
+const mealsModal = ref<Modal>()
+const showEditMealModal = (dayNumber: number, meal: Meal) => {
+  currentMeal.value = meal
+  currentDay.value = days.value.find((val) => val.number == dayNumber)
+
+  const modalElem = document.getElementById('edit-meal-modal')
+  if (!modalElem) {
+    return
+  }
+
+  if (mealsModal.value) {
+    mealsModal.value.hide()
+  }
+
+  mealsModal.value = new Modal(modalElem, {
+    keyboard: false,
+  })
+  mealsModal.value.show()
 }
 
 const showFatalErrorModal = () => {
@@ -153,7 +172,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AddProductModal
+  <AddMealModal
     v-if="trip"
     id="add-product-modal"
     :trip="trip"
@@ -161,6 +180,19 @@ onMounted(async () => {
     :meal-name="currentMealName!"
     @error="showFatalErrorModal"
     @update="reloadDay(currentDay!)"
+  />
+
+  <EditMealModal
+    id="edit-meal-modal"
+    :meal="currentMeal!"
+    @error="showFatalErrorModal"
+    @update="() => {
+      reloadDay(currentDay!);
+      if (mealsModal) {
+        mealsModal.hide()
+        mealsModal = undefined
+      }
+    }"
   />
 
   <CycleDaysModal
@@ -318,7 +350,8 @@ onMounted(async () => {
           :trip="trip"
           @reload="reloadDay(day)"
           @error="showFatalErrorModal()"
-          @add="(n, type) => showAddProductModal(n, type)"
+          @add="(n, type) => showAddMealModal(n, type)"
+          @edit="(meal) => showEditMealModal(day.number, meal)"
         />
       </div>
       <span

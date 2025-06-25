@@ -3,7 +3,6 @@
     "card": {
       "header": "Информация о походе",
       "participants": "Участников",
-      "editButton": "Редактировать",
       "shoppingButton": "Список покупок",
       "packingButton": "Отчет для фасовки"
     },
@@ -43,7 +42,8 @@
       "resultsTitle": "Сумма за день",
       "tableDeleteRecord": "Удалить",
       "tableTotalRecord": "Итого",
-      "clearDayButton": "Очистить день"
+      "clearDayButton": "Очистить день",
+      "tableEditRecord": "Изменить"
     },
     "units": {
       "grams": "г",
@@ -64,6 +64,14 @@
       "closeButton": "Закрыть",
       "addButton": "Добавить",
       "clearProductButton": "Очистить",
+      "invalidMassError": "Введите положительное число"
+    },
+    "editModal": {
+      "title": "Редактировать продукт",
+      "closeButton": "Закрыть",
+      "commitButton": "Применить",
+      "massTitle": "Масса",
+      "massPlaceholder": "Введите массу",
       "invalidMassError": "Введите положительное число"
     },
     "errorModal": {
@@ -164,8 +172,7 @@
         "five": "5 групп"
       },
       "groupNamePrefix": "Группа",
-      "groupErrorMessage": "Введите целое число больше 0",
-      "archiveButtonTitle": "Архивировать"
+      "groupErrorMessage": "Введите целое число больше 0"
     },
     "copyModal": {
       "title": "Скопировать поход",

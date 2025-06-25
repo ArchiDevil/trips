@@ -1,9 +1,10 @@
 from collections import defaultdict
 from datetime import datetime, date, timedelta, timezone
 from typing import Any
+import math
 
 from flask import Blueprint, abort, request, url_for, g
-from sqlalchemy import update
+from sqlalchemy import update, select
 
 from organizer.auth import api_login_required_group
 from organizer.db import get_session
@@ -19,7 +20,7 @@ def format_date(first_day: date, current_day_number: int):
 
 @BP.post('/add')
 @api_login_required_group(AccessGroup.User)
-def meals_add():
+def add():
     json: dict[str, Any] = request.json # type: ignore
     trip_uid = json['trip_uid']
     meal_name = json['meal_name']
@@ -64,9 +65,10 @@ def meals_add():
 
     product_id = json['product_id']
     with get_session() as session:
-        product = session.query(Product.id,
-                                Product.grams).filter(Product.id == product_id,
-                                                      Product.archived == False).first()
+        product = session.execute(
+            select(Product.id, Product.grams)
+            .where(Product.id == product_id, Product.archived == False)
+        ).first()
 
         if not product:
             return {'result': False}
@@ -105,9 +107,60 @@ def meals_add():
         return {'result': True}
 
 
+@BP.post('/edit')
+@api_login_required_group(AccessGroup.User)
+def edit():
+    if 'meal_id' not in request.json or 'mass' not in request.json or 'unit' not in request.json: # type: ignore
+        abort(400)
+
+    try:
+        meal_id = int(request.json['meal_id']) # type: ignore
+        mass = int(request.json['mass']) # type: ignore
+        unit = int(request.json['unit']) # type: ignore
+        assert unit in [x.value for x in Units]
+
+        if mass < 0 or math.isnan(mass):
+            raise ValueError()
+    except (ValueError, AssertionError):
+        abort(400)
+
+    with get_session() as session:
+        meal_info = session.execute(
+            select(MealRecord).where(MealRecord.id == meal_id)
+        ).scalar_one_or_none()
+
+        if not meal_info:
+            abort(400)
+
+        trip = session.execute(
+            select(Trip).where(Trip.id == meal_info.trip_id)
+        ).scalar_one()
+
+        if not user_has_trip_access(trip,
+                                    g.user.id,
+                                    g.user.access_group == AccessGroup.Administrator,
+                                    session):
+            abort(403)
+
+        product = session.execute(
+            select(Product).where(Product.id == meal_info.product_id)
+        ).scalar_one()
+
+        if product.grams is not None:
+            meal_info.mass = int(mass * product.grams)
+        else:
+            if unit == Units.PIECES.value:
+                abort(400)
+            meal_info.mass = mass
+        trip.last_update = datetime.now(timezone.utc)
+        session.commit()
+
+    return {'result': True}
+
+
 @BP.delete('/remove')
 @api_login_required_group(AccessGroup.User)
-def meals_remove():
+def remove():
     if 'meal_id' not in request.json: # type: ignore
         abort(400)
 
@@ -121,10 +174,7 @@ def meals_remove():
         if not meal_info:
             return {'result': False}
 
-        trip = session.query(Trip).filter(Trip.id == meal_info.trip_id).first()
-        if not trip:
-            abort(400)
-
+        trip = session.query(Trip).filter(Trip.id == meal_info.trip_id).one()
         if not user_has_trip_access(trip,
                                     g.user.id,
                                     g.user.access_group == AccessGroup.Administrator,
@@ -141,7 +191,7 @@ def meals_remove():
 
 @BP.post('/clear')
 @api_login_required_group(AccessGroup.User)
-def meals_clear():
+def clear():
     json: Any = request.json
     if 'trip_uid' not in json or 'day_number' not in json:
         abort(400)
@@ -173,17 +223,23 @@ def meals_clear():
 
 def extract_meals(trip_id: int, day_number: int):
     with get_session() as session:
-        meals_info = session.query(MealRecord.id,
-                                   MealRecord.trip_id,
-                                   MealRecord.meal_number,
-                                   MealRecord.product_id,
-                                   MealRecord.mass,
-                                   Product.name,
-                                   Product.calories,
-                                   Product.proteins,
-                                   Product.fats,
-                                   Product.carbs).join(Product).filter(MealRecord.trip_id == trip_id,
-                                                                       MealRecord.day_number == day_number).all()
+        meals_info = session.execute(
+            select(
+                MealRecord.id,
+                MealRecord.trip_id,
+                MealRecord.meal_number,
+                MealRecord.product_id,
+                MealRecord.mass,
+                Product.name,
+                Product.calories,
+                Product.proteins,
+                Product.fats,
+                Product.carbs
+            )
+            .join(Product)
+            .where(MealRecord.trip_id == trip_id, MealRecord.day_number == day_number)
+            .order_by(MealRecord.id)
+        ).all()
         meals_map = {
             0: 'breakfast',
             1: 'lunch',
@@ -203,7 +259,8 @@ def extract_meals(trip_id: int, day_number: int):
                 'calories': meal_info.calories * meal_info.mass / 100.0,
                 'proteins': meal_info.proteins * meal_info.mass / 100.0,
                 'fats': meal_info.fats * meal_info.mass / 100.0,
-                'carbs': meal_info.carbs * meal_info.mass / 100.0
+                'carbs': meal_info.carbs * meal_info.mass / 100.0,
+                'product_id': meal_info.product_id
             }
             output[meals_map[meal_info.meal_number]].append(meal_record)
         return output
@@ -211,7 +268,7 @@ def extract_meals(trip_id: int, day_number: int):
 
 @BP.get('/<trip_uid>')
 @api_login_required_group(AccessGroup.User)
-def get_meals(trip_uid: str):
+def get(trip_uid: str):
     with get_session() as session:
         trip = session.query(Trip).filter(Trip.uid == trip_uid).first()
         if not trip:

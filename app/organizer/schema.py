@@ -102,6 +102,8 @@ class MealRecord(BASE):
     )
     day_number: Mapped[int] = mapped_column(nullable=False)
     meal_number: Mapped[int] = mapped_column(nullable=False)
+
+    # TODO: it must be floating value, not integer
     mass: Mapped[int] = mapped_column(nullable=False)
 
 

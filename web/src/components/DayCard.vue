@@ -6,11 +6,11 @@ import { Dropdown } from 'bootstrap'
 import MealsTable from './MealsTable.vue'
 import ResultsTable from './ResultsTable.vue'
 import BaseIcon from './BaseIcon.vue'
-import { Trip, Day, MealName } from '../interfaces'
+import { Trip, Day, MealName, Meal } from '../interfaces'
 
 const props = defineProps<{
-  trip: Trip,
-  day: Day,
+  trip: Trip
+  day: Day
   editor: boolean
 }>()
 
@@ -18,6 +18,7 @@ const emit = defineEmits<{
   reload: []
   error: []
   add: [number, MealName]
+  edit: [Meal]
 }>()
 
 const dayId = computed(() => {
@@ -142,6 +143,7 @@ onMounted(() => {
         @reload="$emit('reload')"
         @error="$emit('error')"
         @add="$emit('add', day.number, 'breakfast')"
+        @edit="(meal) => $emit('edit', meal)"
       />
       <MealsTable
         :editor="editor"
@@ -151,6 +153,7 @@ onMounted(() => {
         @reload="$emit('reload')"
         @error="$emit('error')"
         @add="$emit('add', day.number, 'lunch')"
+        @edit="(meal) => $emit('edit', meal)"
       />
       <MealsTable
         :editor="editor"
@@ -160,6 +163,7 @@ onMounted(() => {
         @reload="$emit('reload')"
         @error="$emit('error')"
         @add="$emit('add', day.number, 'dinner')"
+        @edit="(meal) => $emit('edit', meal)"
       />
       <MealsTable
         :editor="editor"
@@ -169,6 +173,7 @@ onMounted(() => {
         @reload="$emit('reload')"
         @error="$emit('error')"
         @add="$emit('add', day.number, 'snacks')"
+        @edit="(meal) => $emit('edit', meal)"
       />
       <ResultsTable
         :day="day"

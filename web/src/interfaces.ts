@@ -75,6 +75,7 @@ export interface Meal {
   proteins: number
   fats: number
   carbs: number
+  product_id: number
 }
 
 export type MealName = 'breakfast' | 'lunch' | 'dinner' | 'snacks'
@@ -98,4 +99,9 @@ export interface User {
   last_logged_in: string
   user_type: UserType
   access_group: UserAccessGroup
+}
+
+export interface UnitsResponse {
+  result: boolean
+  units: number[]
 }

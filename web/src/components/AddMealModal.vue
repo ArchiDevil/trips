@@ -3,7 +3,7 @@ import { mande } from 'mande'
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { Day, MealName, Trip } from '../interfaces'
+import { Day, MealName, Trip, UnitsResponse } from '../interfaces'
 import BaseModal from './BaseModal.vue'
 
 const props = defineProps<{
@@ -36,10 +36,6 @@ const validation = computed(() => {
   }
 })
 
-const errorMessageVisible = computed(() => {
-  return errorMessage.value.length > 0
-})
-
 const submitDisabled = computed(() => {
   return (
     productId.value === 0 ||
@@ -57,7 +53,7 @@ const setProduct = async (id: number, name: string) => {
   const api = mande(`/api/products/units?id=${productId.value}`)
   try {
     units.value = []
-    const response = await api.get<{ result: boolean; units: number[] }>()
+    const response = await api.get<UnitsResponse>()
     if (response.result === false) {
       return
     }
@@ -291,8 +287,7 @@ onMounted(() => {
 
     <template #footer>
       <span
-        v-if="errorMessageVisible"
-        id="error-message"
+        v-if="errorMessage.length > 0"
         class="align-middle text-danger mx-3"
       >
         {{ errorMessage }}
@@ -306,7 +301,6 @@ onMounted(() => {
         {{ $t('meals.addModal.closeButton') }}
       </button>
       <button
-        id="add-product-button"
         :disabled="submitDisabled"
         tabindex="4"
         type="button"
