@@ -7,7 +7,7 @@ from organizer.db import get_session
 from organizer.schema import MealRecord, Trip, TripAccess, Units
 
 
-def test_api_rejects_adding_without_logged_in(client: FlaskClient):
+def test_rejects_adding_without_logged_in(client: FlaskClient):
     result = client.post(
         '/api/meals/add',
         data={
@@ -22,7 +22,7 @@ def test_api_rejects_adding_without_logged_in(client: FlaskClient):
     assert result.status_code == 401
 
 
-def test_api_rejects_adding_for_non_owned_trip(org_logged_client: FlaskClient):
+def test_rejects_adding_for_non_owned_trip(org_logged_client: FlaskClient):
     result = org_logged_client.post(
         '/api/meals/add',
         json={
@@ -37,12 +37,12 @@ def test_api_rejects_adding_for_non_owned_trip(org_logged_client: FlaskClient):
     assert result.status_code == 403
 
 
-def test_api_rejects_removing_without_logged_in(client: FlaskClient):
+def test_rejects_removing_without_logged_in(client: FlaskClient):
     result = client.delete('/api/meals/remove', data={'meal_id': 1})
     assert result.status_code == 401
 
 
-def test_api_rejects_removing_for_non_owned_trip(org_logged_client: FlaskClient):
+def test_rejects_removing_for_non_owned_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(
@@ -60,7 +60,7 @@ def test_api_rejects_removing_for_non_owned_trip(org_logged_client: FlaskClient)
     assert result.status_code == 403
 
 
-def test_api_add_adds_product(org_logged_client: FlaskClient, app: Flask):
+def test_add_adds_product(org_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
             record = (
@@ -107,7 +107,7 @@ def test_api_add_adds_product(org_logged_client: FlaskClient, app: Flask):
             assert record
 
 
-def test_api_add_adds_product_to_shared_trip(org_logged_client: FlaskClient):
+def test_add_adds_product_to_shared_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(TripAccess(trip_id=3, user_id=2))
@@ -157,7 +157,7 @@ def test_api_add_adds_product_to_shared_trip(org_logged_client: FlaskClient):
             assert record
 
 
-def test_api_add_merges_existing_product(org_logged_client: FlaskClient, app: Flask):
+def test_add_merges_existing_product(org_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
             record = (
@@ -204,7 +204,7 @@ def test_api_add_merges_existing_product(org_logged_client: FlaskClient, app: Fl
             assert record
 
 
-def test_api_add_adds_a_product_with_pcs(org_logged_client: FlaskClient, app: Flask):
+def test_add_adds_a_product_with_pcs(org_logged_client: FlaskClient, app: Flask):
     result = org_logged_client.post(
         '/api/meals/add',
         json={
@@ -235,7 +235,7 @@ def test_api_add_adds_a_product_with_pcs(org_logged_client: FlaskClient, app: Fl
             assert record
 
 
-def test_api_add_merges_product_with_pcs(org_logged_client: FlaskClient, app: Flask):
+def test_add_merges_product_with_pcs(org_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
             session.add(
@@ -275,122 +275,44 @@ def test_api_add_merges_product_with_pcs(org_logged_client: FlaskClient, app: Fl
             assert record
 
 
-def test_api_add_rejects_incorrect_request(org_logged_client: FlaskClient):
+def test_add_rejects_incorrect_request(org_logged_client: FlaskClient):
     result = org_logged_client.post('/api/meals/add')
     assert result.status_code == 415
 
-
-@pytest.mark.parametrize('trip_id', ['not a number', 982])
-def test_api_add_returns_fail_on_incorrect_trip_id(
-    org_logged_client: FlaskClient, trip_id
+@pytest.mark.parametrize('data', [
+    {'trip_uid': 'not a number'},
+    {'trip_uid': 982},
+    {'meal_name': 256},
+    {'meal_name': 'nan'},
+    {'day_number': 256},
+    {'day_number': 'nan'},
+    {'mass': -250},
+    {'mass': 'nan'},
+    {'unit': 999},
+    {'unit': 'squirrels'},
+    {'unit': Units.PIECES.value},
+    {'product_id': 999},
+    {'product_id': 'numbers'},
+])
+def test_add_rejects_incorrect_data(
+    org_logged_client: FlaskClient, data: dict
 ):
-    result = org_logged_client.post(
-        '/api/meals/add',
-        json={
-            'trip_uid': trip_id,
-            'meal_name': 'breakfast',
-            'day_number': 1,
-            'mass': 10,
-            'unit': Units.GRAMMS.value,
-            'product_id': 1,
-        },
-    )
+    json = {
+        'trip_uid': 'uid1',
+        'meal_name': 'breakfast',
+        'day_number': 1,
+        'mass': 10,
+        'unit': Units.GRAMMS.value,
+        'product_id': 1,
+    }
+    json.update(data)
+
+    result = org_logged_client.post('/api/meals/add', json=json)
     assert result.json
     assert not result.json['result']
 
 
-@pytest.mark.parametrize('name', [256, 'nan'])
-def test_api_add_returns_fail_on_incorrect_meal_name(
-    org_logged_client: FlaskClient, name
-):
-    result = org_logged_client.post(
-        '/api/meals/add',
-        json={
-            'trip_uid': 'uid1',
-            'meal_name': name,
-            'day_number': 1,
-            'mass': 10,
-            'unit': Units.GRAMMS.value,
-            'product_id': 1,
-        },
-    )
-    assert result.json
-    assert not result.json['result']
-
-
-@pytest.mark.parametrize('day', [256, 'nan'])
-def test_api_add_returns_fail_on_incorrect_day_number(
-    org_logged_client: FlaskClient, day
-):
-    result = org_logged_client.post(
-        '/api/meals/add',
-        json={
-            'trip_uid': 'uid1',
-            'meal_name': 'breakfast',
-            'day_number': day,
-            'mass': 10,
-            'unit': Units.GRAMMS.value,
-            'product_id': 1,
-        },
-    )
-    assert result.json
-    assert not result.json['result']
-
-
-@pytest.mark.parametrize('mass', [-250, 'nan'])
-def test_api_add_returns_fail_on_incorrect_mass(org_logged_client: FlaskClient, mass):
-    result = org_logged_client.post(
-        '/api/meals/add',
-        json={
-            'trip_uid': 'uid1',
-            'meal_name': 'breakfast',
-            'day_number': 1,
-            'mass': mass,
-            'unit': Units.GRAMMS.value,
-            'product_id': 1,
-        },
-    )
-    assert result.json
-    assert not result.json['result']
-
-
-@pytest.mark.parametrize('unit', [999, 'squirrels', Units.PIECES.value])
-def test_api_add_returns_fail_on_incorrect_unit(org_logged_client: FlaskClient, unit):
-    result = org_logged_client.post(
-        '/api/meals/add',
-        json={
-            'trip_uid': 'uid1',
-            'meal_name': 'breakfast',
-            'day_number': 1,
-            'mass': 10,
-            'unit': unit,
-            'product_id': 1,
-        },
-    )
-    assert result.json
-    assert not result.json['result']
-
-
-@pytest.mark.parametrize('product', [999, 'numbers'])
-def test_api_add_returns_fail_on_incorrect_product_id(
-    org_logged_client: FlaskClient, product
-):
-    result = org_logged_client.post(
-        '/api/meals/add',
-        json={
-            'trip_uid': 'uid1',
-            'meal_name': 'breakfast',
-            'day_number': 1,
-            'mass': 10,
-            'unit': Units.GRAMMS.value,
-            'product_id': product,
-        },
-    )
-    assert result.json
-    assert not result.json['result']
-
-
-def test_api_add_returns_fail_on_archived_product_id(org_logged_client: FlaskClient):
+def test_add_returns_fail_on_archived_product_id(org_logged_client: FlaskClient):
     result = org_logged_client.post(
         '/api/meals/add',
         json={
@@ -406,7 +328,7 @@ def test_api_add_returns_fail_on_archived_product_id(org_logged_client: FlaskCli
     assert not result.json['result']
 
 
-def test_api_add_updates_trip(org_logged_client: FlaskClient, app: Flask):
+def test_add_updates_trip(org_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
             trip = session.query(Trip).filter(Trip.id == 1).one()
@@ -432,7 +354,123 @@ def test_api_add_updates_trip(org_logged_client: FlaskClient, app: Flask):
             assert first_time != trip.last_update
 
 
-def test_api_remove_removes(org_logged_client: FlaskClient, app: Flask):
+def test_edit_rejects_not_logged_in(client: FlaskClient):
+    response = client.post(
+        '/api/meals/edit',
+        json={
+            'meal_id': 1,
+            'mass': 987,
+            'unit': Units.GRAMMS.value
+        },
+    )
+
+    assert response.status_code == 401
+
+
+def test_edit_rejects_non_owned_trip(org_logged_client: FlaskClient, app: Flask):
+    with app.app_context():
+        with get_session() as session:
+            record = session.query(MealRecord).where(MealRecord.trip_id == 3).one()
+            record_id = record.id
+
+    result = org_logged_client.post(
+        '/api/meals/edit',
+        json={
+            'meal_id': record_id,
+            'mass': 987,
+            'unit': Units.GRAMMS.value
+        }
+    )
+
+    assert result.status_code == 403
+
+
+@pytest.mark.parametrize("data", [
+    {"meal_id": 100500},
+    {"mass": 'nan'},
+    {"mass": -200},
+    {"unit": 'something wrong'},
+    {"unit": Units.PIECES.value},
+    {"meal_id": None},
+    {"mass": None},
+    {"unit": None},
+])
+def test_edit_rejects_incorrect_data(org_logged_client: FlaskClient, data: dict):
+    json = {
+        "meal_id": 1,
+        "mass": 200,
+        "unit": Units.GRAMMS.value,
+    }
+    json.update(data)
+    for key, val in data.items():
+        if val is None:
+            del json[key]
+
+    result = org_logged_client.post('/api/meals/edit', json=json)
+    assert result.status_code == 400
+
+
+def test_edit_edits(org_logged_client: FlaskClient, app: Flask):
+    result = org_logged_client.post(
+        '/api/meals/edit',
+        json={
+            'meal_id': 1,
+            'mass': 987,
+            'unit': Units.GRAMMS.value
+        }
+    )
+    assert result.status_code == 200
+    assert result.json is not None
+    assert result.json['result'] is True
+
+    with app.app_context():
+        with get_session() as session:
+            record = session.query(MealRecord).filter(MealRecord.id == 1).one()
+            assert record.mass == 987
+
+
+def test_edit_edits_with_pieces(org_logged_client: FlaskClient, app: Flask):
+    result = org_logged_client.post(
+        '/api/meals/edit',
+        json={
+            'meal_id': 5,
+            'mass': 6,
+            'unit': Units.PIECES.value
+        }
+    )
+    assert result.status_code == 200
+    assert result.json is not None
+    assert result.json['result'] is True
+
+    with app.app_context():
+        with get_session() as session:
+            record = session.query(MealRecord).filter(MealRecord.id == 5).one()
+            assert record.mass == 6 * 5.5
+
+
+def test_edit_updates_trip(org_logged_client: FlaskClient, app: Flask):
+    with app.app_context():
+        with get_session() as session:
+            trip = session.query(Trip).filter(Trip.id == 1).one()
+            first_time = trip.last_update
+
+    result = org_logged_client.post(
+        '/api/meals/edit',
+        json={
+            'meal_id': 1,
+            'mass': 987,
+            'unit': Units.GRAMMS.value
+        }
+    )
+    assert result.status_code == 200
+
+    with app.app_context():
+        with get_session() as session:
+            trip = session.query(Trip).filter(Trip.id == 1).one()
+            assert first_time != trip.last_update
+
+
+def test_remove_removes(org_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
             record = session.query(MealRecord).filter(MealRecord.id == 1).first()
@@ -449,7 +487,7 @@ def test_api_remove_removes(org_logged_client: FlaskClient, app: Flask):
             assert not record
 
 
-def test_api_remove_removes_shared_trip(org_logged_client: FlaskClient):
+def test_remove_removes_shared_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(TripAccess(trip_id=3, user_id=2))
@@ -473,7 +511,7 @@ def test_api_remove_removes_shared_trip(org_logged_client: FlaskClient):
 
 
 @pytest.mark.parametrize('meal_id', ['nan', None])
-def test_api_remove_rejects_incorrect_data(org_logged_client: FlaskClient, meal_id):
+def test_remove_rejects_incorrect_data(org_logged_client: FlaskClient, meal_id):
     result = org_logged_client.delete(
         '/api/meals/remove', json={'meal_id': meal_id} if meal_id is not None else {}
     )
@@ -481,7 +519,7 @@ def test_api_remove_rejects_incorrect_data(org_logged_client: FlaskClient, meal_
 
 
 @pytest.mark.parametrize('meal_id', [-900, 900])
-def test_api_remove_returns_fail_on_incorrect_meal_id(
+def test_remove_returns_fail_on_incorrect_meal_id(
     org_logged_client: FlaskClient, meal_id
 ):
     result = org_logged_client.delete('/api/meals/remove', json={'meal_id': meal_id})
@@ -490,7 +528,7 @@ def test_api_remove_returns_fail_on_incorrect_meal_id(
     assert not result.json['result']
 
 
-def test_api_remove_updates_trip(org_logged_client: FlaskClient, app: Flask):
+def test_remove_updates_trip(org_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
             trip = session.query(Trip).filter(Trip.id == 1).one()
@@ -505,26 +543,26 @@ def test_api_remove_updates_trip(org_logged_client: FlaskClient, app: Flask):
             assert first_time != trip.last_update
 
 
-def test_api_clear_rejects_incorrect_request(org_logged_client: FlaskClient):
+def test_clear_rejects_incorrect_request(org_logged_client: FlaskClient):
     result = org_logged_client.post('/api/meals/clear')
     assert result.status_code == 415
 
 
-def test_api_clear_rejects_for_non_owned_trip(org_logged_client: FlaskClient):
+def test_clear_rejects_for_non_owned_trip(org_logged_client: FlaskClient):
     result = org_logged_client.post(
         '/api/meals/clear', json={'trip_uid': 'uid3', 'day_number': 1}
     )
     assert result.status_code == 403
 
 
-def test_api_clear_rejects_non_existing_trip(org_logged_client: FlaskClient):
+def test_clear_rejects_non_existing_trip(org_logged_client: FlaskClient):
     result = org_logged_client.post(
         '/api/meals/clear', json={'trip_uid': 'uid999', 'day_number': 1}
     )
     assert result.status_code == 404
 
 
-def test_api_clear_clears(org_logged_client: FlaskClient, app: Flask):
+def test_clear_clears(org_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
             records = (
@@ -551,7 +589,7 @@ def test_api_clear_clears(org_logged_client: FlaskClient, app: Flask):
             assert len(records) == 0
 
 
-def test_api_clear_shared_trip(org_logged_client: FlaskClient):
+def test_clear_shared_trip(org_logged_client: FlaskClient):
     with org_logged_client.application.app_context():
         with get_session() as session:
             session.add(TripAccess(trip_id=3, user_id=2))
@@ -574,16 +612,17 @@ def test_api_clear_shared_trip(org_logged_client: FlaskClient):
             assert len(records) == 0
 
 
-@pytest.mark.parametrize(
-    'json',
-    [{'day_number': 1}, {'trip_uid': 'yes'}, {'trip_uid': 'uid1', 'day_number': 'yes'}],
-)
-def test_api_clear_rejects_incorrect_data(org_logged_client: FlaskClient, json):
+@pytest.mark.parametrize('json', [
+    {'day_number': 1},
+    {'trip_uid': 'yes'},
+    {'trip_uid': 'uid1', 'day_number': 'yes'},
+])
+def test_clear_rejects_incorrect_data(org_logged_client: FlaskClient, json):
     result = org_logged_client.post('/api/meals/clear', json=json)
     assert result.status_code == 400
 
 
-def test_api_clear_updates_trip(org_logged_client: FlaskClient, app: Flask):
+def test_clear_updates_trip(org_logged_client: FlaskClient, app: Flask):
     with app.app_context():
         with get_session() as session:
             trip = session.query(Trip).filter(Trip.id == 1).one()
@@ -642,7 +681,7 @@ def test_get_trip_meals_returns_data_for_shared_trip(org_logged_client: FlaskCli
 
 
 def test_get_trip_day_meals_rejects_not_logged_in(client: FlaskClient):
-    result = client.get('/api/meals/1/1')
+    result = client.get('/api/meals/uid1/1')
     assert result.status_code == 401
 
 
@@ -669,12 +708,13 @@ def test_get_trip_day_meals_returns_meals(org_logged_client: FlaskClient):
     day = response.json['day']
     assert 1 == day['number']
     assert day['meals']
+    assert 'product_id' in day['meals']['breakfast'][0]
     assert day['date']
     assert day['reload_link']
 
 
 def test_meals_cycle_rejects_not_logged_in(client: FlaskClient):
-    response = client.post('/api/meals/1/cycle',
+    response = client.post('/api/meals/uid1/cycle',
                            json={
                                'src-start': '1',
                                'src-end': '1',

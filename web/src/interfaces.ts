@@ -75,6 +75,7 @@ export interface Meal {
   proteins: number
   fats: number
   carbs: number
+  product_id: number
 }
 
 export type MealName = 'breakfast' | 'lunch' | 'dinner' | 'snacks'
