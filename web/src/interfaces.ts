@@ -100,3 +100,8 @@ export interface User {
   user_type: UserType
   access_group: UserAccessGroup
 }
+
+export interface UnitsResponse {
+  result: boolean
+  units: number[]
+}

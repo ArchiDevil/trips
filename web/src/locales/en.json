@@ -3,7 +3,6 @@
     "card": {
       "header": "Trip information",
       "participants": "Participants",
-      "editButton": "Edit",
       "shoppingButton": "Shopping list",
       "packingButton": "Packing list"
     },
@@ -43,7 +42,8 @@
       "resultsTitle": "Day total",
       "tableDeleteRecord": "Remove",
       "tableTotalRecord": "Total",
-      "clearDayButton": "Clear day"
+      "clearDayButton": "Clear day",
+      "tableEditRecord": "Edit"
     },
     "units": {
       "grams": "g",
@@ -65,6 +65,14 @@
       "addButton": "Add",
       "clearProductButton": "Clear",
       "invalidMassError": "Enter a positive number"
+    },
+    "editModal": {
+      "title": "Edit product",
+      "closeButton": "Close",
+      "commitButton": "Apply",
+      "massTitle": "Mass",
+      "invalidMassError": "Enter a positive number",
+      "massPlaceholder": "Enter mass"
     },
     "errorModal": {
       "title": "Connection error",
@@ -164,8 +172,7 @@
         "five": "5 groups"
       },
       "groupNamePrefix": "Group",
-      "groupErrorMessage": "Enter a positive number higher than 0",
-      "archiveButtonTitle": "Archive"
+      "groupErrorMessage": "Enter a positive number higher than 0"
     },
     "copyModal": {
       "title": "Copy a trip",
