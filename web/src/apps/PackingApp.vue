@@ -9,9 +9,7 @@ const tripUid = useRoute().params.uid as string
 const store = useReportsStore()
 
 const daysCount = computed(() => {
-  if (!store.packingData) {
-    return 0
-  }
+  if (!store.packingData) return 0
   return Object.keys(store.packingData.products).length
 })
 const colsCount = ref(3)
@@ -19,6 +17,25 @@ const rowsClass = computed(() => [
   'row-cols-1',
   `row-cols-sm-${Math.min(colsCount.value, daysCount.value)}`,
 ])
+
+const getProductsOnDay = (day: string) => {
+  if (!store.packingData) return []
+  return store.packingData.products[day]
+}
+
+const showBreakfasts = ref(true)
+const showLunches = ref(true)
+const showDinners = ref(true)
+const showSnacks = ref(true)
+
+const productVisible = (mealIdx: number) => {
+  return (
+    (mealIdx === 0 && showBreakfasts.value) ||
+    (mealIdx === 1 && showLunches.value) ||
+    (mealIdx === 2 && showDinners.value) ||
+    (mealIdx === 3 && showSnacks.value)
+  )
+}
 
 onMounted(async () => {
   await store.fetchTrip(tripUid)
@@ -39,29 +56,118 @@ onMounted(async () => {
       </div>
       <div class="col-auto d-flex align-items-end">
         <div class="my-2 d-none d-sm-block">
-          <select
-            v-model="colsCount"
-            class="form-select"
-          >
-            <option value="1">
-              {{ $t('packing.selector.one') }}
-            </option>
-            <option value="2">
-              {{ $t('packing.selector.two') }}
-            </option>
-            <option value="3">
-              {{ $t('packing.selector.three') }}
-            </option>
-            <option value="4">
-              {{ $t('packing.selector.four') }}
-            </option>
-            <option value="5">
-              {{ $t('packing.selector.five') }}
-            </option>
-            <option value="6">
-              {{ $t('packing.selector.six') }}
-            </option>
-          </select>
+          <div class="dropdown">
+            <button
+              type="button"
+              class="btn btn-secondary dropdown-toggle"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              data-bs-auto-close="outside"
+            >
+              {{ $t('packing.options.optionsButton') }}
+            </button>
+            <form
+              class="dropdown-menu p-3"
+              style="min-width: 300px"
+            >
+              <div class="mb-3">
+                <label
+                  for="colsCount"
+                  class="form-label"
+                >
+                  {{ $t('packing.options.columnsCountTitle') }}
+                </label>
+                <select
+                  id="colsCount"
+                  v-model="colsCount"
+                  class="form-select"
+                >
+                  <option value="1">
+                    {{ $t('packing.options.selector.one') }}
+                  </option>
+                  <option value="2">
+                    {{ $t('packing.options.selector.two') }}
+                  </option>
+                  <option value="3">
+                    {{ $t('packing.options.selector.three') }}
+                  </option>
+                  <option value="4">
+                    {{ $t('packing.options.selector.four') }}
+                  </option>
+                  <option value="5">
+                    {{ $t('packing.options.selector.five') }}
+                  </option>
+                  <option value="6">
+                    {{ $t('packing.options.selector.six') }}
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <div class="form-check">
+                  <input
+                    id="show-breakfasts"
+                    v-model="showBreakfasts"
+                    type="checkbox"
+                    class="form-check-input"
+                  >
+                  <label
+                    class="form-check-label"
+                    for="show-breakfasts"
+                  >
+                    {{ $t('packing.options.filters.showBreakfasts') }}
+                  </label>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="form-check">
+                  <input
+                    id="show-lunches"
+                    v-model="showLunches"
+                    type="checkbox"
+                    class="form-check-input"
+                  >
+                  <label
+                    class="form-check-label"
+                    for="show-lunches"
+                  >
+                    {{ $t('packing.options.filters.showLunches') }}
+                  </label>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="form-check">
+                  <input
+                    id="show-dinners"
+                    v-model="showDinners"
+                    type="checkbox"
+                    class="form-check-input"
+                  >
+                  <label
+                    class="form-check-label"
+                    for="show-dinners"
+                  >
+                    {{ $t('packing.options.filters.showDinners') }}
+                  </label>
+                </div>
+              </div>
+              <div>
+                <div class="form-check">
+                  <input
+                    id="show-snacks"
+                    v-model="showSnacks"
+                    type="checkbox"
+                    class="form-check-input"
+                  >
+                  <label
+                    class="form-check-label"
+                    for="show-snacks"
+                  >
+                    {{ $t('packing.options.filters.showSnacks') }}
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -99,49 +205,53 @@ onMounted(async () => {
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="product in store.packingData.products[day]"
+            <template
+              v-for="product in getProductsOnDay(day)"
               :key="product.name"
-              :class="{
-                'table-success': product.meal == 0,
-                'table-warning': product.meal == 1,
-                'table-info': product.meal == 2,
-                'table-secondary': product.meal == 3,
-              }"
             >
-              <td class="d-none d-print-table-cell">
-                <BaseIcon
-                  v-if="product.meal == 0"
-                  icon="fa-carrot"
-                />
-                <BaseIcon
-                  v-if="product.meal == 1"
-                  icon="fa-fish"
-                />
-                <BaseIcon
-                  v-if="product.meal == 2"
-                  icon="fa-pizza-slice"
-                />
-                <BaseIcon
-                  v-if="product.meal == 3"
-                  icon="fa-candy-cane"
-                />
-              </td>
-              <td>{{ product.name }}</td>
-              <td
-                v-for="(_, idx) in store.trip.trip.groups"
-                :key="idx"
+              <tr
+                v-if="productVisible(product.meal)"
+                :class="{
+                  'table-success': product.meal == 0,
+                  'table-warning': product.meal == 1,
+                  'table-info': product.meal == 2,
+                  'table-secondary': product.meal == 3,
+                }"
               >
-                <template v-if="product.grams">
-                  {{ Math.ceil(product.mass[idx] / product.grams) }}
-                  {{ $t('packing.piecesSuffix') }}
-                </template>
-                <template v-else>
-                  {{ product.mass[idx] }}
-                  {{ $t('packing.gramsSuffix') }}
-                </template>
-              </td>
-            </tr>
+                <td class="d-none d-print-table-cell">
+                  <BaseIcon
+                    v-if="product.meal == 0"
+                    icon="fa-carrot"
+                  />
+                  <BaseIcon
+                    v-if="product.meal == 1"
+                    icon="fa-fish"
+                  />
+                  <BaseIcon
+                    v-if="product.meal == 2"
+                    icon="fa-pizza-slice"
+                  />
+                  <BaseIcon
+                    v-if="product.meal == 3"
+                    icon="fa-candy-cane"
+                  />
+                </td>
+                <td>{{ product.name }}</td>
+                <td
+                  v-for="(_, idx) in store.trip.trip.groups"
+                  :key="idx"
+                >
+                  <template v-if="product.grams">
+                    {{ Math.ceil(product.mass[idx] / product.grams) }}
+                    {{ $t('packing.piecesSuffix') }}
+                  </template>
+                  <template v-else>
+                    {{ product.mass[idx] }}
+                    {{ $t('packing.gramsSuffix') }}
+                  </template>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>

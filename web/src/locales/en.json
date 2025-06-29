@@ -254,13 +254,23 @@
   },
   "packing": {
     "title": "Packing list",
-    "selector": {
-      "one": "1 day in a row",
-      "two": "2 days in a row",
-      "three": "3 days in a row",
-      "four": "4 days in a row",
-      "five": "5 days in a row",
-      "six": "6 days in a row"
+    "options": {
+      "optionsButton": "Settings",
+      "columnsCountTitle": "Days in a row",
+      "selector": {
+        "one": "1 day in a row",
+        "two": "2 days in a row",
+        "three": "3 days in a row",
+        "four": "4 days in a row",
+        "five": "5 days in a row",
+        "six": "6 days in a row"
+      },
+      "filters": {
+        "showBreakfasts": "Show breakfasts",
+        "showLunches": "Show lunches",
+        "showDinners": "Show dinners",
+        "showSnacks": "Show snacks"
+      }
     },
     "dayPrefix": "Day",
     "productColumn": "Product",
