@@ -3,21 +3,20 @@ import { computed } from 'vue'
 
 import { useUserStore } from '../stores/user'
 
-import globals from '../globals'
-import BaseIcon from './BaseIcon.vue';
+import BaseIcon from './BaseIcon.vue'
 
 defineProps<{
-  link: 'trips' | 'products' | 'users'
+  link: 'trips' | 'products' | 'admin'
 }>()
 
-const userStore = useUserStore()
+const logoutLink = '/auth/logout'
+const mainPage = '/'
+const tripsPage = '/trips/'
+const productsPage = '/products/'
+const adminPage = '/admin/'
 
+const userStore = useUserStore()
 const admin = computed(() => userStore.info.access_group == 'Administrator')
-const logoutLink = computed(() => globals.urls.logout)
-const mainPage = computed(() => globals.urls.mainPage)
-const tripsPage = computed(() => globals.urls.tripsPage)
-const productsPage = computed(() => globals.urls.productsPage)
-const usersPage = computed(() => globals.urls.usersPage)
 const userLoading = computed(() => userStore.isLoading)
 const userPhotoUrl = computed(() => userStore.info.photo_url)
 const displayedName = computed(() => {
@@ -63,7 +62,6 @@ const displayedName = computed(() => {
         <ul class="navbar-nav me-auto mt-2 mt-lg-0">
           <li class="nav-item">
             <a
-              id="trips-link"
               class="nav-link"
               :href="tripsPage"
               :class="{ active: link == 'trips' }"
@@ -74,7 +72,6 @@ const displayedName = computed(() => {
           </li>
           <li class="nav-item">
             <a
-              id="products-link"
               class="nav-link"
               :href="productsPage"
               :class="{ active: link == 'products' }"
@@ -86,13 +83,12 @@ const displayedName = computed(() => {
           <li class="nav-item">
             <a
               v-if="admin"
-              id="users-link"
               class="nav-link"
-              :href="usersPage"
-              :class="{ active: link == 'users' }"
+              :href="adminPage"
+              :class="{ active: link == 'admin' }"
             >
-              <BaseIcon icon="fa-users" />
-              {{ $t('navbar.usersLink') }}
+              <BaseIcon icon="fa-toolbox" />
+              {{ $t('navbar.adminLink') }}
             </a>
           </li>
           <li class="nav-item">

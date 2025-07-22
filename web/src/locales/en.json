@@ -194,7 +194,7 @@
     "title": "Hikehub",
     "tripsLink": "Trips",
     "productsLink": "Products",
-    "usersLink": "Users",
+    "adminLink": "Admin",
     "formLink": "Take a survey!",
     "logoutLink": "Logout"
   },
@@ -315,5 +315,15 @@
       "add": "Add",
       "close": "Close"
     }
+  },
+  "maintenance": {
+    "title": "Maintenance",
+    "vacuumDbDesc": "Remove all unused data from the database.",
+    "vacuumDbTitle": "Vacuum database",
+    "reindexTripsDesc": "Reindex trips table to avoid broken indices and impossible to reach data.",
+    "reindexTripsTitle": "Reindex trips",
+    "unusedProductsTitle": "Unused Products",
+    "emptyTripsTitle": "Empty Trips",
+    "genericNameTitle": "Name"
   }
 }

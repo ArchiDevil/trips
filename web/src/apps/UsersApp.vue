@@ -8,7 +8,6 @@ import { getUsersApi } from '../backend'
 import AddUserDialog from '../components/AddUserDialog.vue'
 import EditUserDialog from '../components/EditUserDialog.vue'
 import BaseIcon from '../components/BaseIcon.vue'
-import NavigationBar from '../components/NavigationBar.vue'
 
 const usersApi = getUsersApi()
 
@@ -55,13 +54,17 @@ onMounted(async () => {
 </script>
 
 <template>
-  <NavigationBar link="users" />
-
   <div class="container">
     <div class="row my-3">
       <div class="col">
-        <h1 class="display-4">
-          {{ $t('users.title') }}
+        <h1 class="display-6">
+          <RouterLink to="/users/">
+            {{ $t('users.title') }}
+          </RouterLink>
+          /
+          <RouterLink to="/maintenance/">
+            {{ $t('maintenance.title') }}
+          </RouterLink>
         </h1>
       </div>
     </div>

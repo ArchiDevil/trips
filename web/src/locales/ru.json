@@ -194,7 +194,7 @@
     "title": "Hikehub",
     "tripsLink": "Походы",
     "productsLink": "Продукты",
-    "usersLink": "Пользователи",
+    "adminLink": "Админка",
     "formLink": "Пройдите опрос!",
     "logoutLink": "Выйти"
   },
@@ -315,5 +315,15 @@
       "add": "Добавить",
       "close": "Закрыть"
     }
+  },
+  "maintenance": {
+    "title": "Обслуживание",
+    "vacuumDbDesc": "Удалить неиспользуемые данные.",
+    "vacuumDbTitle": "Оптимизировать БД",
+    "reindexTripsDesc": "Переиндексировать таблицу trips для избежания ошибок при поиске данных.",
+    "reindexTripsTitle": "Переиндексировать",
+    "unusedProductsTitle": "Неиспользуемые продукты",
+    "emptyTripsTitle": "Пустые походы",
+    "genericNameTitle": "Название"
   }
 }

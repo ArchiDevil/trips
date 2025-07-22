@@ -15,7 +15,7 @@ export default defineConfig({
         products: resolve(__dirname, 'products.html'),
         trip: resolve(__dirname, 'trip.html'),
         incorrect: resolve(__dirname, 'incorrect.html'),
-        users: resolve(__dirname, 'users.html'),
+        admin: resolve(__dirname, 'admin.html'),
         // auth: resolve(__dirname, 'auth.html'),
       },
     },

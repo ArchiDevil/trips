@@ -15,3 +15,11 @@ export function getUsersApi() {
     return mande('/api/users')
   }
 }
+
+export function getMaintenanceApi() {
+  if (import.meta.env.DEV) {
+    return mande('http://localhost:8000/api/maintenance')
+  } else {
+    return mande('/api/maintenance')
+  }
+}

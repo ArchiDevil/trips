@@ -1,10 +1,6 @@
 import { createI18n } from 'vue-i18n'
 import { createApp } from 'vue'
 
-import ruMessages from './locales/ru.json'
-import enMessages from './locales/en.json'
-import UsersApp from './apps/UsersApp.vue'
-
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
   faClipboardQuestion,
@@ -16,10 +12,18 @@ import {
   faSignOutAlt,
   faTrash,
   faUsers,
+  faToolbox,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
+import { createWebHistory, createRouter } from 'vue-router'
+
+import ruMessages from './locales/ru.json'
+import enMessages from './locales/en.json'
+import AdminApp from './apps/AdminApp.vue'
+import UsersApp from './apps/UsersApp.vue'
+import MaintenanceApp from './apps/MaintenanceApp.vue'
 
 library.add(
   faPlus,
@@ -30,7 +34,8 @@ library.add(
   faUsers,
   faInfo,
   faClipboardQuestion,
-  faSignOutAlt
+  faSignOutAlt,
+  faToolbox
 )
 
 const pinia = createPinia()
@@ -45,9 +50,28 @@ const i18n = createI18n<[typeof ruMessages], 'ru' | 'en'>({
   },
 })
 
-const app = createApp(UsersApp)
+const router = createRouter({
+  history: createWebHistory('/admin'),
+  routes: [
+    {
+      path: '/',
+      redirect: '/users/',
+    },
+    {
+      path: '/users/',
+      component: UsersApp,
+    },
+    {
+      path: '/maintenance/',
+      component: MaintenanceApp,
+    },
+  ],
+})
+
+const app = createApp(AdminApp)
 app.use(pinia)
 app.use(i18n)
+app.use(router)
 app.component('FontAwesomeIcon', FontAwesomeIcon)
 app.mount('#app')
 
